@@ -21,13 +21,13 @@ public class WildDrawFourCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         // 1. Obbliga il prossimo giocatore a pescare
-        game.makeNextPlayerDraw(4);
+        //game.makeNextPlayerDraw(4);
         
         // 2. Fa saltare il turno al prossimo giocatore
-        game.skipNextPlayer();
+        //game.skipNextPlayer();
 
         // 3. Richiede al gioco di gestire la scelta del colore
-        game.promptForColorChoice();
+        //game.promptForColorChoice();
     }
 
     /**

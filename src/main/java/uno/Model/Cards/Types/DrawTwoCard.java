@@ -19,7 +19,7 @@ public class DrawTwoCard extends AbstractCard {
      */
     @Override
     public void performEffect(Game game) {
-        game.makeNextPlayerDraw(2);
-        game.skipNextPlayer(); // In molte regole, il +2 fa anche saltare
+        //game.makeNextPlayerDraw(2);
+        //game.skipNextPlayer(); // In molte regole, il +2 fa anche saltare
     }
 }
