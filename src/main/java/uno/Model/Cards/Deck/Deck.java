@@ -1,4 +1,4 @@
-package uno.Model;
+package uno.Model.Cards.Deck;
 
 import java.util.ArrayList;
 import java.util.Collections;
