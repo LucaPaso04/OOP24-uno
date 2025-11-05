@@ -1,7 +1,7 @@
-// Percorso: src/main/java/uno/Model/NumberedCard.java
+// Percorso: src/main/java/uno/Model/Cards/Types/NumberedCard.java
 package uno.Model.Cards.Types;
 
-import uno.Controller.GameController;
+import uno.Model.Game.Game;
 import uno.Model.Cards.Attributes.CardColor;
 import uno.Model.Cards.Attributes.CardValue;
 
@@ -19,9 +19,11 @@ public class NumberedCard extends AbstractCard {
         }
     }
 
+    /**
+     * Le carte numerate non hanno effetti da eseguire sullo stato del gioco.
+     */
     @Override
-    public void executeEffect(GameController controller) {
-        // Le carte numerate non hanno effetto.
-        // Il controller sa già che deve solo passare il turno.
+    public void performEffect(Game game) {
+        // Non fa nulla, come da specifiche.
     }
 }
