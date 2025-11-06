@@ -11,15 +11,38 @@ public abstract class AIPlayer extends Player {
     public void makeMove() {
         if (getHandSize() > 0)
         {
-            if(getHandSize() == 1)
+            //Controllo se devo pescare o giocare una carta
+            if(hasPlayableCard() && ! blocked())
             {
-                callUno();
+                //Esecuzione mossa implementata nella modalità specifica
                 AIPlayCard();
+                //Controllo se bisogna dichiarare UNO
+                if(getHandSize() == 1)
+                {
+                    //Dichiarazione Uno!
+                    callUno();
+                }
             }
             else
             {
-                AIPlayCard();
-            }
+                //Pesca una carta e controlla se può giocare altrimenti il turno finisce
+                drawCard();
+                    if(hasPlayableCard())
+                    {
+                        //Esecuzione mossa implementata nella modalità specifica
+                        AIPlayCard();
+                        //Controllo se bisogna dichiarare UNO
+                        if(getHandSize() == 1)
+                        {
+                            //Dichiarazione Uno!
+                            callUno();
+                        }
+                    }
+                    else
+                    {
+                        //Fine turno
+                    }
+                }       
         }
         else
         {
