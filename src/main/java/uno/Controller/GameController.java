@@ -84,6 +84,7 @@ public class GameController implements GameViewObserver {
         }
     }
 
+<<<<<<< HEAD
     @Override
     public void onColorChosen(CardColor color) {
         System.out.println("Colore scelto: " + color);
@@ -106,4 +107,18 @@ public class GameController implements GameViewObserver {
                 JOptionPane.ERROR_MESSAGE);
         }
     }
+=======
+    /**
+     * Implementa il metodo dell'interfaccia.
+     * Riceve il colore scelto dalla View e lo passa al Modello.
+     * @param color Il colore scelto.
+     */
+    @Override
+    public void onColorChosen(CardColor color) {
+        System.out.println("Colore scelto: " + color);
+        // Il GameModel riceverà il colore, imposterà il suo stato
+        // interno e notificherà la View (che si aggiornerà di nuovo).
+        gameModel.setColor(color);
+    }
+>>>>>>> 259963575955263c14e0048a1d1502ba0c5e8c83
 }

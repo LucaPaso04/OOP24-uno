@@ -1,6 +1,7 @@
 package uno.Controller;
 
 import uno.Model.Cards.Card;
+import uno.Model.Cards.Attributes.CardColor;
 
 /**
  * Interfaccia (Observer) che definisce le azioni che l'utente
@@ -32,9 +33,17 @@ public interface GameViewObserver {
     void onBackToMenu();
 
     /**
+<<<<<<< HEAD
      * Chiamato quando l'utente clicca il bottone "Passa".
      */
     void onPassTurn();
 
     void onChooseColor();
+=======
+     * Chiamato quando l'utente clicca su uno dei bottoni colore
+     * dopo aver giocato una carta Jolly.
+     * @param color Il colore scelto.
+     */
+    void onColorChosen(CardColor color);
+>>>>>>> 259963575955263c14e0048a1d1502ba0c5e8c83
 }
