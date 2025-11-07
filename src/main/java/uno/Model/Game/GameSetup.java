@@ -52,7 +52,7 @@ public class GameSetup {
         for (int i = 0; i < INITIAL_HAND_SIZE; i++) {
             for (Player player : this.players) {
                 // Aggiunge una carta alla mano del giocatore (presuppone che getHand() esista)
-                player.getHand().add(deck.drawCard());
+                player.addCardToHand(deck.drawCard());
             }
         }
     }

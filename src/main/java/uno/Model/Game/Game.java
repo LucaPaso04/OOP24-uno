@@ -69,7 +69,7 @@ public class Game {
         card.performEffect(this); 
         
         // Sposta la carta
-        getCurrentPlayer().getHand().remove(card);
+        getCurrentPlayer().playCard(card);
         discardPile.addCard(card);
         
         // --- LOGICA DI AVANZAMENTO TURNO DELEGATA ---
@@ -87,7 +87,7 @@ public class Game {
             notifyObservers(); 
             return;
         }
-        player.getHand().add(drawDeck.drawCard());
+        player.addCardToHand(drawDeck.drawCard());
         
         notifyObservers();
     }
