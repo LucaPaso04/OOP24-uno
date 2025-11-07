@@ -24,7 +24,7 @@ public class Game {
     // --- NUOVI CAMPI ---
     private final TurnManager turnManager; // Delega la gestione dei turni
     private GameState currentState;
-    private CardColor currentWildColor;
+    private CardColor currentColor;
 
     /**
      * Costruisce una nuova partita.
@@ -41,7 +41,7 @@ public class Game {
         this.turnManager = new TurnManager(players); 
         
         this.currentState = GameState.RUNNING;
-        this.currentWildColor = null;
+        this.currentColor = null;
         
         // NOTA: La distribuzione delle carte ora è gestita da GameSetup
         // nel MenuController, non più qui.
@@ -117,8 +117,8 @@ public class Game {
         return this.currentState;
     }
     
-    public CardColor getCurrentWildColor() {
-        return this.currentWildColor;
+    public CardColor getCurrentColor() {
+        return this.currentColor;
     }
 
     public Deck<Card> getDrawDeck() {
@@ -127,6 +127,10 @@ public class Game {
 
     public DiscardPile getDiscardPile() {
         return this.discardPile;
+    }
+
+    public List<Player> getPlayers() {
+        return this.players;
     }
     
     // --- METODI PER GLI EFFETTI DELLE CARTE (Delegano al TurnManager) ---
@@ -161,7 +165,7 @@ public class Game {
         if (this.currentState != GameState.WAITING_FOR_COLOR) {
             return;
         }
-        this.currentWildColor = color;
+        this.currentColor = color;
         this.currentState = GameState.RUNNING; 
         
         // Ora che il colore è stato scelto, passiamo il turno.

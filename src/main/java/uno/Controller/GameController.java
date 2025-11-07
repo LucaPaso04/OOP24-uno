@@ -1,6 +1,7 @@
 package uno.Controller;
 
 import uno.Model.Cards.Card;
+import uno.Model.Cards.Attributes.CardColor;
 import uno.Model.Game.Game;
 import uno.View.GameFrame;
 import uno.View.Scenes.GameScene;
@@ -79,5 +80,18 @@ public class GameController implements GameViewObserver {
             menuScene.setObserver(menuController);
             mainFrame.showScene(menuScene);
         }
+    }
+
+    /**
+     * Implementa il metodo dell'interfaccia.
+     * Riceve il colore scelto dalla View e lo passa al Modello.
+     * @param color Il colore scelto.
+     */
+    @Override
+    public void onColorChosen(CardColor color) {
+        System.out.println("Colore scelto: " + color);
+        // Il GameModel riceverà il colore, imposterà il suo stato
+        // interno e notificherà la View (che si aggiornerà di nuovo).
+        gameModel.setColor(color);
     }
 }
