@@ -153,6 +153,7 @@ public class Game {
 
     public void requestColorChoice() {
         this.currentState = GameState.WAITING_FOR_COLOR;
+        System.out.println("In attesa della scelta del colore...");
         notifyObservers();
     }
 

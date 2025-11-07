@@ -21,7 +21,7 @@ public class WildCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         // Richiede al gioco di gestire la logica per la scelta del colore.
-        //game.promptForColorChoice();
+        game.requestColorChoice();
     }
 
     /**

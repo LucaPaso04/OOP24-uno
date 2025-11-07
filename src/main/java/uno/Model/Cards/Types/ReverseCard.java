@@ -19,6 +19,6 @@ public class ReverseCard extends AbstractCard {
      */
     @Override
     public void performEffect(Game game) {
-        //game.reversePlayDirection();
+        game.reversePlayOrder();
     }
 }

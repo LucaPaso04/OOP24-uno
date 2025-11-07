@@ -19,6 +19,6 @@ public class SkipCard extends AbstractCard {
      */
     @Override
     public void performEffect(Game game) {
-        //game.skipNextPlayer();
+        game.skipNextPlayer();
     }
 }
