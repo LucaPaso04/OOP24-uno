@@ -8,7 +8,7 @@ public abstract class AIPlayer extends Player {
     public abstract void AIPlayCard();
 
     // Logica di gioco generale valida per tutte le AI
-    public void makeMove() {
+    /*public void makeMove() {
         if (getHandSize() > 0)
         {
             //Controllo se devo pescare o giocare una carta
@@ -49,5 +49,5 @@ public abstract class AIPlayer extends Player {
             //MANCA IMPLEMENTAZIONE NEL GAME PER GESTIRE LA VITTORIA DELL'AI/GIOCATORE
             //win(this.id);
         }
-    }
+    }*/
 }
