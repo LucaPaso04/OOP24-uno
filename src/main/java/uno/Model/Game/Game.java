@@ -240,14 +240,32 @@ public class Game {
             drawDeck.shuffle();
             System.out.println("Mazzo rimescolato con " + cardsToReshuffle.size() + " carte.");
         }
-        
-        if (drawDeck.isEmpty()) {
-            System.out.println("Mazzo ancora vuoto. Impossibile pescare.");
-            return;
-        }
 
         player.addCardToHand(drawDeck.drawCard());
         // Rimosso notifyObservers() - sarà gestito dal metodo chiamante
+    }
+
+    /**
+     * Metodo chiamato dal Controller quando il giocatore
+     * preme il bottone "UNO!".
+     * Imposta lo stato del giocatore come "sicuro".
+     */
+    public void callUno(Player player) {
+        // Un giocatore può validamente chiamare UNO solo se ha 1 carta.
+        if (player.getHandSize() == 1) {
+            player.hasCalledUno();
+        } else {
+
+            drawCardForPlayer(player);
+
+            notifyObservers();
+
+            drawCardForPlayer(player);
+
+            notifyObservers();
+
+            throw new IllegalStateException("Non puoi chiamare UNO ora! Hai " + player.getHandSize() + " carte. Penalità applicata: hai pescato 2 carte.");
+        }
     }
 
     // --- METODI GETTER ---

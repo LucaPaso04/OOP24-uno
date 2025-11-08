@@ -39,8 +39,8 @@ public class GameController implements GameViewObserver {
         } catch (Exception e) {
             // Mostra un errore se la mossa non è valida
             JOptionPane.showMessageDialog(gameScene, 
-                "Mossa non valida! " + e.getMessage(), 
-                "Errore", 
+                e.getMessage(), 
+                "Mossa non valida", 
                 JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -62,8 +62,15 @@ public class GameController implements GameViewObserver {
 
     @Override
     public void onCallUno() {
-        System.out.println("L'utente ha chiamato UNO!");
-        // TODO: gameModel.callUno(gameModel.getCurrentPlayer());
+        System.out.println("L'utente clicca 'UNO!'");
+        try {
+            gameModel.callUno(gameModel.getCurrentPlayer());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(gameScene, 
+                e.getMessage(), // Messaggio d'errore (es. "Non puoi chiamare UNO ora")
+                "Mossa non valida", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     @Override

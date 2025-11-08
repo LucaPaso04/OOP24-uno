@@ -38,6 +38,7 @@ public abstract class Deck<T extends Card> {
      * Mescola casualmente le carte nel mazzo.
      */
     public void shuffle() {
+        System.out.println("Mischiando il mazzo...");
         Collections.shuffle(cards);
     }
 

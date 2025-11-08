@@ -58,31 +58,14 @@ public class Player {
     }
 
     /**
-     * Metodo chiamato dal Controller quando il giocatore
-     * preme il bottone "UNO!".
-     * Imposta lo stato del giocatore come "sicuro".
-     */
-    public void callUno() {
-        // Un giocatore può validamente chiamare UNO solo se ha 1 carta.
-        if (this.getHandSize() == 1) {
-            this.hasCalledUno = true;
-            System.out.println(this.name + " ha chiamato UNO!");
-        } else {
-            // Logica opzionale per penalizzare una "falsa chiamata"
-            System.out.println(this.name + " ha chiamato UNO! ma ha " + this.getHandSize() + " carte!");
-            // In alcune regole, una falsa chiamata comporta una penalità.
-        }
-    }
-
-    /**
      * Verifica se il giocatore ha chiamato UNO.
      * La classe Game userà questo metodo per decidere
      * se penalizzare un giocatore alla fine del suo turno.
      *
      * @return true se il giocatore ha chiamato UNO, false altrimenti.
      */
-    public boolean hasCalledUno() {
-        return this.hasCalledUno;
+    public void hasCalledUno() {
+        this.hasCalledUno = true;
     }
 
     /**

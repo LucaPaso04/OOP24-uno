@@ -65,32 +65,18 @@ public class GameSetup {
     private void flipFirstCard() {
         Card firstCard = deck.drawCard();
 
-        // Regola ufficiale: se la prima carta è un +4, 
-        // rimettila nel mazzo, mischia e gira un'altra carta.
-        while (firstCard.getValue() == CardValue.WILD_DRAW_FOUR) {
-            deck.addCard(firstCard); // Rimette la carta in fondo (o dove 'addCard' la mette)
-            deck.shuffle();
+        // Regola ufficiale: se la prima carta è diversa da un numero,
+        // bisogna continuare a scartare carte finchè non ne esce una valida.
+        while (firstCard.getValue() == CardValue.WILD_DRAW_FOUR ||
+                firstCard.getValue() == CardValue.WILD ||
+                firstCard.getValue() == CardValue.DRAW_TWO ||
+                firstCard.getValue() == CardValue.REVERSE ||
+                firstCard.getValue() == CardValue.SKIP) {
+            discardPile.addCard(firstCard); // Metti la carta non valida nella pila degli scarti
             firstCard = deck.drawCard();
         }
 
         // Aggiunge la prima carta valida alla pila degli scarti
         discardPile.addCard(firstCard);
-
-        // Se la prima carta è un Jolly, la logica di scelta colore
-        // verrà attivata da performEffect.
-        // Se è una carta colorata, impostiamo quello come colore iniziale.
-        if (firstCard.getColor() != CardColor.WILD) {
-            // Imposta il colore attivo iniziale nella partita
-            game.setColor(firstCard.getColor());
-        }
-
-        // Applica l'effetto della prima carta (es. Salta, Inverti, Pesca 2, Jolly)
-        // La classe Game gestirà questo effetto sul "primo" giocatore.
-        firstCard.performEffect(game);
-        
-        // Se è un Jolly, imposta uno stato per la scelta del colore
-        if (firstCard.getValue() == CardValue.WILD) {
-            game.requestColorChoice();
-        }
     }
 }
