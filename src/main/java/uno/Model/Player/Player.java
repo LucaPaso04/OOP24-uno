@@ -5,6 +5,8 @@ import uno.Model.Cards.Card;
 import uno.Model.Game.Game;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Rappresenta un giocatore. È la classe base per tutti i tipi di giocatori.
@@ -46,6 +48,16 @@ public class Player {
      */
     public void addCardToHand(Card card) {
         this.hand.add(card);
+    }
+
+    /**
+     * Sostituisce l'intera mano con le sue controparti "flippate".
+     * @param translator Il metodo (da Game) che sa come tradurre una carta.
+     */
+    public void flipHand(Function<Card, Card> translator) {
+        this.hand = this.hand.stream()
+            .map(translator)
+            .collect(Collectors.toList());
     }
 
     /**

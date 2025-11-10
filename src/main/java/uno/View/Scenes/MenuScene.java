@@ -87,7 +87,6 @@ public class MenuScene extends JPanel {
             }
         });
 
-        flipButton.setEnabled(false); // Disabilitato per ora
         flipButton.addActionListener(e -> {
             if (observer != null) {
                 observer.onStartFlipGame();

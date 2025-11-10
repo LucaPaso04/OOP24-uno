@@ -11,5 +11,7 @@ public enum CardValue {
     
     // Carte Jolly
     WILD,           // Jolly
-    WILD_DRAW_FOUR  // Jolly Pesca Quattro
+    WILD_DRAW_FOUR,  // Jolly Pesca Quattro
+
+    FLIP // Flip
 }
