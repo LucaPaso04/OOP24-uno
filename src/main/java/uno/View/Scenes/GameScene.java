@@ -18,6 +18,11 @@ import java.net.URL;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import javax.swing.ImageIcon;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -72,6 +77,7 @@ public class GameScene extends JPanel implements GameModelObserver {
     private JLabel westAILabel, northAILabel, eastAILabel;
 
     private final Map<String, ImageIcon> cardImageCache;
+    private final Map<String, ImageIcon> transparentImageCache;
 
     // --- Pannelli Centrali ---
     private JPanel centerPanel;
@@ -91,6 +97,7 @@ public class GameScene extends JPanel implements GameModelObserver {
 
         // 1. Inizializza la cache e carica le immagini
         this.cardImageCache = new HashMap<>();
+        this.transparentImageCache = new HashMap<>();
         loadCardImages();
         
         setBackground(BACKGROUND_COLOR);
@@ -389,8 +396,10 @@ public class GameScene extends JPanel implements GameModelObserver {
      */
     private void styleAsCardButton(JButton button, String cardName) {
         ImageIcon icon = cardImageCache.get(cardName);
+        ImageIcon transparentIcon = transparentImageCache.get(cardName);
         if (icon != null) {
             button.setIcon(icon);
+            button.setDisabledIcon(transparentIcon);
             button.setText(null);
         } else {
             // Fallback se l'immagine non è trovata
@@ -478,6 +487,7 @@ public class GameScene extends JPanel implements GameModelObserver {
                 // Scala l'immagine alla dimensione standard
                 Image scaledImg = icon.getImage().getScaledInstance(CARD_WIDTH, CARD_HEIGHT, Image.SCALE_SMOOTH);
                 cardImageCache.put(cardName, new ImageIcon(scaledImg));
+                transparentImageCache.put(cardName, createTransparentIcon(new ImageIcon(scaledImg), 0.5f));
             } else {
                 System.err.println("Immagine non trovata: " + path);
             }
@@ -485,5 +495,39 @@ public class GameScene extends JPanel implements GameModelObserver {
             System.err.println("Errore durante il caricamento di: " + cardName);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Crea una versione semitrasparente di una ImageIcon.
+     *
+     * @param original L'icona originale.
+     * @param alpha Il livello di trasparenza (0.0f = completamente trasparente, 
+     * 1.0f = completamente opaco).
+     * @return Una nuova ImageIcon con la trasparenza applicata.
+     */
+    public ImageIcon createTransparentIcon(ImageIcon original, float alpha) {
+        // 1. Ottieni l'immagine originale dall'icona
+        Image originalImage = original.getImage();
+        int width = original.getIconWidth();
+        int height = original.getIconHeight();
+
+        // 2. Crea una nuova immagine "tela" con canale Alfa (trasparenza)
+        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        // 3. Ottieni il "pennello" (Graphics2D) per disegnare sulla nuova immagine
+        Graphics2D g2d = newImage.createGraphics();
+
+        // 4. Imposta il livello di trasparenza!
+        // AlphaComposite.SRC_OVER è la modalità di "fusione" standard
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+
+        // 5. Disegna l'immagine originale sulla nuova tela (con la trasparenza impostata)
+        g2d.drawImage(originalImage, 0, 0, null);
+
+        // 6. Rilascia le risorse grafiche
+        g2d.dispose();
+
+        // 7. Restituisci la nuova icona creata dall'immagine modificata
+        return new ImageIcon(newImage);
     }
 }

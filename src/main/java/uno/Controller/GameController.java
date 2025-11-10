@@ -80,7 +80,7 @@ public class GameController implements GameViewObserver, GameModelObserver {
             gameScene.setHumanInputEnabled(false); 
             
             // L'IA non gioca subito. Creiamo un Timer per un breve ritardo.
-            int AI_DELAY = 1000; // 1 secondo (1000ms)
+            int AI_DELAY = 1500; // 1 secondo (1000ms)
             
             ActionListener aiTask = new ActionListener() {
                 @Override
