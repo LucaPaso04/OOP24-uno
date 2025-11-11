@@ -23,13 +23,7 @@ public class WildDrawColorCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-        
-        if(activeValue != CardValue.WILD_DRAW_COLOR) {
-            return; // Non eseguire l'effetto se il valore non è WILD_DRAW_COLOR
-        }
-
-        // Richiede al gioco di gestire la logica per la scelta del colore.
-        game.requestColorChoice();
+        dispatchBasicEffect(game, activeValue);
     }
 
     /**
@@ -40,6 +34,13 @@ public class WildDrawColorCard extends AbstractCard {
         // La regola ufficiale (Wild Draw Color) stabilisce che la carta può essere 
         // giocata *soltanto* se il giocatore NON ha una carta abbinabile per COLORE 
         // con il COLORE ATTIVO del gioco.
+
+        CardValue activeValue = this.getValue(game);
+        
+        // 1. Se il LATO ATTIVO è un Jolly (WILD), la mossa è sempre valida.
+        if (activeValue != CardValue.WILD_DRAW_COLOR) {
+            return super.canBePlayedOn(topCard, game);
+        }
 
         // 1. Determina il colore attivo nel gioco.
         CardColor activeColor = game.getCurrentColor();
@@ -56,8 +57,7 @@ public class WildDrawColorCard extends AbstractCard {
             
             // I Jolly non sono considerati "carte abbinabili per colore" ai fini di questa regola.
             // (Li si può giocare, ma non invalidano l'uso del Wild Draw Color).
-            if (cardInHand.getValue(game) == CardValue.WILD_FLIP || 
-                cardInHand.getValue(game) == CardValue.WILD_DRAW_COLOR) {
+            if (cardInHand.getValue(game) == CardValue.WILD_DRAW_COLOR) {
                 continue;
             }
 

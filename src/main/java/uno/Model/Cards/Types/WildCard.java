@@ -27,13 +27,7 @@ public class WildCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-        
-        if(activeValue != CardValue.WILD  && activeValue != CardValue.WILD_FLIP) {
-            return; // Non eseguire l'effetto se il valore non è WILD o WILD_FLIP
-        }
-
-        // Richiede al gioco di gestire la logica per la scelta del colore.
-        game.requestColorChoice();
+        dispatchBasicEffect(game, activeValue);
     }
 
     /**
@@ -42,6 +36,15 @@ public class WildCard extends AbstractCard {
      */
     @Override
     public boolean canBePlayedOn(Card topCard, Game game) {
-        return true;
+        CardValue activeValue = this.getValue(game);
+        
+        // 1. Se il LATO ATTIVO è un Jolly (WILD), la mossa è sempre valida.
+        if (activeValue == CardValue.WILD) {
+            return true;
+        }
+        
+        // 2. Se il LATO ATTIVO non è un Jolly, si applica la logica di abbinamento 
+        //    standard (colore/valore) definita nella classe padre AbstractCard.
+        return super.canBePlayedOn(topCard, game);
     }
 }

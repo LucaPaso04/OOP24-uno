@@ -86,6 +86,7 @@ public class GameScene extends JPanel implements GameModelObserver {
     private JButton passButton;
     
     // --- Pannelli Laterali (Est) ---
+    private JButton settingsButton;
     private JLabel statusLabel;
     private JButton unoButton;
     private ColorChooserPanel colorChooserPanel; 
@@ -146,7 +147,12 @@ public class GameScene extends JPanel implements GameModelObserver {
         unoButton.addActionListener(e -> {
             if (controllerObserver != null) { controllerObserver.onCallUno(); }
         });
-        
+        settingsButton.addActionListener(e -> {
+            if (controllerObserver != null) { 
+                // Chiama l'azione di ritorno al menu
+                controllerObserver.onBackToMenu(); 
+            }
+        });
         onGameUpdate(); // Prima visualizzazione
     }
 
@@ -195,6 +201,9 @@ public class GameScene extends JPanel implements GameModelObserver {
     @Override
     public void onGameUpdate() {
         boolean isHumanTurn = gameModel.getCurrentPlayer().getClass() == Player.class;
+        boolean isDarkSide = gameModel.isDarkSide();
+
+        this.colorChooserPanel.updateButtons(isDarkSide);
         
         // --- Gestione Stato (Visibilità) ---
         if (gameModel.getGameState() == GameState.WAITING_FOR_COLOR) {
@@ -265,8 +274,43 @@ public class GameScene extends JPanel implements GameModelObserver {
 
     public void showWinnerPopup(String winnerName) {
         setHumanInputEnabled(false);
-        JOptionPane.showMessageDialog(this, winnerName + " ha vinto la partita!", 
-            "Partita Terminata", JOptionPane.INFORMATION_MESSAGE);
+
+        // 1. Definisce le opzioni dei pulsanti
+        Object[] options = {
+            "Torna al Menu",  // Opzione 0
+            "Chiudi Gioco"   // Opzione 1
+        };
+
+        // 2. Mostra il popup personalizzato
+        int choice = JOptionPane.showOptionDialog(
+            this,                                     // Parent component
+            winnerName + " ha vinto la partita!\nCosa vuoi fare?", // Messaggio
+            "Partita Terminata",                      // Titolo
+            JOptionPane.YES_NO_CANCEL_OPTION,         // Tipo di opzioni (anche se usiamo opzioni custom)
+            JOptionPane.INFORMATION_MESSAGE,          // Tipo di icona
+            null,                                     // Icona custom (null per default)
+            options,                                  // Le opzioni definite sopra
+            options[0]                                // Opzione di default
+        );
+
+        // 3. Gestisce la scelta dell'utente
+        if (controllerObserver != null) { // Controlla sempre che il controller sia impostato
+            switch (choice) {
+                case 0: // Torna al Menu
+                    // Richiama la logica per tornare al menu, gestita nel Controller
+                    controllerObserver.onBackToMenu(); 
+                    break;
+                case 1: // Chiudi Gioco
+                    System.exit(0);
+                    break;
+                case JOptionPane.CLOSED_OPTION:
+                    // Se la finestra viene chiusa (X), esce dal gioco.
+                    System.exit(0); 
+                    break;
+                default:
+                    break;
+            }
+        }
     }
     
     // --- Metodi Helper per la Creazione GUI ---
@@ -353,6 +397,18 @@ public class GameScene extends JPanel implements GameModelObserver {
         return panel;
     }
 
+    private JPanel createSettingsPanel() {
+        // Usa FlowLayout allineato a destra per spingere il pulsante verso l'angolo
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        panel.setOpaque(false);
+        
+        // Crea il pulsante usando lo stile esistente, con dimensioni ridotte
+        this.settingsButton = createStyledButton("Menu", new Color(70, 70, 70), Color.WHITE, 80, 30);
+        
+        panel.add(this.settingsButton);
+        return panel;
+    }
+
     private JPanel createInfoPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -378,10 +434,18 @@ public class GameScene extends JPanel implements GameModelObserver {
         eastPanel.setLayout(new BoxLayout(eastPanel, BoxLayout.Y_AXIS));
         eastPanel.setOpaque(false);
         
+        // 1. NUOVO: Aggiungi il pannello delle impostazioni in cima
+        JPanel settingsPanel = createSettingsPanel();
+        eastPanel.add(settingsPanel); // Ora è il primo elemento nel container Est
+        
+        // 2. Elementi esistenti: IA Est e resto
         JPanel infoPanel = createInfoPanel();
         colorChooserPanel = new ColorChooserPanel();
         
-        eastPanel.add(eastAIPanel); // Pannello IA Est in cima
+        // Rimuovi il rigid area che altrimenti sarebbe il primo elemento del container
+        // eastPanel.add(Box.createRigidArea(new Dimension(0, 15))); // Rimosso
+
+        eastPanel.add(eastAIPanel); // Pannello IA Est
         eastPanel.add(Box.createRigidArea(new Dimension(0, 15)));
         eastPanel.add(infoPanel);
         eastPanel.add(Box.createRigidArea(new Dimension(0, 15)));
@@ -441,9 +505,11 @@ public class GameScene extends JPanel implements GameModelObserver {
             case BLUE: return new Color(33, 150, 243);
             case GREEN: return new Color(76, 175, 80);
             case YELLOW: return new Color(255, 235, 59);
-            case WILD:
-            default:
-                return Color.DARK_GRAY;
+            case ORANGE: return new Color(255, 140, 0);
+            case PURPLE: return new Color(128, 0, 128);
+            case PINK: return new Color(255, 105, 180);
+            case TEAL: return new Color(0, 128, 128);
+            case WILD: default: return Color.DARK_GRAY;
         }
     }
 
@@ -467,6 +533,8 @@ public class GameScene extends JPanel implements GameModelObserver {
         // Carica le carte WILD manualmente
         loadImage("WILD_WILD");
         loadImage("WILD_WILD_DRAW_FOUR");
+        loadImage("WILD_WILD_DRAW_TWO");
+        loadImage("WILD_WILD_DRAW_COLOR");
         
         // Carica il dorso della carta
         loadImage("CARD_BACK");

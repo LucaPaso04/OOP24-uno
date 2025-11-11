@@ -25,11 +25,7 @@ public class SkipCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-
-        if(activeValue != CardValue.SKIP) {
-            return; // Non eseguire l'effetto se il valore non è SKIP
-        }
-
-        game.skipNextPlayer();
+        // Chiama il centro di controllo per eseguire l'azione corretta
+        dispatchBasicEffect(game, activeValue);
     }
 }

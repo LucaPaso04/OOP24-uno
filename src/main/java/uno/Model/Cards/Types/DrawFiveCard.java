@@ -20,14 +20,7 @@ public class DrawFiveCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-        
-        if(activeValue != CardValue.DRAW_FIVE) {
-            System.out.println("ERRORE! activeValue è: " + activeValue);
-            return; // Non eseguire l'effetto se il valore non è DRAW_FIVE
-        }
-
-        System.out.println("Effetto DRAW_FIVE: Il prossimo giocatore pesca 5 carte e salta il turno.");
-        game.makeNextPlayerDraw(5);
-        game.skipNextPlayer(); // In molte regole, il +5 fa anche saltare
+        // Chiama il centro di controllo per eseguire l'azione corretta
+        dispatchBasicEffect(game, activeValue);
     }
 }

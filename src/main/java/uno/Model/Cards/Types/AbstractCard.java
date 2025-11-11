@@ -82,6 +82,62 @@ public abstract class AbstractCard implements Card {
         // Nessun effetto di default
     }
 
+    /**
+     * NUOVO METODO STATICO (Dispatcher)
+     * Esegue un'azione di gioco base in base al CardValue fornito.
+     * @param game L'istanza del gioco.
+     * @param valueIl valore ATTIVO della carta (dal lato chiaro o scuro).
+     */
+    protected void dispatchBasicEffect(Game game, CardValue value) {
+        switch (value) {
+            case SKIP:
+                game.skipNextPlayer();
+                break;
+            case SKIP_EVERYONE:
+                //TODO: CREA UN METODO SPECIFICO NEL GAME PER QUESTO E USALO QUI
+                game.skipNextPlayer();
+                game.skipNextPlayer();
+                game.skipNextPlayer();
+                break;
+            case REVERSE:
+                game.reversePlayOrder();
+                break;
+            case DRAW_ONE:
+                game.makeNextPlayerDraw(1);
+                game.skipNextPlayer();
+                break;
+            case DRAW_TWO:
+                game.makeNextPlayerDraw(2);
+                game.skipNextPlayer();
+                break;
+            case DRAW_FIVE:
+                game.makeNextPlayerDraw(5);
+                game.skipNextPlayer();
+                break;
+            case FLIP:
+                game.flipTheWorld(this);
+                break;
+            case WILD:
+                game.requestColorChoice();
+                break;
+            case WILD_DRAW_COLOR:
+                game.drawUntilColorChosenCard();
+                break;
+            case WILD_DRAW_FOUR:
+                game.makeNextPlayerDraw(4);
+                game.skipNextPlayer();
+                game.requestColorChoice();
+                break;
+            case WILD_DRAW_TWO:
+                game.makeNextPlayerDraw(2);
+                game.skipNextPlayer();
+                game.requestColorChoice();
+                break;
+            default:
+                break;
+        }
+    }
+
     @Override
     public String toString() {
         return "C: " + this.lightSide.color() + " " + this.lightSide.value() + " / S: " + this.darkSide.color() + " " + this.darkSide.value();

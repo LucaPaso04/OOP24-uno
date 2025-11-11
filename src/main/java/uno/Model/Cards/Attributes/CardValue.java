@@ -19,5 +19,4 @@ public enum CardValue {
     DRAW_ONE, // Pesca Uno (per Flip)
     SKIP_EVERYONE, // Salta Tutti (per Flip)
     WILD_DRAW_COLOR, // Jolly Pesca Colore (per Flip)
-    WILD_FLIP // Jolly (per Flip)
 }

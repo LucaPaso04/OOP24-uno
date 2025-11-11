@@ -1,6 +1,5 @@
 package uno.Model.Cards.Types;
 
-import uno.Model.Cards.Attributes.CardColor;
 import uno.Model.Cards.Attributes.CardValue;
 import uno.Model.Game.Game;
 import uno.Model.Cards.Attributes.CardFace;
@@ -21,11 +20,6 @@ public class FlipCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-
-        if(activeValue != CardValue.FLIP) {
-            return; // Non eseguire l'effetto se il valore non è FLIP
-        }
-
-        game.flipTheWorld(this);
+        dispatchBasicEffect(game, activeValue);
     }
 }

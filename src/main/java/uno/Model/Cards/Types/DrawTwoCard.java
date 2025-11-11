@@ -25,12 +25,7 @@ public class DrawTwoCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-
-        if(activeValue != CardValue.DRAW_TWO) {
-            return; // Non eseguire l'effetto se il valore non è DRAW_TWO
-        }
-
-        game.makeNextPlayerDraw(2);
-        game.skipNextPlayer(); // In molte regole, il +2 fa anche saltare
+        // Chiama il centro di controllo per eseguire l'azione corretta
+        dispatchBasicEffect(game, activeValue);
     }
 }

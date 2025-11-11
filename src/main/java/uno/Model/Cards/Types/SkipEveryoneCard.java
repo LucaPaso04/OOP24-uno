@@ -20,13 +20,7 @@ public class SkipEveryoneCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-
-        if(activeValue != CardValue.SKIP_EVERYONE) {
-            return; // Non eseguire l'effetto se il valore non è SKIP_EVERYONE
-        }
-
-        game.skipNextPlayer();
-        game.skipNextPlayer();
-        game.skipNextPlayer();
+        // Chiama il centro di controllo per eseguire l'azione corretta
+        dispatchBasicEffect(game, activeValue);
     }
 }

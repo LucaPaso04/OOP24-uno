@@ -19,12 +19,7 @@ public class DrawOneCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-
-        if(activeValue != CardValue.DRAW_ONE) {
-            return; // Non eseguire l'effetto se il valore non è DRAW_ONE
-        }
-
-        game.makeNextPlayerDraw(1);
-        game.skipNextPlayer(); // In molte regole, il +1 fa anche saltare
+        // Chiama il centro di controllo per eseguire l'azione corretta
+        dispatchBasicEffect(game, activeValue);
     }
 }

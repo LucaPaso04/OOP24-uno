@@ -6,6 +6,7 @@ import uno.Model.Cards.Attributes.CardValue;
 import uno.Model.Cards.Card;
 import uno.Model.Cards.Types.NumberedCard;
 import uno.Model.Cards.Types.SkipCard;
+import uno.Model.Cards.Types.SkipEveryoneCard;
 import uno.Model.Cards.Types.ReverseCard;
 import uno.Model.Cards.Types.DrawOneCard;
 import uno.Model.Cards.Types.DrawTwoCard;
@@ -82,12 +83,53 @@ public class FlipDeck extends Deck<Card> {
         CardFace lightFace = createCardFace(mapping.light);
         CardFace darkFace = createCardFace(mapping.dark);
 
-        // --- CORREZIONE LOGICA CHIAVE ---
-        // Determina il TIPO di carta PIÙ COMPLESSO
-        Card card = CardFactory.createFlipCard(lightFace, darkFace);
+        // 2. Determina la classe corretta da istanziare in base al VALORE del lato Chiaro
+        Card card;
+        CardValue lightValue = lightFace.value();
+        CardValue darkValue = darkFace.value();
+
+        // --- 1. PRIORITÀ ALTA: JOLLY COMPLESSI (+4, +2, DRAW_COLOR) ---
+        // Se un lato qualsiasi ha un Jolly complesso, usiamo la classe Jolly corrispondente.
+        if (lightValue == CardValue.WILD_DRAW_TWO || darkValue == CardValue.WILD_DRAW_TWO) {
+            card = new WildDrawTwoCard(lightFace, darkFace);
+        } else if (lightValue == CardValue.WILD_DRAW_COLOR || darkValue == CardValue.WILD_DRAW_COLOR) {
+             // Questa classe gestisce la giocabilità restrittiva e il cambio colore.
+            card = new WildDrawColorCard(lightFace, darkFace);
+        } 
+        
+        // --- 2. PRIORITÀ MEDIA: JOLLY STANDARD (WILD) ---
+        // Se un lato qualsiasi è WILD, usiamo WildCard.
+        else if (lightValue == CardValue.WILD || darkValue == CardValue.WILD) {
+             // WildCard ha canBePlayedOn che restituisce sempre true, 
+             // risolvendo il tuo problema di "Mossa non valida".
+            card = new WildCard(lightFace, darkFace);
+        }
+        
+        // --- 3. AZIONI SPECIALI (FLIP) ---
+        else if (lightValue == CardValue.FLIP || darkValue == CardValue.FLIP) {
+            card = new FlipCard(lightFace, darkFace);
+        }
+        
+        // --- 4. AZIONI SEMPLICI (Devono controllare entrambi i lati) ---
+        else if (lightValue == CardValue.SKIP || darkValue == CardValue.SKIP) {
+            card = new SkipCard(lightFace, darkFace);
+        } else if (lightValue == CardValue.REVERSE || darkValue == CardValue.REVERSE) {
+            card = new ReverseCard(lightFace, darkFace);
+        } else if (lightValue == CardValue.DRAW_ONE || darkValue == CardValue.DRAW_ONE) {
+            card = new DrawOneCard(lightFace, darkFace);
+        } else if (lightValue == CardValue.SKIP_EVERYONE || darkValue == CardValue.SKIP_EVERYONE) {
+            card = new SkipEveryoneCard(lightFace, darkFace);
+        }
+
+        // --- 5. DEFAULT: CARTE NUMERATE ---
+        else {
+             // Inclusa la CardValue.ZERO che è un caso numerico.
+            card = new NumberedCard(lightFace, darkFace);
+        }
+
+        System.out.println("Aggiunta carta al mazzo: " + card);
 
         cards.add(card);
-        System.out.println("Aggiunta carta al mazzo: " + card);
     }
 
     /**
@@ -104,79 +146,6 @@ public class FlipDeck extends Deck<Card> {
     // CLASSI DTO PER IL PARSING JSON
     // TODO: SPOSTALE IN UN FILE SEPARATO SE NECESSARIO
     // =========================================================================
-
-    /**
-     * Semplice factory per decidere quale classe di carta istanziare.
-     * Questa logica dovrebbe stare idealmente in CardFactory.java.
-     */
-    private static class CardFactory {
-        
-        /**
-         * Crea la classe Flip Card più adatta per incapsulare i comportamenti di entrambi i lati.
-         * @param light La faccia chiara.
-         * @param dark La faccia scura.
-         * @return La carta più "complessa" in termini di effetti.
-         */
-        public static Card createFlipCard(CardFace light, CardFace dark) {
-            CardValue lightValue = light.value();
-            CardValue darkValue = dark.value();
-
-            // 1. Controlla i valori Wild più complessi
-            if (lightValue == CardValue.WILD_DRAW_FOUR || darkValue == CardValue.WILD_DRAW_FOUR) {
-                 return new WildDrawFourCard(light, dark);
-            }
-            if (lightValue == CardValue.WILD_DRAW_TWO || darkValue == CardValue.WILD_DRAW_TWO) {
-                 return new WildDrawTwoCard(light, dark);
-            }
-
-            // 2. Controlla i valori Jolly normali
-            if (lightValue == CardValue.WILD || darkValue == CardValue.WILD) {
-                return new WildCard(light, dark);
-            }
-
-            // 3. Controlla la CARTA FLIP
-            if (lightValue == CardValue.FLIP || darkValue == CardValue.FLIP) {
-                return new FlipCard(light, dark); // Questa è l'unica FlipCard vera
-            }
-
-            // 4. Controlla le Azioni Standard (Reverse, Skip, DrawTwo)
-            // Se entrambi i lati sono REVERSE, allora è una ReverseCard
-            if (lightValue == CardValue.REVERSE || darkValue == CardValue.REVERSE) {
-                 return new ReverseCard(light, dark);
-            }
-            if (lightValue == CardValue.SKIP || darkValue == CardValue.SKIP) {
-                return new SkipCard(light, dark);
-            }
-            if (lightValue == CardValue.DRAW_TWO || darkValue == CardValue.DRAW_TWO) {
-                return new DrawTwoCard(light, dark);
-            }
-
-            // 5. Se tutti i controlli falliscono, si tratta di una Carta Numerica
-            // (La classe NumberedCard gestirà correttamente che il lato scuro
-            // potrebbe non essere un numero, se non ha un effetto speciale)
-            return new NumberedCard(light, dark);
-        }
-
-        private static boolean isActionCard(CardValue value) {
-            return value == CardValue.SKIP || value == CardValue.REVERSE || value == CardValue.DRAW_TWO || 
-                   value == CardValue.FLIP || value == CardValue.WILD || value == CardValue.WILD_DRAW_TWO || 
-                   value == CardValue.WILD_DRAW_FOUR;
-        }
-
-        private static Card createCardByValue(CardValue value, CardFace light, CardFace dark) {
-            // Questa funzione si assicura che venga usata la classe PIÙ ADATTA
-            return switch (value) {
-                case SKIP -> new SkipCard(light, dark);
-                case REVERSE -> new ReverseCard(light, dark);
-                case DRAW_TWO -> new DrawTwoCard(light, dark);
-                case FLIP -> new FlipCard(light, dark);
-                case WILD -> new WildCard(light, dark);
-                // Le carte Wild più complesse (Draw) devono essere gestite
-                case WILD_DRAW_TWO -> new WildDrawTwoCard(light, dark);
-                default -> new NumberedCard(light, dark); // Per i numeri o i valori non mappati
-            };
-        }
-    }
 
     /**
      * Rappresenta la struttura dati di un singolo lato (Chiaro o Scuro) nel JSON.

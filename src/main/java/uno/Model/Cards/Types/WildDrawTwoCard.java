@@ -22,19 +22,7 @@ public class WildDrawTwoCard extends AbstractCard {
     @Override
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
-        
-        if(activeValue != CardValue.WILD_DRAW_TWO) {
-            return; // Non eseguire l'effetto se il valore non è WILD_DRAW_TWO
-        }
-
-        // 1. Obbliga il prossimo giocatore a pescare
-        game.makeNextPlayerDraw(2);
-        
-        // 2. Fa saltare il turno al prossimo giocatore
-        game.skipNextPlayer();
-
-        // 3. Richiede al gioco di gestire la scelta del colore
-        game.requestColorChoice();
+        dispatchBasicEffect(game, activeValue);
     }
 
     /**
@@ -45,6 +33,15 @@ public class WildDrawTwoCard extends AbstractCard {
      */
     @Override
     public boolean canBePlayedOn(Card topCard, Game game) {
-        return true;
+        CardValue activeValue = this.getValue(game);
+        
+        // 1. Se il LATO ATTIVO è un Jolly (WILD), la mossa è sempre valida.
+        if (activeValue == CardValue.WILD_DRAW_TWO) {
+            return true;
+        }
+        
+        // 2. Se il LATO ATTIVO non è un Jolly, si applica la logica di abbinamento 
+        //    standard (colore/valore) definita nella classe padre AbstractCard.
+        return super.canBePlayedOn(topCard, game);
     }
 }
