@@ -7,13 +7,23 @@ import uno.Model.Cards.Card;
 import uno.Model.Cards.Types.NumberedCard;
 import uno.Model.Cards.Types.SkipCard;
 import uno.Model.Cards.Types.ReverseCard;
+import uno.Model.Cards.Types.DrawOneCard;
 import uno.Model.Cards.Types.DrawTwoCard;
 import uno.Model.Cards.Types.FlipCard;
 import uno.Model.Cards.Types.WildCard;
+import uno.Model.Cards.Types.WildDrawColorCard;
 import uno.Model.Cards.Types.WildDrawFourCard;
+import uno.Model.Cards.Types.WildDrawTwoCard;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Rappresenta un mazzo di UNO classico da 108 carte.
@@ -38,89 +48,155 @@ public class FlipDeck extends Deck<Card> {
      */
     @Override
     protected void createDeck() {
-        // Lista dei 4 colori principali (come lato chiaro)
-        List<CardColor> lightColors = Arrays.asList(CardColor.RED, CardColor.YELLOW, CardColor.GREEN, CardColor.BLUE);
-        // Valori numerici da 1 a 9
-        List<CardValue> numberValues = Arrays.asList(
-                CardValue.ONE, CardValue.TWO, CardValue.THREE, CardValue.FOUR,
-                CardValue.FIVE, CardValue.SIX, CardValue.SEVEN, CardValue.EIGHT, CardValue.NINE
-        );
+        Gson gson = new Gson();
+        // Cerca il file JSON nella cartella delle risorse
+        String resourcePath = "/json/flipmap.json";
 
-        // Mappa per definire la controparte scura (Dark Side) di ogni colore
-        // NOTA: In un gioco reale, i valori/effetti cambierebbero, qui solo i colori.
-        for (final CardColor lightColor : lightColors) {
-            CardColor darkColor;
-            
-            // Implementazione della logica di swap richiesta dall'utente
-            if (lightColor == CardColor.RED) darkColor = CardColor.YELLOW;
-            else if (lightColor == CardColor.YELLOW) darkColor = CardColor.RED;
-            else if (lightColor == CardColor.BLUE) darkColor = CardColor.GREEN;
-            else if (lightColor == CardColor.GREEN) darkColor = CardColor.BLUE;
-            else continue; // Salta i Jolly se per errore sono inclusi qui
-            
-            // --- A. Carte Numeriche ---
+        try (InputStream is = getClass().getResourceAsStream(resourcePath);
+            Reader reader = new InputStreamReader(is)) {
 
-            // 1. Aggiunge una carta ZERO (1x)
-            CardFace lightZero = new CardFace(lightColor, CardValue.ZERO);
-            CardFace darkZero = new CardFace(darkColor, CardValue.ZERO);
-            this.cards.add(new NumberedCard(lightZero, darkZero));
-            
-            // 2. Aggiunge due carte 1-9 (2x)
-            for (final CardValue value : numberValues) {
-                CardFace lightFace = new CardFace(lightColor, value);
-                CardFace darkFace = new CardFace(darkColor, value);
-                this.cards.add(new NumberedCard(lightFace, darkFace));
-                this.cards.add(new NumberedCard(lightFace, darkFace));
+            if (is == null) {
+                throw new IOException("File non trovato nelle risorse: " + resourcePath);
             }
             
-            // --- B. Carte Azione Standard (2x per tipo) ---
-            
-            // SKIP
-            CardFace lightSkip = new CardFace(lightColor, CardValue.SKIP);
-            CardFace darkSkip = new CardFace(darkColor, CardValue.SKIP); 
-            this.cards.add(new SkipCard(lightSkip, darkSkip));
-            this.cards.add(new SkipCard(lightSkip, darkSkip));
+            // Legge il file JSON in un array di oggetti Mapping
+            Mapping[] mappings = gson.fromJson(reader, Mapping[].class);
 
-            // REVERSE
-            CardFace lightReverse = new CardFace(lightColor, CardValue.REVERSE);
-            CardFace darkReverse = new CardFace(darkColor, CardValue.REVERSE);
-            this.cards.add(new ReverseCard(lightReverse, darkReverse));
-            this.cards.add(new ReverseCard(lightReverse, darkReverse));
+            // Aggiunge le carte al mazzo
+            for (Mapping mapping : mappings) {
+                // Instanzia una o più copie della carta basandosi sulla singola mappatura
+                addCardMappingToDeck(mapping);
+            }
 
-            // DRAW_TWO
-            CardFace lightDrawTwo = new CardFace(lightColor, CardValue.DRAW_TWO);
-            CardFace darkDrawTwo = new CardFace(darkColor, CardValue.DRAW_TWO);
-            this.cards.add(new DrawTwoCard(lightDrawTwo, darkDrawTwo));
-            this.cards.add(new DrawTwoCard(lightDrawTwo, darkDrawTwo));
-            
-            // --- C. Flip Card (2x per colore) ---
-            // L'effetto FlipCard fa game.flipTheWorld() su entrambi i lati.
-            CardFace lightFlip = new CardFace(lightColor, CardValue.FLIP);
-            CardFace darkFlip = new CardFace(darkColor, CardValue.FLIP); // La carta Flip girata ha un colore diverso
-            this.cards.add(new FlipCard(lightFlip, darkFlip));
-            this.cards.add(new FlipCard(lightFlip, darkFlip));
+        } catch (IOException | NullPointerException e) {
+            System.err.println("FATALE: Errore di caricamento o parsing di flipmap.json. Impossibile creare il mazzo Flip.");
+            e.printStackTrace();
         }
+    }
 
-        // --- 3. Carte Jolly ---
+    /**
+     * Crea un'istanza Card dal Mapping letto e la aggiunge al mazzo il numero corretto di volte.
+     */
+    private void addCardMappingToDeck(Mapping mapping) {
+        // 1. Converti i DTO in oggetti CardFace
+        CardFace lightFace = createCardFace(mapping.light);
+        CardFace darkFace = createCardFace(mapping.dark);
+
+        // --- CORREZIONE LOGICA CHIAVE ---
+        // Determina il TIPO di carta PIÙ COMPLESSO
+        Card card = CardFactory.createFlipCard(lightFace, darkFace);
+
+        cards.add(card);
+        System.out.println("Aggiunta carta al mazzo: " + card);
+    }
+
+    /**
+     * Metodo helper per convertire CardConfig (dal JSON) in CardFace.
+     */
+    private CardFace createCardFace(CardConfig config) {
+        // Usa valueOf per convertire le stringhe del JSON negli Enum
+        CardColor color = CardColor.valueOf(config.color.toUpperCase());
+        CardValue value = CardValue.valueOf(config.value.toUpperCase());
+        return new CardFace(color, value);
+    }
+
+    // =========================================================================
+    // CLASSI DTO PER IL PARSING JSON
+    // TODO: SPOSTALE IN UN FILE SEPARATO SE NECESSARIO
+    // =========================================================================
+
+    /**
+     * Semplice factory per decidere quale classe di carta istanziare.
+     * Questa logica dovrebbe stare idealmente in CardFactory.java.
+     */
+    private static class CardFactory {
         
-        // WILD (4x)
-        CardFace lightWild = new CardFace(CardColor.WILD, CardValue.WILD);
-        // Lato scuro di Wild: assumiamo l'equivalente di WILD_DRAW_FOUR (come da mappa precedente in Game.java)
-        CardFace darkWild = new CardFace(CardColor.WILD, CardValue.WILD_DRAW_FOUR);
+        /**
+         * Crea la classe Flip Card più adatta per incapsulare i comportamenti di entrambi i lati.
+         * @param light La faccia chiara.
+         * @param dark La faccia scura.
+         * @return La carta più "complessa" in termini di effetti.
+         */
+        public static Card createFlipCard(CardFace light, CardFace dark) {
+            CardValue lightValue = light.value();
+            CardValue darkValue = dark.value();
 
-        for (int i = 0; i < 4; i++) {
-            // Wild (Light) <-> Wild Draw Four (Dark)
-            this.cards.add(new WildCard(lightWild, darkWild));
+            // 1. Controlla i valori Wild più complessi
+            if (lightValue == CardValue.WILD_DRAW_FOUR || darkValue == CardValue.WILD_DRAW_FOUR) {
+                 return new WildDrawFourCard(light, dark);
+            }
+            if (lightValue == CardValue.WILD_DRAW_TWO || darkValue == CardValue.WILD_DRAW_TWO) {
+                 return new WildDrawTwoCard(light, dark);
+            }
+
+            // 2. Controlla i valori Jolly normali
+            if (lightValue == CardValue.WILD || darkValue == CardValue.WILD) {
+                return new WildCard(light, dark);
+            }
+
+            // 3. Controlla la CARTA FLIP
+            if (lightValue == CardValue.FLIP || darkValue == CardValue.FLIP) {
+                return new FlipCard(light, dark); // Questa è l'unica FlipCard vera
+            }
+
+            // 4. Controlla le Azioni Standard (Reverse, Skip, DrawTwo)
+            // Se entrambi i lati sono REVERSE, allora è una ReverseCard
+            if (lightValue == CardValue.REVERSE || darkValue == CardValue.REVERSE) {
+                 return new ReverseCard(light, dark);
+            }
+            if (lightValue == CardValue.SKIP || darkValue == CardValue.SKIP) {
+                return new SkipCard(light, dark);
+            }
+            if (lightValue == CardValue.DRAW_TWO || darkValue == CardValue.DRAW_TWO) {
+                return new DrawTwoCard(light, dark);
+            }
+
+            // 5. Se tutti i controlli falliscono, si tratta di una Carta Numerica
+            // (La classe NumberedCard gestirà correttamente che il lato scuro
+            // potrebbe non essere un numero, se non ha un effetto speciale)
+            return new NumberedCard(light, dark);
         }
 
-        // WILD_DRAW_FOUR (4x)
-        CardFace lightWDF = new CardFace(CardColor.WILD, CardValue.WILD_DRAW_FOUR);
-        // Lato scuro di Wild Draw Four: assumiamo l'equivalente di WILD
-        CardFace darkWDF = new CardFace(CardColor.WILD, CardValue.WILD);
+        private static boolean isActionCard(CardValue value) {
+            return value == CardValue.SKIP || value == CardValue.REVERSE || value == CardValue.DRAW_TWO || 
+                   value == CardValue.FLIP || value == CardValue.WILD || value == CardValue.WILD_DRAW_TWO || 
+                   value == CardValue.WILD_DRAW_FOUR;
+        }
+
+        private static Card createCardByValue(CardValue value, CardFace light, CardFace dark) {
+            // Questa funzione si assicura che venga usata la classe PIÙ ADATTA
+            return switch (value) {
+                case SKIP -> new SkipCard(light, dark);
+                case REVERSE -> new ReverseCard(light, dark);
+                case DRAW_TWO -> new DrawTwoCard(light, dark);
+                case FLIP -> new FlipCard(light, dark);
+                case WILD -> new WildCard(light, dark);
+                // Le carte Wild più complesse (Draw) devono essere gestite
+                case WILD_DRAW_TWO -> new WildDrawTwoCard(light, dark);
+                default -> new NumberedCard(light, dark); // Per i numeri o i valori non mappati
+            };
+        }
+    }
+
+    /**
+     * Rappresenta la struttura dati di un singolo lato (Chiaro o Scuro) nel JSON.
+     */
+    private static class CardConfig {
+        @SerializedName("color")
+        String color;
+        @SerializedName("value")
+        String value;
+    }
+
+    /**
+     * Rappresenta l'intera mappatura (Light <-> Dark) per un tipo di carta.
+     */
+    private static class Mapping {
+        @SerializedName("light")
+        CardConfig light;
+        @SerializedName("dark")
+        CardConfig dark;
         
-        for (int i = 0; i < 4; i++) {
-            // Wild Draw Four (Light) <-> Wild (Dark)
-            this.cards.add(new WildDrawFourCard(lightWDF, darkWDF));
-        }
+        // Opzionale: puoi aggiungere qui il numero di copie (es. "count": 2) se il JSON lo includesse.
     }
 }

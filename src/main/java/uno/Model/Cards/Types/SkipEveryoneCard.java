@@ -2,20 +2,15 @@
 package uno.Model.Cards.Types;
 
 import uno.Model.Game.Game;
-import uno.Model.Cards.Attributes.CardColor;
-import uno.Model.Cards.Attributes.CardValue;
 import uno.Model.Cards.Attributes.CardFace;
+import uno.Model.Cards.Attributes.CardValue;
 
 /**
  * Rappresenta una carta "Salta Turno" (Skip).
  */
-public class SkipCard extends AbstractCard {
+public class SkipEveryoneCard extends AbstractCard {
 
-    public SkipCard(CardColor color) {
-        super(color, CardValue.SKIP);
-    }
-
-    public SkipCard(CardFace lightSide, CardFace darkSide) {
+    public SkipEveryoneCard(CardFace lightSide, CardFace darkSide) {
         super(lightSide, darkSide);
     }
 
@@ -26,10 +21,12 @@ public class SkipCard extends AbstractCard {
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
 
-        if(activeValue != CardValue.SKIP) {
-            return; // Non eseguire l'effetto se il valore non è SKIP
+        if(activeValue != CardValue.SKIP_EVERYONE) {
+            return; // Non eseguire l'effetto se il valore non è SKIP_EVERYONE
         }
 
+        game.skipNextPlayer();
+        game.skipNextPlayer();
         game.skipNextPlayer();
     }
 }

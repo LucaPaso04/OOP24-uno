@@ -3,21 +3,16 @@ package uno.Model.Cards.Types;
 
 import uno.Model.Game.Game;
 import uno.Model.Cards.Card;
-import uno.Model.Cards.Attributes.CardColor;
-import uno.Model.Cards.Attributes.CardValue;
 
 import uno.Model.Cards.Attributes.CardFace;
+import uno.Model.Cards.Attributes.CardValue;
 
 /**
- * Rappresenta una carta Jolly Pesca Quattro (+4).
+ * Rappresenta una carta Jolly Pesca Due (+2).
  */
-public class WildDrawFourCard extends AbstractCard {
+public class WildDrawTwoCard extends AbstractCard {
 
-    public WildDrawFourCard() {
-        super(CardColor.WILD, CardValue.WILD_DRAW_FOUR);
-    }
-
-    public WildDrawFourCard(CardFace lightSide, CardFace darkSide) {
+    public WildDrawTwoCard(CardFace lightSide, CardFace darkSide) {
         super(lightSide, darkSide);
     }
 
@@ -28,12 +23,12 @@ public class WildDrawFourCard extends AbstractCard {
     public void performEffect(Game game) {
         CardValue activeValue = this.getValue(game);
         
-        if(activeValue != CardValue.WILD_DRAW_FOUR) {
-            return; // Non eseguire l'effetto se il valore non è WILD_DRAW_FOUR
+        if(activeValue != CardValue.WILD_DRAW_TWO) {
+            return; // Non eseguire l'effetto se il valore non è WILD_DRAW_TWO
         }
 
         // 1. Obbliga il prossimo giocatore a pescare
-        game.makeNextPlayerDraw(4);
+        game.makeNextPlayerDraw(2);
         
         // 2. Fa saltare il turno al prossimo giocatore
         game.skipNextPlayer();

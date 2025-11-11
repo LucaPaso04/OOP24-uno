@@ -20,6 +20,12 @@ public class FlipCard extends AbstractCard {
      */
     @Override
     public void performEffect(Game game) {
-        game.flipTheWorld();
+        CardValue activeValue = this.getValue(game);
+
+        if(activeValue != CardValue.FLIP) {
+            return; // Non eseguire l'effetto se il valore non è FLIP
+        }
+
+        game.flipTheWorld(this);
     }
 }

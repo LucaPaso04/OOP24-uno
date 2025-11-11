@@ -26,6 +26,12 @@ public class WildCard extends AbstractCard {
      */
     @Override
     public void performEffect(Game game) {
+        CardValue activeValue = this.getValue(game);
+        
+        if(activeValue != CardValue.WILD  && activeValue != CardValue.WILD_FLIP) {
+            return; // Non eseguire l'effetto se il valore non è WILD o WILD_FLIP
+        }
+
         // Richiede al gioco di gestire la logica per la scelta del colore.
         game.requestColorChoice();
     }

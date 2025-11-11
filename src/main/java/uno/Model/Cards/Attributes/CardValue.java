@@ -13,5 +13,11 @@ public enum CardValue {
     WILD,           // Jolly
     WILD_DRAW_FOUR,  // Jolly Pesca Quattro
 
-    FLIP // Flip
+    FLIP, // Flip
+    WILD_DRAW_TWO, // Jolly Pesca Due (per Flip)
+    DRAW_FIVE, // Pesca Cinque (per Flip)
+    DRAW_ONE, // Pesca Uno (per Flip)
+    SKIP_EVERYONE, // Salta Tutti (per Flip)
+    WILD_DRAW_COLOR, // Jolly Pesca Colore (per Flip)
+    WILD_FLIP // Jolly (per Flip)
 }

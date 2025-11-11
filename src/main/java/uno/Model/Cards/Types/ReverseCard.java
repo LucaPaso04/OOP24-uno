@@ -25,6 +25,12 @@ public class ReverseCard extends AbstractCard {
      */
     @Override
     public void performEffect(Game game) {
+        CardValue activeValue = this.getValue(game);
+        
+        if(activeValue != CardValue.REVERSE) {
+            return; // Non eseguire l'effetto se il valore non è REVERSE
+        }
+
         game.reversePlayOrder();
     }
 }

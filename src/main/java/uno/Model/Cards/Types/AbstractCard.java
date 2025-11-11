@@ -54,9 +54,22 @@ public abstract class AbstractCard implements Card {
     @Override
     public boolean canBePlayedOn(Card topCard, Game game) {
         CardFace myFace = getActiveFace(game);
+        CardColor activeColor = (game.getCurrentColor() != null) ? game.getCurrentColor() : topCard.getColor(game);
+
+        // --- REGOLE DI MATCH ---
         
-        // La logica ora usa i valori ATTIVI
-        return myFace.color() == topCard.getColor(game) || myFace.value() == topCard.getValue(game);
+        // A. Match di COLORE ATTIVO (Regola prioritaria se c'è un Jolly attivo)
+        if (myFace.color() == activeColor) {
+            return true;
+        }
+        
+        // B. Match di VALORE della carta in cima (usiamo getValue(game) per il lato attivo della topCard)
+        if (myFace.value() == topCard.getValue(game)) {
+            return true;
+        }
+
+        // Se nessuna regola è soddisfatta, la mossa non è valida.
+        return false;
     }
 
     /**

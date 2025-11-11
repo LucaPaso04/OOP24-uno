@@ -97,7 +97,10 @@ public class Game {
         }
 
         // Esegui effetto carta (polimorfismo)
+        System.out.println("Svolgo l'effetto: " + card.getValue(this));
+        System.out.println("La carta giocata è di classe: " + card.getClass().getSimpleName());
         card.performEffect(this);
+        
         
         // Sposta la carta
         player.playCard(card);
@@ -139,44 +142,9 @@ public class Game {
      * in base allo stato attuale del gioco (carta in cima e colore attivo).
      */
     private boolean isValidMove(Card cardToPlay) {
-        Card topCard = getTopDiscardCard(); //
+        Card topCard = getTopDiscardCard();
 
-        //TODO: OGNI CARTA HA IL SUO METODO canBePlayedOn, utilizza quello per rendere più pulito questo metodo
-        
-        // Determina il colore attivo. Se currentColor è impostato (da un Jolly),
-        // usa quello. Altrimenti, usa il colore della carta in cima.
-        CardColor activeColor = (this.currentColor != null) ? this.currentColor : topCard.getColor(this);
-
-        // 1. Regola Jolly Standard (WILD)
-        if (cardToPlay.getValue(this) == CardValue.WILD) {
-            return true;
-        }
-
-        // 2. Regola Jolly +4 (WILD_DRAW_FOUR)
-        if (cardToPlay.getValue(this) == CardValue.WILD_DRAW_FOUR) {
-            // Regola ufficiale: puoi giocarla solo se NON hai
-            // altre carte che corrispondono al COLORE ATTIVO.
-            for (Card cardInHand : getCurrentPlayer().getHand()) {
-                if (cardInHand.getColor(this) == activeColor) {
-                    return false; // Mossa illegale: hai un'altra carta giocabile
-                }
-            }
-            return true; // Mossa legale
-        }
-
-        // 3. Regole Standard (non-Jolly)
-        // La carta è valida se corrisponde al colore ATTIVO...
-        if (cardToPlay.getColor(this) == activeColor) {
-            return true;
-        }
-        
-        // ...o se corrisponde al VALORE della carta in cima.
-        if (cardToPlay.getValue(this) == topCard.getValue(this)) {
-            return true;
-        }
-
-        // Se nessuna regola è soddisfatta, la mossa non è valida
-        return false;
+        return cardToPlay.canBePlayedOn(topCard, this);
     }
     
     /**
@@ -385,12 +353,12 @@ public class Game {
      * Chiamato dalla FlipCard.
      * Cambia lo stato del gioco e "traduce" tutte le carte.
      */
-    public void flipTheWorld() {
+    public void flipTheWorld(Card card) {
         this.isDarkSide = !this.isDarkSide; // 1. Inverti lo stato
         System.out.println("FLIP! Ora il gioco è sul lato: " + (isDarkSide ? "SCURO" : "CHIARO"));
 
         // 2. Resetta il colore (la carta in cima ora ha un nuovo colore)
-        this.currentColor = null; 
+        this.currentColor = card.getColor(this); 
         
         // 3. Notifica la View per ridisegnare tutto
         notifyObservers();
@@ -415,12 +383,46 @@ public class Game {
         if (this.currentState != GameState.WAITING_FOR_COLOR) {
             return;
         }
+
+        // Se la prima carta nella discardPile è un Cambia Colore o Jolly Pesca Quattro, allora fai setColor,
+        // altrimenti drawUntilColorChosenCard
+        Card topCard = discardPile.getTopCard();
+        if (topCard.getValue(this) == CardValue.WILD_DRAW_COLOR) {
+            drawUntilColorChosenCard();
+            return;
+        }
+
         this.currentColor = color;
         this.currentState = GameState.RUNNING; 
         
         // Ora che il colore è stato scelto, passiamo il turno.
         this.turnManager.advanceTurn();
 
+        notifyObservers();
+    }
+
+    public void drawUntilColorChosenCard() {
+        Player player = getCurrentPlayer();
+        if (this.currentState != GameState.WAITING_FOR_COLOR) {
+            return;
+        }
+
+        System.out.println(player.getName() + " deve pescare fino a trovare una carta del colore scelto: " + this.currentColor);
+
+        while (true) {
+            Card drawnCard = drawDeck.drawCard();
+            player.addCardToHand(drawnCard);
+            System.out.println(player.getName() + " ha pescato: " + drawnCard);
+
+            if (drawnCard.getColor(this) == this.currentColor) {
+                System.out.println(player.getName() + " ha trovato una carta del colore scelto: " + drawnCard);
+                break;
+            }
+        }
+
+        // Dopo aver trovato la carta, torna allo stato di gioco normale
+        this.currentState = GameState.RUNNING;
+        this.turnManager.advanceTurn();
         notifyObservers();
     }
 }

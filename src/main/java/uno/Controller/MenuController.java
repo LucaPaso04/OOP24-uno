@@ -5,6 +5,7 @@ import uno.Model.Cards.Deck.StandardDeck;
 import uno.Model.Game.Game;
 import uno.Model.Game.GameSetup; // <-- IMPORTA
 import uno.Model.Player.AIClassic;
+import uno.Model.Player.AIFlip;
 import uno.Model.Player.Player;
 import uno.View.GameFrame;
 import uno.View.Scenes.GameScene;
@@ -78,9 +79,9 @@ public class MenuController implements MenuObserver {
         // 1. Crea i giocatori
         List<Player> players = new ArrayList<>();
         players.add(new Player("Giocatore 1")); // Giocatore umano
-        players.add(new AIClassic("IA-1")); // Avversario
-        players.add(new AIClassic("IA-2"));
-        players.add(new AIClassic("IA-3"));
+        players.add(new AIFlip("IA-1")); // Avversario
+        players.add(new AIFlip("IA-2"));
+        players.add(new AIFlip("IA-3"));
         // puoi aggiungere altri giocatori qui...
 
         // 2. Crea il Model (Mazzo e Partita)

@@ -185,7 +185,6 @@ public class GameScene extends JPanel implements GameModelObserver {
         }
         
         if (!enabled && !isHumanTurn) {
-            System.out.println("Disabilito input umano.");
             colorChooserPanel.setVisible(false);
         }
     }
@@ -404,6 +403,7 @@ public class GameScene extends JPanel implements GameModelObserver {
         } else {
             // Fallback se l'immagine non è trovata
             button.setText(cardName.replace("_", " "));
+            button.setForeground(Color.WHITE); //Imposta il testo bianco
         }
         
         button.setPreferredSize(new Dimension(CARD_WIDTH, CARD_HEIGHT));

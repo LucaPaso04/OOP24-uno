@@ -22,18 +22,5 @@ public class NumberedCard extends AbstractCard {
 
     public NumberedCard(CardFace lightSide, CardFace darkSide) {
         super(lightSide, darkSide);
-        // Controllo di sicurezza
-        if (lightSide.value().ordinal() > CardValue.NINE.ordinal() ||
-            darkSide.value().ordinal() > CardValue.NINE.ordinal()) {
-            throw new IllegalArgumentException("NumberedCard deve avere un valore tra 0 e 9 su entrambi i lati.");
-        }
-    }
-
-    /**
-     * Le carte numerate non hanno effetti da eseguire sullo stato del gioco.
-     */
-    @Override
-    public void performEffect(Game game) {
-        // Non fa nulla, come da specifiche.
     }
 }

@@ -195,6 +195,7 @@ public class GameController implements GameViewObserver, GameModelObserver {
         System.out.println("Colore scelto: " + color);
         // Il GameModel riceverà il colore, imposterà il suo stato
         // interno e notificherà la View (che si aggiornerà di nuovo).
+        
         gameModel.setColor(color);
     }
 }
