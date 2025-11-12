@@ -3,120 +3,122 @@ package uno.View.Components;
 import uno.Controller.GameViewObserver;
 import uno.Model.Cards.Attributes.CardColor;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Window;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List; // Import necessario
 
 /**
- * Un pannello che appare quando un giocatore deve scegliere
- * un colore dopo aver giocato una carta Jolly.
+ * Un pannello che appare quando un giocatore deve scegliere un colore.
  */
-public class ColorChooserPanel extends JPanel {
+public class ColorChooserPanel extends JPanel implements ActionListener {
 
-    private GameViewObserver observer;
-    
-    // Colori per il tema scuro della UI
+    private final GameViewObserver observer;
+
     private static final Color PANEL_COLOR = new Color(50, 50, 50);
     private static final Color TEXT_COLOR = Color.WHITE;
     private static final Font BOLD_FONT = new Font("Arial", Font.BOLD, 14);
 
-    // NUOVI COLORI SPECIFICI PER IL TEMA SCURO (Flip Side)
-    // I valori sono presi dal file CardColor.java
-    private static final Color PINK_COLOR = new Color(255, 105, 180);  // Pink
-    private static final Color TEAL_COLOR = new Color(0, 128, 128);    // Teal
-    private static final Color ORANGE_COLOR = new Color(255, 140, 0);  // Orange
-    private static final Color PURPLE_COLOR = new Color(128, 0, 128);  // Purple
-    
-    public ColorChooserPanel() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    // MODIFICA: Il costruttore ora accetta un flag per determinare i colori.
+    public ColorChooserPanel(GameViewObserver observer, boolean isDarkSide) { // <-- NUOVO PARAMETRO
+        this.observer = observer;
+
+        // CAMBIA LAYOUT: 2 righe, 2 colonne, con 5 pixel di spazio (verticale e orizzontale)
+        setLayout(new GridLayout(2, 2, 10, 10)); // Ho messo 10px per maggiore visibilità
+
         setBackground(PANEL_COLOR);
         setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createEtchedBorder(), "Scegli Colore",
             TitledBorder.LEFT, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR
         ));
-        setVisible(false); // Nascosto di default
-        
-        // Inizializza i pulsanti con il lato chiaro di default
-        updateButtons(false);
-    }
 
-    /**
-     * Imposta il controller che ascolterà gli eventi di questo pannello.
-     * @param observer L'observer del controller.
-     */
-    public void setObserver(GameViewObserver observer) {
-        this.observer = observer;
-    }
+        // 1. Determina i colori da offrire in base al lato del gioco.
+        List<CardColor> colorsToOffer = isDarkSide ? 
+            List.of(CardColor.PINK, CardColor.TEAL, CardColor.ORANGE, CardColor.PURPLE) :
+            List.of(CardColor.RED, CardColor.GREEN, CardColor.BLUE, CardColor.YELLOW);
+            
+        // 2. Aggiunge i pulsanti dinamicamente (GridLayout li posiziona in griglia)
+        for (CardColor colorEnum : colorsToOffer) {
+            Color awtColor;
+            Color textColor;
+            String text;
 
-    /**
-     * Aggiorna i pulsanti mostrati nel pannello in base al lato attivo del gioco.
-     * @param isDarkSide true se siamo sul lato scuro (Flip), false per il lato chiaro (Standard).
-     */
-    public void updateButtons(boolean isDarkSide) {
-        this.removeAll(); // Rimuove i pulsanti esistenti
-        
-        if (isDarkSide) {
-            // Paletta Scuro (Pink, Teal, Orange, Purple)
-            JButton pinkButton = createColorButton("PINK", PINK_COLOR, CardColor.PINK);
-            JButton tealButton = createColorButton("TEAL", TEAL_COLOR, CardColor.TEAL);
-            JButton orangeButton = createColorButton("ORANGE", ORANGE_COLOR, CardColor.ORANGE);
-            JButton purpleButton = createColorButton("PURPLE", PURPLE_COLOR, CardColor.PURPLE);
+            // Mappa l'enum CardColor a un colore AWT e testo
+            if (isDarkSide) {
+                switch (colorEnum) {
+                    case PINK: awtColor = new Color(255, 105, 180); textColor = Color.BLACK; text = "ROSA"; break;
+                    case TEAL: awtColor = new Color(0, 128, 128); textColor = Color.WHITE; text = "VERDE ACQUA"; break;
+                    case ORANGE: awtColor = new Color(255, 140, 0); textColor = Color.BLACK; text = "ARANCIO"; break;
+                    case PURPLE: awtColor = new Color(153, 50, 204); textColor = Color.WHITE; text = "VIOLA"; break;
+                    default: continue;
+                }
+            } else {
+                switch (colorEnum) {
+                    case RED: awtColor = new Color(211, 47, 47); textColor = Color.WHITE; text = "ROSSO"; break;
+                    case GREEN: awtColor = new Color(76, 175, 80); textColor = Color.WHITE; text = "VERDE"; break;
+                    case BLUE: awtColor = new Color(33, 150, 243); textColor = Color.WHITE; text = "BLU"; break;
+                    case YELLOW: awtColor = new Color(255, 235, 59); textColor = Color.BLACK; text = "GIALLO"; break;
+                    default: continue;
+                }
+            }
             
-            this.add(pinkButton);
-            this.add(tealButton);
-            this.add(orangeButton);
-            this.add(purpleButton);
-        } else {
-            // Paletta Chiaro (Red, Blue, Green, Yellow)
-            // Utilizziamo i colori originali per l'interfaccia.
-            JButton redButton = createColorButton("Rosso", new Color(211, 47, 47), CardColor.RED);
-            JButton blueButton = createColorButton("Blu", new Color(33, 150, 243), CardColor.BLUE);
-            JButton greenButton = createColorButton("Verde", new Color(76, 175, 80), CardColor.GREEN);
-            JButton yellowButton = createColorButton("Giallo", new Color(255, 235, 59), CardColor.YELLOW);
-            
-            this.add(redButton);
-            this.add(blueButton);
-            this.add(greenButton);
-            this.add(yellowButton);
+            JButton button = createColorButton(text, awtColor, textColor, colorEnum);
+            add(button); // Aggiunge direttamente il bottone
+            // Rimosso: add(Box.createRigidArea(new Dimension(0, 5)));
         }
         
-        this.revalidate();
-        this.repaint();
+        // Imposta una dimensione preferita che funziona bene con 2x2
+        setPreferredSize(new Dimension(220, 150));
     }
-
+    
     /**
-     * Metodo helper per creare e configurare i bottoni colorati.
+     * Metodo helper per creare e configurare i bottoni colorati, associando il CardColor.
      */
-    private JButton createColorButton(String text, Color bgColor, CardColor colorEnum) {
+    private JButton createColorButton(String text, Color bgColor, Color fgColor, CardColor colorEnum) {
         JButton button = new JButton(text);
         button.setFont(BOLD_FONT);
         button.setBackground(bgColor);
-        
-        // Logica per garantire un buon contrasto del testo
-        if (colorEnum == CardColor.YELLOW || colorEnum == CardColor.PINK || colorEnum == CardColor.ORANGE) {
-            button.setForeground(Color.BLACK);
-        } else {
-            button.setForeground(Color.WHITE);
-        }
+        button.setForeground(fgColor);
         
         button.setOpaque(true);
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setMaximumSize(new Dimension(150, 40));
-        button.setPreferredSize(new Dimension(150, 40));
+        button.setAlignmentX(JPanel.CENTER_ALIGNMENT);
         
-        button.addActionListener(e -> {
-            if (observer != null) {
-                observer.onColorChosen(colorEnum);
-            }
-        });
+        // Imposta le dimensioni in modo che i pulsanti siano grossomodo quadrati
+        Dimension buttonSize = new Dimension(100, 50); 
+        button.setMaximumSize(buttonSize);
+        button.setPreferredSize(buttonSize);
+        
+        button.setActionCommand(colorEnum.name());
+        button.addActionListener(this); 
+        
         return button;
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // Usa getActionCommand per recuperare il nome dell'enum
+        String command = e.getActionCommand();
+        CardColor chosenColor = CardColor.valueOf(command);
+        
+        if (chosenColor != null) {
+            // 1. Notifica il controller
+            if (observer != null) {
+                observer.onColorChosen(chosenColor);
+            }
+            
+            // 2. Chiude il popup
+            Window parentDialog = SwingUtilities.getWindowAncestor(this);
+            if (parentDialog != null) {
+                parentDialog.dispose(); 
+            }
+        }
     }
 }

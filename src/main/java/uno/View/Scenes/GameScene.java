@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JOptionPane;
@@ -83,12 +84,10 @@ public class GameScene extends JPanel implements GameModelObserver {
     private JLabel discardPileCard;
     private JButton drawDeckButton;
     private JButton passButton;
-    
-    // --- Pannelli Laterali (Est) ---
     private JButton settingsButton;
     private JLabel statusLabel;
+    private boolean isColorDialogShowing = false;
     private JButton unoButton;
-    private ColorChooserPanel colorChooserPanel; 
 
     public GameScene(Game gameModel) {
         super(new BorderLayout(10, 10));
@@ -110,27 +109,16 @@ public class GameScene extends JPanel implements GameModelObserver {
         northAIPanel = createOpponentPanel("IA-Nord (2)");
         eastAIPanel = createOpponentPanel("IA-Est (3)");
 
-        // Pannello Est (Info + Scelta Colore + IA Est)
-        JPanel eastContainer = createEastContainer();
-
         // --- Assemblaggio Layout ---
         add(northAIPanel, BorderLayout.NORTH);
         add(westAIPanel, BorderLayout.WEST);
-        add(eastContainer, BorderLayout.EAST);
+        add(eastAIPanel, BorderLayout.EAST);
         add(centerPanel, BorderLayout.CENTER);
         
         // Pannello Sud (Mano Umano + Bottone UNO)
         JPanel southPanel = new JPanel(new BorderLayout(10, 0));
         southPanel.setOpaque(false);
         southPanel.add(new JScrollPane(playerHandPanel), BorderLayout.CENTER);
-        
-        JPanel unoButtonPanel = new JPanel(new BorderLayout());
-        unoButtonPanel.setOpaque(false);
-        unoButtonPanel.setBorder(new EmptyBorder(0, 0, 10, 10));
-        this.unoButton = createStyledButton("UNO!", new Color(255, 193, 7), Color.BLACK, 100, 80); // Giallo
-        unoButtonPanel.add(this.unoButton, BorderLayout.CENTER);
-        
-        southPanel.add(unoButtonPanel, BorderLayout.EAST);
         add(southPanel, BorderLayout.SOUTH);
 
         // --- Collegamento Azioni -> Controller ---
@@ -158,7 +146,7 @@ public class GameScene extends JPanel implements GameModelObserver {
      */
     public void setObserver(GameViewObserver observer) {
         this.controllerObserver = observer;
-        this.colorChooserPanel.setObserver(observer);
+        //this.colorChooserPanel.setObserver(observer);
     }
 
     /**
@@ -185,11 +173,39 @@ public class GameScene extends JPanel implements GameModelObserver {
                 comp.setEnabled(enabled); 
             }
         }
-        
-        if (!enabled && !isHumanTurn) {
-            colorChooserPanel.setVisible(false);
-        }
     }
+
+    private void showColorChooser() {
+        boolean isDarkSide = gameModel.isDarkSide();
+        
+        // 1. Crea l'istanza del pannello ColorChooser
+        ColorChooserPanel panel = new ColorChooserPanel(this.controllerObserver, isDarkSide); 
+        
+        // 2. Utilizza showOptionDialog per rimuovere i pulsanti di default 
+        // e impedire la chiusura tramite il tasto 'X'.
+        JOptionPane pane = new JOptionPane(
+            panel, 
+            JOptionPane.PLAIN_MESSAGE, // Tipo di messaggio (senza icone)
+            JOptionPane.DEFAULT_OPTION, // Nessun pulsante 'OK'/'Cancel'
+            null, // Nessuna icona
+            new Object[]{}, // Array vuoto per le opzioni (rimuove i pulsanti standard)
+            null
+        );
+        
+        // 3. Imposta l'azione predefinita per la chiusura della finestra:
+        // impedisce la chiusura tramite il tasto 'X' e Alt+F4.
+        pane.setInitialValue(null);
+        pane.setWantsInput(false);
+        
+        // Crea la finestra di dialogo modale che ospita il JOptionPane
+        JDialog dialog = pane.createDialog(this, "Scegli un Colore");
+        
+        // Imposta la chiusura su DO_NOTHING_ON_CLOSE per bloccare il tasto 'X'
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        
+        // Mostra la finestra (blocca il thread fino alla chiusura)
+        dialog.setVisible(true);
+}
 
     /**
      * Metodo chiamato dal Modello (Game) quando lo stato cambia.
@@ -197,20 +213,22 @@ public class GameScene extends JPanel implements GameModelObserver {
     @Override
     public void onGameUpdate() {
         boolean isHumanTurn = gameModel.getCurrentPlayer().getClass() == Player.class;
-        boolean isDarkSide = gameModel.isDarkSide();
-
-        this.colorChooserPanel.updateButtons(isDarkSide);
         
         // --- Gestione Stato (Visibilità) ---
         if (gameModel.getGameState() == GameState.WAITING_FOR_COLOR) {
             setHumanInputEnabled(false); 
-            if (isHumanTurn) { 
+            if (isHumanTurn && !isColorDialogShowing) { 
                 System.out.println("Mostro il pannello di scelta colore.");
-                colorChooserPanel.setVisible(true);
+                
+                this.isColorDialogShowing = true;
+
+                showColorChooser();
+
+                this.isColorDialogShowing = false;
             }
             statusLabel.setText("Scegli un colore!");
         } else if (gameModel.getGameState() == GameState.RUNNING) {
-            colorChooserPanel.setVisible(false);
+            this.isColorDialogShowing = false;
 
             String direction = gameModel.isClockwise() ? "Orario" : "Antiorario";
             statusLabel.setText("<html><div style='text-align: center;'>Turno di: " 
@@ -359,6 +377,7 @@ public class GameScene extends JPanel implements GameModelObserver {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         
+        // --- Preparazione degli elementi ---
         this.drawDeckButton = new JButton();
         styleAsCardButton(this.drawDeckButton, "CARD_BACK"); // Usa l'immagine del dorso
         
@@ -370,13 +389,117 @@ public class GameScene extends JPanel implements GameModelObserver {
         this.discardPileCard.setOpaque(true); 
         
         this.passButton = createStyledButton("Passa", BUTTON_COLOR_PASS, Color.WHITE, 100, 40);
+
+        this.unoButton = createStyledButton("UNO!", new Color(255, 193, 7), Color.BLACK, 100, 40); // Giallo
+
+        // Nota: Assumiamo che drawDeckButton, discardPileCard e passButton
+        // siano stati inizializzati correttamente prima di questo metodo.
+
+        // Crea i pannelli ausiliari (Assumiamo che i metodi esistano e siano validi)
+        JPanel settingsPanel = createSettingsPanel(); 
+        JPanel infoPanel = createInfoPanel();
+
+        // Pannelli di riempimento (Spacer) per il centraggio orizzontale
+        JPanel horizontalSpacerLeft = new JPanel();
+        horizontalSpacerLeft.setOpaque(false);
+        JPanel horizontalSpacerRight = new JPanel();
+        horizontalSpacerRight.setOpaque(false);
+        JPanel verticalSpacerTop = new JPanel();
+        verticalSpacerTop.setOpaque(false);
+
+        // ----------------------------------------------------------------------
+        // LAYOUT GBC: 6 colonne
+        // ----------------------------------------------------------------------
+
+        // 1. SETTINGS PANEL (Menu): Posizione (0, 0) - Alto a Sinistra
+        gbc.gridx = 0; 
+        gbc.gridy = 0;
+        gbc.gridwidth = 1; 
+        gbc.anchor = GridBagConstraints.NORTHWEST; 
+        gbc.weightx = 0.0; 
+        gbc.weighty = 0.0; 
+        gbc.fill = GridBagConstraints.NONE;
+        panel.add(settingsPanel, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 0;
-        panel.add(this.drawDeckButton, gbc);
-        gbc.gridx = 1; gbc.gridy = 0;
-        panel.add(this.discardPileCard, gbc);
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2;
-        panel.add(this.passButton, gbc);
+        // --- Riga 1 (Contenuto Centrale) ---
+
+        // 1. SPACER SUPERIORE: Colonna 1, Row 0
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.gridwidth = 4;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.5; // Prende spazio verticale
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(verticalSpacerTop, gbc);
+        
+        // 2. SPACER SINISTRO: Colonna 1, Row 1. Prende metà dello spazio extra
+        gbc.gridx = 1; 
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.weightx = 0.5; // Peso per spingere il contenuto centrale
+        gbc.weighty = 0.0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(horizontalSpacerLeft, gbc);
+
+        // 3. DRAW DECK (Pesca): Colonna 2, Row 1
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        gbc.weightx = 0.0; // Non prende spazio extra
+        gbc.weighty = 0.0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
+        panel.add(drawDeckButton, gbc); 
+        
+        // 4. DISCARD PILE (Scarti): Colonna 3, Row 1
+        gbc.gridx = 3; 
+        gbc.gridy = 1;
+        gbc.weightx = 0.0; 
+        gbc.weighty = 0.0; 
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
+        panel.add(discardPileCard, gbc); 
+        
+        // 5. SPACER DESTRO: Colonna 4, Row 1. Prende l'altra metà dello spazio extra
+        gbc.gridx = 4; 
+        gbc.gridy = 1;
+        gbc.weightx = 0.5; // Peso uguale a Spacer L per centrare
+        gbc.weighty = 0.0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(horizontalSpacerRight, gbc);
+
+        // 6. INFO PANEL: Colonna 5, Row 1
+        gbc.gridx = 5; 
+        gbc.gridy = 0;
+        gbc.weightx = 0.0; 
+        gbc.weighty = 0.0; 
+        gbc.fill = GridBagConstraints.NONE; 
+        gbc.anchor = GridBagConstraints.NORTHEAST;
+        panel.add(infoPanel, gbc);
+        
+        // --- Riga 2 (Pulsante Passa) ---
+        
+        // 7. PASS BUTTON: Posizione (5, 2) - Basso a Destra
+        // Usiamo l'ultima colonna (5) per l'allineamento a destra.
+        gbc.gridx = 2; 
+        gbc.gridy = 2;
+        gbc.weightx = 0.0;
+        gbc.weighty = 1.0; // IMPORTANTE: Spinge il bottone verso il basso
+        gbc.anchor = GridBagConstraints.CENTER; // Ancoraggio in basso a destra
+        gbc.fill = GridBagConstraints.NONE;
+        panel.add(passButton, gbc); 
+
+        // 7. UNO BUTTON: Posizione (5, 2) - Basso a Destra
+        // Usiamo l'ultima colonna (5) per l'allineamento a destra.
+        gbc.gridx = 3; 
+        gbc.gridy = 2;
+        gbc.weightx = 0.0;
+        gbc.weighty = 1.0; // IMPORTANTE: Spinge il bottone verso il basso
+        gbc.anchor = GridBagConstraints.CENTER; // Ancoraggio in basso a destra
+        gbc.fill = GridBagConstraints.NONE;
+        panel.add(unoButton, gbc); 
         
         return panel;
     }
@@ -423,31 +546,6 @@ public class GameScene extends JPanel implements GameModelObserver {
         panel.add(this.statusLabel);
 
         return panel;
-    }
-    
-    private JPanel createEastContainer() {
-        JPanel eastPanel = new JPanel();
-        eastPanel.setLayout(new BoxLayout(eastPanel, BoxLayout.Y_AXIS));
-        eastPanel.setOpaque(false);
-        
-        // 1. NUOVO: Aggiungi il pannello delle impostazioni in cima
-        JPanel settingsPanel = createSettingsPanel();
-        eastPanel.add(settingsPanel); // Ora è il primo elemento nel container Est
-        
-        // 2. Elementi esistenti: IA Est e resto
-        JPanel infoPanel = createInfoPanel();
-        colorChooserPanel = new ColorChooserPanel();
-        
-        // Rimuovi il rigid area che altrimenti sarebbe il primo elemento del container
-        // eastPanel.add(Box.createRigidArea(new Dimension(0, 15))); // Rimosso
-
-        eastPanel.add(eastAIPanel); // Pannello IA Est
-        eastPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        eastPanel.add(infoPanel);
-        eastPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        eastPanel.add(colorChooserPanel);
-        eastPanel.add(Box.createVerticalGlue()); // Spinge tutto in alto
-        return eastPanel;
     }
 
     /**
