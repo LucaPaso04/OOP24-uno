@@ -2,197 +2,161 @@ package uno.Model.Players;
 
 import uno.Model.Cards.Card;
 import uno.Model.Game.Game;
-import uno.Model.Cards.Attributes.CardColor; // Importa CardColor
+import uno.Model.Game.GameState; // Importante per controllare lo stato
+import uno.Model.Cards.Attributes.CardColor;
 import uno.Model.Cards.Attributes.CardValue;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional; // Importa Optional
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
-/**
- * Implementazione di una IA di livello "classico" o base.
- * Estende AIPlayer e implementa la logica decisionale.
- */
 public class AIAllWild extends AIPlayer {
 
     public AIAllWild(String name) {
         super(name);
     }
 
-    /**
-     * Logica decisionale principale dell'IA.
-     * Chiamato dal GameController quando è il turno di questa IA.
-     * @param game L'istanza corrente del modello Game.
-     */
     @Override
     public void takeTurn(Game game) {
-        // Controlla che sia il suo turno per evitare errori
+        // Controllo di sicurezza: se non è il mio turno, esco
         if (game.getCurrentPlayer() != this) {
             return;
-            //throw new IllegalStateException("Non è il turno di " + this.name);
         }
 
-        System.out.println(this.name + " sta pensando...");
+        System.out.println(this.name + " (AI All Wild) sta pensando...");
 
-        // 1. Trova una carta giocabile
-        Optional<Card> cardToPlay = findFirstPlayableCard(game);
+        // 1. Sceglie la carta migliore
+        Optional<Card> cardToPlay = chooseBestCard(game);
 
         if (cardToPlay.isPresent()) {
-            // 2. Se trova una carta, la gioca
-            Card card = cardToPlay.get();
-            
-            // Gioca la carta
+            playSelectedCard(game, cardToPlay.get());
+        } else {
+            // 2. Se non ha carte da giocare (raro in All Wild), pesca
+            handleDrawSequence(game);
+        }
+    }
+
+    private void playSelectedCard(Game game, Card card) {
+        try {
+            // Gioca la carta fisicamente
             game.playCard(card);
             System.out.println(this.name + " gioca " + card);
 
-            // Se la carta è un Jolly, l'IA deve anche scegliere un colore
-            if (card.getColor(game) == CardColor.WILD) {
-                CardColor chosenColor = chooseBestColor(game);
-                game.setColor(chosenColor); // Imposta il colore scelto
+            // --- GESTIONE EFFETTI IMMEDIATI ---
+            // Dopo aver giocato playCard, il gioco potrebbe essere entrato in pausa 
+            // in attesa di un colore o di un giocatore bersaglio. L'IA deve risolverlo SUBITO.
+
+            if (game.getGameState() == GameState.WAITING_FOR_COLOR) {
+                // Scegliamo sempre il Rosso per semplicità in All Wild, o un colore random
+                // Tanto in All Wild il colore conta poco, ma serve per sbloccare lo stato.
+                game.setColor(CardColor.RED);
+                System.out.println(this.name + " ha impostato il colore a ROSSO.");
             }
-            
-            // 3. Logica per chiamare UNO
+
+            if (game.getGameState() == GameState.WAITING_FOR_PLAYER) {
+                // Dobbiamo scegliere un bersaglio per SWAP o TARGETED DRAW
+                Player target = findBestTarget(game);
+                if (target != null) {
+                    game.choosenPlayer(target); // Nota: usa il metodo con il typo 'choosen' presente in Game.java
+                    System.out.println(this.name + " ha scelto come bersaglio: " + target.getName());
+                }
+            }
+
+            // Gestione chiamata UNO
             if (this.getHandSize() == 1) {
                 try {
                     game.callUno(this);
-                } catch (IllegalStateException e) {
-                    // L'IA non farà mai una falsa chiamata
+                } catch (Exception e) {
+                    // Ignora se non può chiamarlo
                 }
             }
-            
-        } else {
-            // 4. Se non trova carte giocabili, pesca una carta
+
+        } catch (Exception e) {
+            System.err.println("Errore AI durante la giocata: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void handleDrawSequence(Game game) {
+        try {
             game.playerInitiatesDraw();
-            Card drawnCard = hand.get(hand.size() - 1); // L'ultima carta è quella pescata
+            Card drawnCard = hand.get(hand.size() - 1);
+            System.out.println(this.name + " ha pescato: " + drawnCard);
 
-            System.out.println(this.name + " pesca una carta.");
-
-            // 5. Controlla se la carta pescata è giocabile
+            // In All Wild, la carta pescata è quasi sempre giocabile.
+            // Se è valida, la gioca subito.
             if (isMoveValid(drawnCard, game)) {
-                
-                game.playCard(drawnCard);
-                System.out.println(this.name + " gioca " + drawnCard + " dopo averla pescata.");
-
-                // Se è giocabile, la gioca immediatamente
-                if (drawnCard.getColor(game) == CardColor.WILD) {
-                    CardColor chosenColor = chooseBestColor(game);
-                    game.setColor(chosenColor); // Imposta il colore scelto
-                }
-
-                // Logica per chiamare UNO se necessario
-                if (this.getHandSize() == 1) {
-                    try {
-                        game.callUno(this);
-                    } catch (IllegalStateException e) {
-                        // L'IA non farà mai una falsa chiamata
-                    }
-                }
-            }
-            else{
-                // 6. Altrimenti, passa
+                playSelectedCard(game, drawnCard);
+            } else {
                 System.out.println(this.name + " passa il turno.");
                 game.playerPassTurn();
             }
+        } catch (Exception e) {
+            System.out.println(this.name + " non ha potuto pescare/giocare: " + e.getMessage());
+            // Forza il passaggio del turno se bloccato
+            try { game.playerPassTurn(); } catch (Exception ex) {}
         }
     }
 
-    /**
-     * Logica per determinare se una carta è giocabile.
-     * @param game
-     * @return
-     */
+    // --- LOGICA STRATEGICA ---
 
-    private boolean isMoveValid(Card card, Game game) {
-        Card topCard = game.getTopDiscardCard(); //
+    private Optional<Card> chooseBestCard(Game game) {
+        List<Card> hand = this.getHand();
+        Player bestSwapTarget = findBestTarget(game);
         
-        // Determina il colore attivo. Se currentColor è impostato (da un Jolly),
-        // usa quello. Altrimenti, usa il colore della carta in cima.
-        CardColor activeColor = (game.getCurrentColor() != null) ? game.getCurrentColor() : topCard.getColor(game);
+        // Cerca se abbiamo una carta Scambio Forzato
+        Optional<Card> swapCard = hand.stream()
+            .filter(c -> c.getValue(game) == CardValue.WILD_FORCED_SWAP)
+            .findFirst();
 
-        // 1. Regola Jolly Standard (WILD)
-        if (card.getValue(game) == CardValue.WILD) {
-            return true;
-        }
-
-        // 2. Regola Jolly +4 (WILD_DRAW_FOUR)
-        if (card.getValue(game) == CardValue.WILD_DRAW_FOUR) {
-            // Regola ufficiale: puoi giocarla solo se NON hai
-            // altre carte che corrispondono al COLORE ATTIVO.
-            for (Card cardInHand : game.getCurrentPlayer().getHand()) {
-                if (cardInHand.getColor(game) == activeColor) {
-                    return false; // Mossa illegale: hai un'altra carta giocabile
-                }
+        // STRATEGIA SWAP: Se abbiamo molte carte e l'avversario poche, scambiamo!
+        if (swapCard.isPresent() && bestSwapTarget != null) {
+            if (this.getHandSize() > bestSwapTarget.getHandSize()) {
+                return swapCard;
             }
-            return true; // Mossa legale
         }
 
-        // 3. Regole Standard (non-Jolly)
-        // La carta è valida se corrisponde al colore ATTIVO...
-        if (card.getColor(game) == activeColor) {
-            return true;
-        }
-        
-        // ...o se corrisponde al VALORE della carta in cima.
-        if (card.getValue(game) == topCard.getValue(game)) {
-            return true;
-        }
-
-        // Se nessuna regola è soddisfatta, la mossa non è valida
-        return false;
-    }
-
-    /**
-     * Logica di ricerca base: trova la prima carta valida.
-     * @param game Il modello Game per i controlli.
-     * @return Una carta giocabile, o Optional.empty() se non ce ne sono.
-     */
-    private Optional<Card> findFirstPlayableCard(Game game) {
-        Card topCard = game.getTopDiscardCard();
-        CardColor currentColor = game.getCurrentColor(); 
-
-        for (Card card : this.hand) {
-            if (isMoveValid(card, game)) {
+        // Priorità alle carte "cattive" (Draw 2, Draw 4, Skip)
+        for (Card card : hand) {
+            CardValue val = card.getValue(game);
+            if (val == CardValue.WILD_TARGETED_DRAW_TWO || 
+                val == CardValue.WILD_DRAW_FOUR || 
+                val == CardValue.WILD_DRAW_TWO ||
+                val == CardValue.WILD_SKIP_TWO) {
                 return Optional.of(card);
             }
         }
-        return Optional.empty(); // Nessuna carta trovata
+
+        // Se non ci sono priorità, gioca la prima carta trovata
+        // (Evitando lo swap se ci danneggia)
+        for (Card card : hand) {
+            if (card.getValue(game) == CardValue.WILD_FORCED_SWAP) {
+                // Se ho meno carte del target, non voglio scambiare a meno che non sia l'unica carta
+                if (bestSwapTarget != null && this.getHandSize() < bestSwapTarget.getHandSize()) {
+                    continue; 
+                }
+            }
+            return Optional.of(card);
+        }
+
+        // Se è rimasto solo lo swap "brutto", giocalo comunque
+        if (!hand.isEmpty()) return Optional.of(hand.get(0));
+
+        return Optional.empty();
     }
 
     /**
-     * Logica IA base per scegliere un colore (il colore più presente nella sua mano).
+     * Trova il giocatore avversario con il minor numero di carte (il più pericoloso).
      */
-    private CardColor chooseBestColor(Game game) {
-        // Usiamo un EnumMap per contare i colori. È molto efficiente per le chiavi Enum.
-        Map<CardColor, Integer> colorCounts = new EnumMap<>(CardColor.class);
+    private Player findBestTarget(Game game) {
+        return game.getPlayers().stream()
+                .filter(p -> p != this) // Esclude se stesso
+                .min(Comparator.comparingInt(Player::getHandSize))
+                .orElse(null);
+    }
 
-        // Inizializza i conteggi a 0 per i colori che si possono scegliere
-        colorCounts.put(CardColor.RED, 0);
-        colorCounts.put(CardColor.GREEN, 0);
-        colorCounts.put(CardColor.BLUE, 0);
-        colorCounts.put(CardColor.YELLOW, 0);
-
-        // Itera sulla mano dell'IA ('this.hand' è ereditato da Player)
-        for (Card card : this.hand) {
-            CardColor color = card.getColor(game);
-            
-            // Contiamo solo le carte colorate, ignoriamo le WILD
-            if (colorCounts.containsKey(color)) {
-                colorCounts.put(color, colorCounts.get(color) + 1);
-            }
-        }
-
-        // Ora trova il colore con il conteggio massimo
-        CardColor bestColor = CardColor.RED; // Colore di default se la mano è vuota o ha solo Jolly
-        int maxCount = -1;
-
-        for (Map.Entry<CardColor, Integer> entry : colorCounts.entrySet()) {
-            if (entry.getValue() > maxCount) {
-                maxCount = entry.getValue();
-                bestColor = entry.getKey();
-            }
-        }
-        
-        System.out.println(this.name + " sceglie " + bestColor);
-        return bestColor;
+    private boolean isMoveValid(Card card, Game game) {
+        // In All Wild, quasi tutto è lecito.
+        return true;
     }
 }

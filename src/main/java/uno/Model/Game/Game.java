@@ -419,7 +419,7 @@ public class Game {
         this.currentState = GameState.RUNNING; 
         
         // Ora che il colore è stato scelto, passiamo il turno.
-        //this.turnManager.advanceTurn();
+        this.turnManager.advanceTurn();
 
         notifyObservers();
     }
@@ -451,7 +451,7 @@ public class Game {
         this.currentState = GameState.RUNNING;
 
         // Avanza il turno
-        //this.turnManager.advanceTurn();
+        this.turnManager.advanceTurn();
 
         notifyObservers();
     }
