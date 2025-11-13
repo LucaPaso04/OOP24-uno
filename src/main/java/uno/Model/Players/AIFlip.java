@@ -50,11 +50,13 @@ public class AIFlip extends AIPlayer {
             if (card.getColor(game) == CardColor.WILD && card.getValue(game) != CardValue.WILD_DRAW_COLOR) {
                 CardColor chosenColor = chooseBestColor(game);
                 game.setColor(chosenColor); // Imposta il colore scelto
+                game.getTurnManager().advanceTurn();
             }
 
             if (card.getValue(game) == CardValue.WILD_DRAW_COLOR) {
                 CardColor chosenColor = CardColor.PURPLE;
                 game.setColor(chosenColor); // Imposta il colore scelto
+                game.getTurnManager().advanceTurn();
             }
             
             // 3. Logica per chiamare UNO
@@ -83,6 +85,7 @@ public class AIFlip extends AIPlayer {
                 if (drawnCard.getColor(game) == CardColor.WILD) {
                     CardColor chosenColor = chooseBestColor(game);
                     game.setColor(chosenColor); // Imposta il colore scelto
+                    game.getTurnManager().advanceTurn();
                 }
 
                 // Logica per chiamare UNO se necessario

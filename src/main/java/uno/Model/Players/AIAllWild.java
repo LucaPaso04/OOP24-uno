@@ -34,6 +34,8 @@ public class AIAllWild extends AIPlayer {
             // 2. Se non ha carte da giocare (raro in All Wild), pesca
             handleDrawSequence(game);
         }
+
+        game.getTurnManager().advanceTurn();
     }
 
     private void playSelectedCard(Game game, Card card) {

@@ -322,6 +322,10 @@ public class Game {
         return this.players;
     }
 
+    public TurnManager getTurnManager(){
+        return this.turnManager;
+    }
+
     /**
      * Restituisce il giocatore che ha vinto la partita.
      * @return Il giocatore vincitore, o null se la partita è ancora in corso.
@@ -417,9 +421,6 @@ public class Game {
 
         this.currentColor = color;
         this.currentState = GameState.RUNNING; 
-        
-        // Ora che il colore è stato scelto, passiamo il turno.
-        this.turnManager.advanceTurn();
 
         notifyObservers();
     }
@@ -449,9 +450,6 @@ public class Game {
         }
 
         this.currentState = GameState.RUNNING;
-
-        // Avanza il turno
-        this.turnManager.advanceTurn();
 
         notifyObservers();
     }

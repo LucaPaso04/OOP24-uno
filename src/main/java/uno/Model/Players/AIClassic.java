@@ -49,6 +49,7 @@ public class AIClassic extends AIPlayer {
             if (card.getColor(game) == CardColor.WILD) {
                 CardColor chosenColor = chooseBestColor(game);
                 game.setColor(chosenColor); // Imposta il colore scelto
+                game.getTurnManager().advanceTurn();
             }
             
             // 3. Logica per chiamare UNO
@@ -77,6 +78,7 @@ public class AIClassic extends AIPlayer {
                 if (drawnCard.getColor(game) == CardColor.WILD) {
                     CardColor chosenColor = chooseBestColor(game);
                     game.setColor(chosenColor); // Imposta il colore scelto
+                    game.getTurnManager().advanceTurn();
                 }
 
                 // Logica per chiamare UNO se necessario
