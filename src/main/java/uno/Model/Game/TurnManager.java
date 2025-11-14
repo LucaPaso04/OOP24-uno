@@ -65,6 +65,7 @@ public class TurnManager {
         // 4. Gestisci il "giro" (wrap-around)
         // Usa l'aritmetica modulare per gestire grandi salti negativi (N passi)
         currentPlayerIndex = (nextIndex % N + N) % N; 
+        System.out.println("Ora tocca al giocatore: " + currentPlayerIndex);
 
         // TODO: Gestire logica di reset Uno!
     }

@@ -482,8 +482,8 @@ public class Game {
         notifyObservers();
     }
 
-        public void forcedAdvanceTurn() {
-        turnManager.advanceTurn();
+        public void AIAdvanceTurn() {
+        this.turnManager.advanceTurn();
         notifyObservers(); 
     }
 }

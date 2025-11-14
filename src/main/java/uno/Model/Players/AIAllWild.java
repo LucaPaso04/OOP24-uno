@@ -34,8 +34,6 @@ public class AIAllWild extends AIPlayer {
             // 2. Se non ha carte da giocare (raro in All Wild), pesca
             handleDrawSequence(game);
         }
-
-        game.getTurnManager().advanceTurn();
     }
 
     private void playSelectedCard(Game game, Card card) {
@@ -51,9 +49,8 @@ public class AIAllWild extends AIPlayer {
             if (game.getGameState() == GameState.WAITING_FOR_COLOR) {
                 // Scegliamo sempre il Rosso per semplicità in All Wild, o un colore random
                 // Tanto in All Wild il colore conta poco, ma serve per sbloccare lo stato.
-                game.setColor(CardColor.RED);
-                System.out.println(this.name + " ha impostato il colore a ROSSO.");
-                game.forcedAdvanceTurn();
+                game.setColor(null);
+                game.AIAdvanceTurn();
             }
 
             if (game.getGameState() == GameState.WAITING_FOR_PLAYER) {
@@ -62,7 +59,7 @@ public class AIAllWild extends AIPlayer {
                 if (target != null) {
                     game.choosenPlayer(target); // Nota: usa il metodo con il typo 'choosen' presente in Game.java
                     System.out.println(this.name + " ha scelto come bersaglio: " + target.getName());
-                    game.forcedAdvanceTurn(); // Avanza il turno forzatamente dopo la scelta
+                    game.AIAdvanceTurn();
                 }
             }
 
