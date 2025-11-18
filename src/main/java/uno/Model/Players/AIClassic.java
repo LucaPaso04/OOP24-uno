@@ -71,7 +71,7 @@ public class AIClassic extends AIPlayer {
         if (card.getColor(game) == CardColor.WILD) {
             CardColor chosenColor = chooseBestColor(game);
             game.setColor(chosenColor);
-            // RIMOSSO: game.AIAdvanceTurn() <- BUG! Il turno è già gestito da playCard()
+            game.AIAdvanceTurn();
         }
     }
 
