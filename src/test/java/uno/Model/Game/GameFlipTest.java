@@ -45,7 +45,7 @@ class GameFlipTest {
         flipDeck = new FlipDeck();
         
         // Il costruttore di Game popola le mappe
-        game = new Game(flipDeck, players);
+        game = new Game(flipDeck, players, "FLIP");
         
         // Prepara il setup del gioco
         gameSetup = new GameSetup(game, flipDeck, game.getDiscardPile(), players);

@@ -14,9 +14,8 @@ public class TurnManager {
     private final List<Player> players;
     private int currentPlayerIndex;
     private boolean isClockwise; // true = senso orario, false = antiorario
-    private boolean skipNext;
     private boolean hasDrawnThisTurn;
-    private int skipSize;
+    private int skipSize; // Indica QUANTI giocatori saltare (0 per un turno normale).
 
     /**
      * Crea un nuovo gestore dei turni.
@@ -29,7 +28,6 @@ public class TurnManager {
         this.currentPlayerIndex = rand.nextInt(players.size());
 
         this.isClockwise = true;
-        this.skipNext = false;
         this.hasDrawnThisTurn = false;
         this.skipSize = 0;
     }
@@ -44,30 +42,26 @@ public class TurnManager {
 
     /**
      * Calcola e passa al giocatore successivo.
-     * Applica qualsiasi effetto "salta" in sospeso.
+     * Applica l'avanzamento basato su skipSize.
      */
     public void advanceTurn(Game game) {
         int N = players.size();
     
-        // 1. Calcola lo step: N posizioni (salta tutti) o 1/2 (skip singolo)
-        int step;
-        if (skipSize != 0) {
-            step = skipSize; // Torna al giocatore corrente
-        } else {
-            step = this.skipNext ? 2 : 1; // Logica esistente per Skip/Normale
-        }
+        // 1. Calcola il passo totale: 
+        // Se skipSize è N (vuol dire saltare N giocatori), il passo totale è N + 1.
+        int totalSteps = this.skipSize + 1; 
 
         // 2. Resetta i flag per il *nuovo* turno
-        this.skipNext = false;         // Il flag "skip" è stato "consumato"
-        this.skipSize = 0;    // <-- Reset del nuovo flag
+        this.skipSize = 0;    // Reset per la prossima carta/effetto
         this.hasDrawnThisTurn = false; // Il nuovo giocatore non ha ancora pescato
 
         // 3. Calcola la direzione e il prossimo indice
         int direction = isClockwise ? 1 : -1;
-        int nextIndex = (currentPlayerIndex + (step * direction));
+        // La posizione si sposta di 'totalSteps' nella direzione 'direction'.
+        int nextIndex = (currentPlayerIndex + (totalSteps * direction));
 
         // 4. Gestisci il "giro" (wrap-around)
-        // Usa l'aritmetica modulare per gestire grandi salti negativi (N passi)
+        // Usa l'aritmetica modulare (aggiunge N per gestire numeri negativi)
         currentPlayerIndex = (nextIndex % N + N) % N; 
         System.out.println("Ora tocca al giocatore: " + currentPlayerIndex);
 
@@ -87,19 +81,23 @@ public class TurnManager {
 
     /**
      * Restituisce il giocatore che giocherebbe DOPO quello corrente,
-     * senza far avanzare il turno.
+     * tenendo conto di eventuali skipSize in sospeso.
      * @return Il prossimo giocatore.
      */
     public Player peekNextPlayer() {
-        int increment = skipNext ? 2 : 1;
+        // Calcola il passo totale (come in advanceTurn)
+        int totalSteps = this.skipSize + 1; 
+        
+        int N = players.size();
         int direction = isClockwise ? 1 : -1;
-        int nextIndex = (currentPlayerIndex + (increment * direction));
+        
+        // Calcola l'indice futuro
+        int nextIndex = (currentPlayerIndex + (totalSteps * direction));
 
-        if (nextIndex < 0) {
-            return players.get(players.size() + nextIndex);
-        } else {
-            return players.get(nextIndex % players.size());
-        }
+        // Gestisci il "giro" con il modulo
+        int nextPlayerIndex = (nextIndex % N + N) % N; 
+        
+        return players.get(nextPlayerIndex);
     }
 
     /**
@@ -110,18 +108,14 @@ public class TurnManager {
     }
 
     /**
-     * Imposta un flag per saltare il prossimo giocatore.
-     * L'avanzamento effettivo avverrà alla chiamata di advanceTurn().
+     * Imposta il numero di giocatori da saltare nel prossimo turno.
+     * @param n Il numero di giocatori da saltare (es. 1 per Skip, 2 per Skip Two).
      */
-    public void skipNextPlayer() {
-        this.skipNext = true;
-    }
-
     public void skipPlayers(int n) {
-        skipSize = n;
+        this.skipSize = n;
     }
 
-    // --- NUOVI METODI GETTER/SETTER ---
+    // --- METODI GETTER/SETTER ---
 
     /**
      * @return true se il giocatore corrente ha già pescato.

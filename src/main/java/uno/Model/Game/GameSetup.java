@@ -52,8 +52,7 @@ public class GameSetup {
     private void dealInitialCards() {
         for (int i = 0; i < INITIAL_HAND_SIZE; i++) {
             for (Player player : this.players) {
-                // Aggiunge una carta alla mano del giocatore (presuppone che getHand() esista)
-                player.addCardToHand(deck.drawCard());
+                game.drawCardForPlayer(player);
             }
         }
     }
@@ -65,6 +64,7 @@ public class GameSetup {
     private void flipFirstCard(boolean isAllWild) {
         if(isAllWild){
             game.setCurrentColor(CardColor.WILD);
+            game.logSystemAction("SETUP_FIRST_CARD", "ALL_WILD_START", "Color: WILD");
             return;
         }
 
@@ -78,6 +78,11 @@ public class GameSetup {
                 firstCard.getValue(game) == CardValue.REVERSE ||
                 firstCard.getValue(game) == CardValue.SKIP ||
                 firstCard.getValue(game) == CardValue.FLIP) && !isAllWild) {
+
+            game.logSystemAction("SETUP_CARD_SKIPPED", 
+                            firstCard.getClass().getSimpleName(), 
+                            "Drawn and discarded: " + firstCard.toString());
+            
             System.out.println("Carta scartata: " + firstCard);
             discardPile.addCard(firstCard); // Metti la carta non valida nella pila degli scarti
             firstCard = deck.drawCard();
@@ -86,6 +91,10 @@ public class GameSetup {
         // Aggiunge la prima carta valida alla pila degli scarti
         discardPile.addCard(firstCard);
         System.out.println("Prima carta girata: " + firstCard);
+
+        game.logSystemAction("SETUP_CARD_FLIPPED", 
+                        firstCard.getClass().getSimpleName(), 
+                        "Starting Color: " + firstCard.getColor(game));
 
         // Imposta il colore attivo in base alla prima carta
         game.setCurrentColor(firstCard.getColor(game));

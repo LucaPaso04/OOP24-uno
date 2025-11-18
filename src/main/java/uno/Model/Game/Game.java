@@ -5,11 +5,13 @@ import uno.Model.Cards.Attributes.CardColor;
 import uno.Model.Cards.Attributes.CardValue;
 import uno.Model.Cards.Deck.Deck;
 import uno.Model.Players.Player;
+import uno.Model.Utils.GameLogger;
 import uno.View.GameModelObserver;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 /**
  * Classe principale del Modello. Contiene la logica e lo stato della partita.
@@ -29,6 +31,8 @@ public class Game {
     private CardColor currentColor;
     private Card currentPlayedCard;
 
+    private final GameLogger logger;
+
     private boolean isDarkSide = false; // <-- STATO FLIP
 
     /**
@@ -36,7 +40,7 @@ public class Game {
      * @param deck Il mazzo da usare.
      * @param players La lista dei giocatori, già creata e in ordine.
      */
-    public Game(Deck<Card> deck, List<Player> players) {
+    public Game(Deck<Card> deck, List<Player> players, String gameMode) {
         this.drawDeck = deck;
         this.players = players;
         this.winner = null; // Inizializza il vincitore a null
@@ -45,10 +49,14 @@ public class Game {
         // --- COLLEGAMENTO ---
         // Il TurnManager ora possiede la logica di chi sta giocando
         this.turnManager = new TurnManager(players); 
+
+        this.logger = new GameLogger(String.valueOf(System.currentTimeMillis()));
         
         this.currentState = GameState.RUNNING;
         this.currentColor = null; // Nessun colore attivo all'inizio
         this.currentPlayedCard = null;
+
+        logger.logAction("SYSTEM", "GAME_START", gameMode, "Players: " + players.size());
         
         // NOTA: La distribuzione delle carte ora è gestita da GameSetup
         // nel MenuController, non più qui.
@@ -89,6 +97,10 @@ public class Game {
         }
 
         this.currentPlayedCard = card;
+
+        logger.logAction(player.getName(), "PLAY", 
+                    card.getClass().getSimpleName(), 
+                    card.getValue(this).toString());
         
         // --- FINE LOGICA DI VALIDAZIONE ---
 
@@ -123,6 +135,7 @@ public class Game {
         if (player.hasWon()) {
             this.currentState = GameState.GAME_OVER;
             this.winner = player;
+            logger.logAction("SYSTEM", "GAME_OVER", "N/A", "Winner: " + this.winner.getName());
             System.out.println("PARTITA FINITA! Il vincitore è " + this.winner.getName());
             notifyObservers(); // Notifica la View che la partita è finita
             return; // Non avanzare il turno, la partita è bloccata
@@ -220,6 +233,11 @@ public class Game {
             }
         }
 
+        Player currentPlayer = getCurrentPlayer();
+        String handSize = String.valueOf(currentPlayer.getHand().size()); // Dimensione della mano dopo la pescata
+
+        logger.logAction(currentPlayer.getName(), "PASS_TURN", "N/A", "HandSize: " + handSize);
+
         // Se sei qui, hai pescato e hai scelto di passare
         System.out.println(getCurrentPlayer().getName() + " passa il turno.");
         turnManager.advanceTurn(this); // Avanza al prossimo giocatore
@@ -247,7 +265,12 @@ public class Game {
             System.out.println("Mazzo rimescolato con " + cardsToReshuffle.size() + " carte.");
         }
 
-        player.addCardToHand(drawDeck.drawCard());
+        Card drawnCard = drawDeck.drawCard(); //
+        player.addCardToHand(drawnCard);
+
+        logger.logAction(player.getName(), "DRAW", 
+                    drawnCard.getClass().getSimpleName(), 
+                    drawnCard.getValue(this).toString());
         // Rimosso notifyObservers() - sarà gestito dal metodo chiamante
     }
 
@@ -260,7 +283,10 @@ public class Game {
         // Un giocatore può validamente chiamare UNO solo se ha 1 carta.
         if (player.getHandSize() == 1) {
             player.hasCalledUno();
+            logger.logAction(player.getName(), "CALL_UNO_SUCCESS", "N/A", "HandSize: 1");
         } else {
+
+            logger.logAction(player.getName(), "CALL_UNO_FAILED", "N/A", "Initial HandSize: " + player.getHandSize() + ". Penalty: Draw 2.");
 
             drawCardForPlayer(player);
             drawCardForPlayer(player);
@@ -331,12 +357,6 @@ public class Game {
     }
     
     // --- METODI PER GLI EFFETTI DELLE CARTE (Delegano al TurnManager) ---
-    
-    public void skipNextPlayer() {
-        this.turnManager.skipNextPlayer();
-        System.out.println("Giocatore saltato!");
-    }
-
     public void skipPlayers(int n) {
         this.turnManager.skipPlayers(n);
         System.out.println("Giocatore saltato!");
@@ -370,6 +390,15 @@ public class Game {
 
         // 2. Resetta il colore (la carta in cima ora ha un nuovo colore)
         this.currentColor = card.getColor(this); 
+
+        // --- LOGICA DI SCELTA CASUALE PER WILD FLIPPATO ---
+        if (this.currentColor == CardColor.WILD) {
+            CardColor[] coloredValues = {CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW};
+            Random random = new Random();
+            CardColor chosenColor = coloredValues[random.nextInt(coloredValues.length)];
+
+            this.currentColor = chosenColor;
+        }
         
         // 3. Notifica la View per ridisegnare tutto
         notifyObservers();
@@ -404,6 +433,8 @@ public class Game {
         // Deve prendere il valore della carta giocata (NON quella nel mazzo degli scarti)
         Card playedCard = this.currentPlayedCard;
 
+        logger.logAction(getCurrentPlayer().getName(), "SET_COLOR", "N/A", color.toString());
+
         if (playedCard.getValue(this) == CardValue.WILD_DRAW_COLOR) {
             drawUntilColorChosenCard(color);
             return;
@@ -421,6 +452,8 @@ public class Game {
         }
 
         Card playedCard = this.currentPlayedCard;
+
+        logger.logAction(getCurrentPlayer().getName(), "CHOOSEN_PLAYER", "N/A", player.getName());
 
         if(playedCard.getValue(this) == CardValue.WILD_FORCED_SWAP){
             System.out.println("Scambio forzato con: " + player.getName());
@@ -475,5 +508,11 @@ public class Game {
         public void AIAdvanceTurn() {
         this.turnManager.advanceTurn(this);
         notifyObservers(); 
+    }
+
+    // Nel file Game.java
+    // Assumendo che 'logger' sia il tuo campo GameLogger
+    public void logSystemAction(String actionType, String cardDetails, String extraInfo) {
+        this.logger.logAction("SYSTEM", actionType, cardDetails, extraInfo);
     }
 }

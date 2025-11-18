@@ -94,25 +94,25 @@ public abstract class AbstractCard implements Card {
     protected void dispatchBasicEffect(Game game, CardValue value) {
         switch (value) {
             case SKIP:
-                game.skipNextPlayer();
+                game.skipPlayers(1);
                 break;
             case SKIP_EVERYONE:
-                game.skipPlayers(4);
+                game.skipPlayers(3);
                 break;
             case REVERSE:
                 game.reversePlayOrder();
                 break;
             case DRAW_ONE:
                 game.makeNextPlayerDraw(1);
-                game.skipNextPlayer();
+                game.skipPlayers(1);;
                 break;
             case DRAW_TWO:
                 game.makeNextPlayerDraw(2);
-                game.skipNextPlayer();
+                game.skipPlayers(1);
                 break;
             case DRAW_FIVE:
                 game.makeNextPlayerDraw(5);
-                game.skipNextPlayer();
+                game.skipPlayers(1);
                 break;
             case FLIP:
                 game.flipTheWorld(this);
@@ -122,12 +122,12 @@ public abstract class AbstractCard implements Card {
                 break;
             case WILD_DRAW_FOUR:
                 game.makeNextPlayerDraw(4);
-                game.skipNextPlayer();
+                game.skipPlayers(1);
                 game.requestColorChoice();
                 break;
             case WILD_DRAW_TWO:
                 game.makeNextPlayerDraw(2);
-                game.skipNextPlayer();
+                game.skipPlayers(1);
                 game.requestColorChoice();
                 break;
             case WILD_FORCED_SWAP:
@@ -137,21 +137,21 @@ public abstract class AbstractCard implements Card {
                 game.reversePlayOrder();
                 break;
             case WILD_SKIP:
-                game.skipNextPlayer();
+                game.skipPlayers(1);
                 break;
             case WILD_SKIP_TWO:
-                game.skipPlayers(3);
+                game.skipPlayers(2);
                 break;
             case WILD_TARGETED_DRAW_TWO:
                 game.requestPlayerChoice();
                 break;
             case WILD_DRAW_FOUR_ALLWILD:
                 game.makeNextPlayerDraw(4);
-                game.skipNextPlayer();
+                game.skipPlayers(1);
                 break;
             case WILD_DRAW_TWO_ALLWILD:
                 game.makeNextPlayerDraw(2);
-                game.skipNextPlayer();
+                game.skipPlayers(1);
                 break;
             default:
                 break;

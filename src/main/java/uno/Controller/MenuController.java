@@ -44,7 +44,7 @@ public class MenuController implements MenuObserver {
 
         // 2. Crea il Model (Mazzo e Partita)
         StandardDeck deck = new StandardDeck();
-        Game gameModel = new Game(deck, players);
+        Game gameModel = new Game(deck, players, "CLASSIC");
 
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
         // Questo popola le mani dei giocatori e la pila degli scarti.
@@ -87,7 +87,7 @@ public class MenuController implements MenuObserver {
 
         // 2. Crea il Model (Mazzo e Partita)
         FlipDeck deck = new FlipDeck();
-        Game gameModel = new Game(deck, players);
+        Game gameModel = new Game(deck, players, "FLIP");
 
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
         // Questo popola le mani dei giocatori e la pila degli scarti.
@@ -131,7 +131,7 @@ public class MenuController implements MenuObserver {
 
         // 2. Crea il Model (Mazzo e Partita)
         AllWildDeck deck = new AllWildDeck();
-        Game gameModel = new Game(deck, players);
+        Game gameModel = new Game(deck, players, "ALL_WILD");
 
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
         // Questo popola le mani dei giocatori e la pila degli scarti.
