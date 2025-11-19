@@ -1,53 +1,68 @@
 package uno.Model.Cards.Deck;
 
-import uno.Model.Cards.Attributes.CardColor;
-import uno.Model.Cards.Attributes.CardFace;
 import uno.Model.Cards.Attributes.CardValue;
 import uno.Model.Cards.Card;
-import uno.Model.Cards.Types.*;
-
-
-import java.util.Arrays;
-import java.util.List;
+import uno.Model.Cards.Types.DoubleSidedCard; // La nuova carta unica
+import uno.Model.Cards.Behaviors.*; // Importa tutti i comportamenti
 
 /**
- * Rappresenta un mazzo di UNO classico da 108 carte.
- * Estende la classe Deck astratta e implementa il metodo
- * di creazione specifico per questa modalità di gioco.
+ * Rappresenta il mazzo per la modalità "All Wild" (Tutto Jolly).
+ * In questa modalità tutte le carte sono Jolly e hanno effetti vari.
  */
 public class AllWildDeck extends Deck<Card> {
 
-    /**
-     * Costruisce un nuovo mazzo All Wild.
-     * Il costruttore della classe padre (Deck) chiamerà automaticamente
-     * createDeck() e poi shuffle().
-     */
+    // Istanza unica del dorso per risparmiare memoria (comune a tutte le carte)
+    private final CardSideBehavior STANDARD_BACK = new BackSideBehavior();
+
     public AllWildDeck() {
         super();
     }
 
-    /**
-     * Implementazione del metodo astratto per popolare la lista 'cards' 
-     * (protetta nella classe padre) con le 112 carte del gioco classico,
-     * utilizzando classi specifiche per ogni effetto.
-     */
     @Override
     protected void createDeck() {
-        CardFace wildCardFace = new CardFace(CardColor.WILD, CardValue.WILD_ALLWILD);
-        CardFace wildDrawFourCardFace = new CardFace(CardColor.WILD, CardValue.WILD_DRAW_FOUR_ALLWILD);
-        CardFace wildDrawTwoCardFace = new CardFace(CardColor.WILD, CardValue.WILD_DRAW_TWO_ALLWILD);
-        // aggiungi 14 carte per Wild
-        for(int i = 0; i < 14; i++) {
-            this.cards.add(new WildCard(wildCardFace, wildCardFace));
-            this.cards.add(new WildDrawFourCard(wildDrawFourCardFace, wildDrawFourCardFace));
-            this.cards.add(new WildForcedSwapCard());
-            this.cards.add(new WildReverseCard());
-            this.cards.add(new WildSkipCard());
-            this.cards.add(new WildTargetedDrawTwoCard());
-            this.cards.add(new WildDrawTwoCard(wildDrawTwoCardFace, wildDrawTwoCardFace));
-            this.cards.add(new WildSkipTwoCard());
-        }
+        // Nella modalità All Wild, le carte vengono ripetute molte volte.
+        // Basandoci sul tuo codice originale: 14 copie per ogni tipo (14 * 8 = 112 carte).
+        
+        for (int i = 0; i < 14; i++) {
+            
+            // 1. Jolly Classico (WILD)
+            // Usa WildBehavior: chiede il colore (opzionale in AllWild, ma standard per coerenza)
+            addCard(new WildBehavior(CardValue.WILD_ALLWILD, 0));
 
-        // Totale: 14 carte per Wild card = 112 carte
+            // 2. Jolly Pesca 4 (+4)
+            addCard(new WildBehavior(CardValue.WILD_DRAW_FOUR_ALLWILD, 4));
+
+            // 3. Jolly Pesca 2 (+2)
+            addCard(new WildBehavior(CardValue.WILD_DRAW_TWO_ALLWILD, 2));
+
+            // 6. Inverti (Wild Reverse)
+            addCard(new WildBehavior(CardValue.WILD_REVERSE, 0));
+
+            // --- AZIONI SPECIALI (Usiamo ActionBehavior con lambda) ---
+            
+            // 4. Scambio Forzato (Forced Swap)
+            // L'effetto è chiedere di scegliere un giocatore.
+            addCard(new WildBehavior(CardValue.WILD_FORCED_SWAP, 0));
+
+            // 5. Pesca 2 Mirata (Targeted Draw 2)
+            // Anche questo richiede di scegliere un giocatore target.
+            addCard(new WildBehavior(CardValue.WILD_TARGETED_DRAW_TWO, 0));
+
+            // 7. Salta (Skip)
+            addCard(new WildBehavior(CardValue.WILD_SKIP, 
+                0));
+
+            // 8. Salta Due (Skip Two)
+            addCard(new WildBehavior(CardValue.WILD_SKIP_TWO, 0));
+        }
+    }
+
+    /**
+     * Metodo helper per creare la DoubleSidedCard.
+     * Associa il comportamento specifico al lato Front e il dorso standard al lato Back.
+     */
+    private void addCard(CardSideBehavior frontBehavior) {
+        Card card = new DoubleSidedCard(frontBehavior, STANDARD_BACK);
+        this.cards.add(card);
     }
 }

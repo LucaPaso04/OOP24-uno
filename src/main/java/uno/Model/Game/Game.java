@@ -11,7 +11,6 @@ import uno.View.GameModelObserver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Random;
 
 /**
  * Classe principale del Modello. Contiene la logica e lo stato della partita.
@@ -384,23 +383,33 @@ public class Game {
      * Chiamato dalla FlipCard.
      * Cambia lo stato del gioco e "traduce" tutte le carte.
      */
-    public void flipTheWorld(Card card) {
-        this.isDarkSide = !this.isDarkSide; // 1. Inverti lo stato
+    public void flipTheWorld() {
+        // 1. Inverti PRIMA lo stato del mondo
+        // Questo è fondamentale affinché currentPlayedCard.getColor(this)
+        // restituisca il colore del lato NUOVO (quello che sta per apparire).
+        this.isDarkSide = !this.isDarkSide; 
+        
         System.out.println("FLIP! Ora il gioco è sul lato: " + (isDarkSide ? "SCURO" : "CHIARO"));
 
-        // 2. Resetta il colore (la carta in cima ora ha un nuovo colore)
-        this.currentColor = card.getColor(this); 
+        // 2. Aggiorna il colore attivo prendendolo dal lato appena rivelato della carta
+        // Poiché abbiamo già fatto l'inversione al punto 1, getColor() leggerà il lato corretto.
+        this.currentColor = this.currentPlayedCard.getColor(this); 
 
         // --- LOGICA DI SCELTA CASUALE PER WILD FLIPPATO ---
+        // Se per caso il lato che appare è un JOLLY (raro, ma possibile), scegliamo un colore a caso
+        // per non bloccare il gioco in attesa di un input che non può arrivare.
         if (this.currentColor == CardColor.WILD) {
             CardColor[] coloredValues = {CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW};
-            Random random = new Random();
+            java.util.Random random = new java.util.Random();
             CardColor chosenColor = coloredValues[random.nextInt(coloredValues.length)];
 
             this.currentColor = chosenColor;
+            System.out.println("Il lato rivelato è WILD! Colore scelto casualmente: " + chosenColor);
         }
         
-        // 3. Notifica la View per ridisegnare tutto
+        System.out.println("Nuovo colore attivo dopo il FLIP: " + this.currentColor);
+        
+        // 3. Notifica la View per ridisegnare tutto (sfondi, carte, ecc.)
         notifyObservers();
     }
 

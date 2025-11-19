@@ -3,25 +3,14 @@ package uno.Model.Cards.Deck;
 import uno.Model.Cards.Attributes.CardColor;
 import uno.Model.Cards.Attributes.CardFace;
 import uno.Model.Cards.Attributes.CardValue;
+import uno.Model.Cards.Behaviors.*;
 import uno.Model.Cards.Card;
-import uno.Model.Cards.Types.NumberedCard;
-import uno.Model.Cards.Types.SkipCard;
-import uno.Model.Cards.Types.SkipEveryoneCard;
-import uno.Model.Cards.Types.ReverseCard;
-import uno.Model.Cards.Types.DrawOneCard;
-import uno.Model.Cards.Types.DrawTwoCard;
-import uno.Model.Cards.Types.FlipCard;
-import uno.Model.Cards.Types.WildCard;
-import uno.Model.Cards.Types.WildDrawColorCard;
-import uno.Model.Cards.Types.WildDrawFourCard;
-import uno.Model.Cards.Types.WildDrawTwoCard;
+import uno.Model.Cards.Types.DoubleSidedCard;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Arrays;
-import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
@@ -79,55 +68,66 @@ public class FlipDeck extends Deck<Card> {
      * Crea un'istanza Card dal Mapping letto e la aggiunge al mazzo il numero corretto di volte.
      */
     private void addCardMappingToDeck(Mapping mapping) {
-        // 1. Converti i DTO in oggetti CardFace
+        // 1. Converti il JSON config in oggetti CardFace
         CardFace lightFace = createCardFace(mapping.light);
         CardFace darkFace = createCardFace(mapping.dark);
 
-        // 2. Determina la classe corretta da istanziare in base al VALORE del lato Chiaro
-        Card card;
-        CardValue lightValue = lightFace.value();
-        CardValue darkValue = darkFace.value();
+        // 2. Crea i comportamenti (Behaviors) per ogni lato
+        CardSideBehavior lightBehavior = createBehavior(lightFace);
+        CardSideBehavior darkBehavior = createBehavior(darkFace);
 
-        // --- 1. PRIORITÀ ALTA: JOLLY COMPLESSI (+4, +2, DRAW_COLOR) ---
-        // Se un lato qualsiasi ha un Jolly complesso, usiamo la classe Jolly corrispondente.
-        if (lightValue == CardValue.WILD_DRAW_TWO || darkValue == CardValue.WILD_DRAW_TWO) {
-            card = new WildDrawTwoCard(lightFace, darkFace);
-        } else if (lightValue == CardValue.WILD_DRAW_COLOR || darkValue == CardValue.WILD_DRAW_COLOR) {
-             // Questa classe gestisce la giocabilità restrittiva e il cambio colore.
-            card = new WildDrawColorCard(lightFace, darkFace);
-        } 
-        
-        // --- 2. PRIORITÀ MEDIA: JOLLY STANDARD (WILD) ---
-        // Se un lato qualsiasi è WILD, usiamo WildCard.
-        else if (lightValue == CardValue.WILD || darkValue == CardValue.WILD) {
-             // WildCard ha canBePlayedOn che restituisce sempre true, 
-             // risolvendo il tuo problema di "Mossa non valida".
-            card = new WildCard(lightFace, darkFace);
-        }
-        
-        // --- 3. AZIONI SPECIALI (FLIP) ---
-        else if (lightValue == CardValue.FLIP || darkValue == CardValue.FLIP) {
-            card = new FlipCard(lightFace, darkFace);
-        }
-        
-        // --- 4. AZIONI SEMPLICI (Devono controllare entrambi i lati) ---
-        else if (lightValue == CardValue.SKIP || darkValue == CardValue.SKIP) {
-            card = new SkipCard(lightFace, darkFace);
-        } else if (lightValue == CardValue.REVERSE || darkValue == CardValue.REVERSE) {
-            card = new ReverseCard(lightFace, darkFace);
-        } else if (lightValue == CardValue.DRAW_ONE || darkValue == CardValue.DRAW_ONE) {
-            card = new DrawOneCard(lightFace, darkFace);
-        } else if (lightValue == CardValue.SKIP_EVERYONE || darkValue == CardValue.SKIP_EVERYONE) {
-            card = new SkipEveryoneCard(lightFace, darkFace);
-        }
+        // 3. Crea la carta composta
+        Card card = new DoubleSidedCard(lightBehavior, darkBehavior);
 
-        // --- 5. DEFAULT: CARTE NUMERATE ---
-        else {
-             // Inclusa la CardValue.ZERO che è un caso numerico.
-            card = new NumberedCard(lightFace, darkFace);
-        }
-
+        // 4. Aggiungi al mazzo (loop se ci sono copie multiple, se gestito)
         cards.add(card);
+    }
+
+    /**
+     * Questo metodo sostituisce lo SWITCH gigante di AbstractCard e FlipDeck.
+     * Converte Dati -> Comportamento.
+     */
+    private CardSideBehavior createBehavior(CardFace face) {
+        CardColor c = face.color();
+        CardValue v = face.value();
+
+        // --- A. CARTE JOLLY (WILD) ---
+        if (c == CardColor.WILD) {
+            switch (v) {
+                case WILD_DRAW_TWO:      return new WildBehavior(v, 2);
+                case WILD_DRAW_FOUR:     return new WildBehavior(v, 4);
+                case WILD_DRAW_COLOR:    return new WildBehavior(v, true); // Logica specifica
+                case WILD:               return new WildBehavior(v, 0);
+                // Aggiungi qui altri Jolly AllWild se servono
+                default:                 return new WildBehavior(v, 0);
+            }
+        }
+
+        // --- B. CARTE AZIONE E NUMERICHE ---
+        switch (v) {
+            // 1. Pesca
+            case DRAW_ONE:      return new DrawBehavior(c, v, 1);
+            case DRAW_TWO:      return new DrawBehavior(c, v, 2);
+            case DRAW_FIVE:     return new DrawBehavior(c, v, 5);
+            
+            // 2. Azioni semplici
+            case SKIP:          return new ActionBehavior(c, v, (g) -> g.skipPlayers(1));
+            case SKIP_EVERYONE: return new ActionBehavior(c, v, (g) -> g.skipPlayers(g.getPlayers().size() - 1)); // O metodo specifico
+            case REVERSE:       return new ActionBehavior(c, v, (g) -> g.reversePlayOrder());
+            
+            // 3. Flip
+            case FLIP: 
+                // Passiamo 'null' o gestiamo il riferimento alla carta? 
+                // FlipAction ha bisogno della carta stessa per passarla a game.flipTheWorld(card).
+                // Visto che qui stiamo creando il comportamento PRIMA della carta, usiamo un trucco
+                // oppure cambiamo Game.flipTheWorld per non richiedere la carta, ma solo il colore.
+                // Game.flipTheWorld usa la carta solo per: this.currentColor = card.getColor(this);
+                // Possiamo definire una classe specifica per il Flip che si inietta dopo o che passa "this" dinamicamente.
+                return new FlipBehavior(c, v);
+
+            // 4. Numeri
+            default:            return new NumericBehavior(c, v);
+        }
     }
 
     /**

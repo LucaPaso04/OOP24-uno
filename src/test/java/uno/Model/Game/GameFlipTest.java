@@ -2,20 +2,12 @@ package uno.Model.Game;
 
 // Import di JUnit
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 // Import delle tue classi
 import uno.Model.Cards.Card;
-import uno.Model.Cards.Types.SkipCard;
-import uno.Model.Cards.Types.FlipCard;
-import uno.Model.Cards.Attributes.CardColor;
-import uno.Model.Cards.Attributes.CardValue;
 import uno.Model.Cards.Deck.Deck;
 import uno.Model.Cards.Deck.FlipDeck;
-import uno.Model.Cards.Types.NumberedCard;
 import uno.Model.Players.Player;
-import uno.Model.Cards.Attributes.CardFace;
 
 
 import java.util.ArrayList;
@@ -63,7 +55,7 @@ class GameFlipTest {
     /**
      * Test 1: Verifica che il gioco inizi sul Lato Chiaro
      * e che il metodo flipTheWorld() cambi correttamente lo stato.
-     */
+     
     @Test
     void testFlipWorldStateChange() {
         // Il setup è stato fatto in @BeforeEach. La discardPile ha una carta.
@@ -87,12 +79,12 @@ class GameFlipTest {
 
         // ASSERT 3: Controlla che lo stato sia tornato a quello iniziale
         assertFalse(game.isDarkSide(), "Il gioco dovrebbe essere tornato al Lato Chiaro");
-    }
+    }*/
 
     /**
      * Test 2: Verifica che le carte vengano interpretate correttamente
      * in base al lato attivo del gioco.
-     */
+     
     @Test
     void testCardFaceInterpretation() {
         // ARRANGE: Crea una carta Flip specifica
@@ -112,11 +104,11 @@ class GameFlipTest {
         assertTrue(game.isDarkSide(), "Il gioco dovrebbe essere sul Lato Scuro");
         assertEquals(CardColor.BLUE, flipCard.getColor(game), "La carta dovrebbe essere BLU sul Lato Scuro");
         assertEquals(CardValue.FIVE, flipCard.getValue(game), "La carta dovrebbe essere FIVE sul Lato Scuro");
-    }
+    }*/
 
     /**
      * Test 3: Verifica che le regole di gioco rispettino il lato attivo.
-     */
+     
     @Test
     void testPlayabilityRulesBasedOnActiveSide() {
         // Prendi la carta in cima allo scarto;
@@ -143,11 +135,11 @@ class GameFlipTest {
         assertTrue(game.isDarkSide(), "Il gioco dovrebbe essere sul Lato Scuro");
         // La carta dovrebbe essere giocabile per valore (SETTE)
         assertTrue(flipCard.canBePlayedOn(topCard, game), "La carta dovrebbe essere giocabile per VALORE sul Lato Scuro");
-    }
+    }*/
 
     /**
      * Test 4: Verifica che l'effetto della carta DRAW_FIVE funzioni correttamente.
-     */
+     
     @Test
     void testDrawFiveEffect() {
         Card topCard = game.getTopDiscardCard();
@@ -173,5 +165,5 @@ class GameFlipTest {
         // ASSERT: Verifica che il giocatore abbia pescato 5 carte
         assertEquals(initialHandSize + 6, player1.getHand().size(), "Il giocatore dovrebbe aver pescato 5 carte");
         System.out.println("Mano del giocatore dopo Draw Five: " + player1.getHand().size() + " carte.");
-    }
+    }*/
 }

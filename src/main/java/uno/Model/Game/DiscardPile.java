@@ -5,8 +5,6 @@ import uno.Model.Cards.Card;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Rappresenta la pila degli scarti nel gioco UNO.

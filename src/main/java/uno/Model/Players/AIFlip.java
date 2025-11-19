@@ -125,33 +125,51 @@ public class AIFlip extends AIPlayer {
     }
 
     /**
-     * Logica per scegliere il miglior colore quando si gioca un Jolly.
-     * Sceglie il colore che l'IA ha in maggior quantità.
-     * @param game L'istanza corrente del modello Game.
-     * @return Il colore scelto.
+     * Logica per scegliere il miglior colore quando si gioca un Jolly in modalità Flip.
+     * Rileva automaticamente se siamo sul lato Chiaro o Scuro e conta i colori corretti.
+     * * @param game L'istanza corrente del modello Game.
+     * @return Il colore scelto (compatibile con il lato attuale).
      */
     private CardColor chooseBestColor(Game game) {
-        // Usiamo un EnumMap per contare i colori. È molto efficiente per le chiavi Enum.
+        // Usiamo un EnumMap per contare i colori.
         Map<CardColor, Integer> colorCounts = new EnumMap<>(CardColor.class);
 
-        // Inizializza i conteggi a 0 per i colori che si possono scegliere
-        colorCounts.put(CardColor.RED, 0);
-        colorCounts.put(CardColor.GREEN, 0);
-        colorCounts.put(CardColor.BLUE, 0);
-        colorCounts.put(CardColor.YELLOW, 0);
+        // 1. DETERMINA I COLORI VALIDI
+        // In base al lato attivo, prepariamo i "secchielli" per il conteggio.
+        CardColor[] validColors;
+        
+        if (game.isDarkSide()) {
+            // Colori del Lato Oscuro
+            validColors = new CardColor[] { 
+                CardColor.TEAL, CardColor.PINK, CardColor.PURPLE, CardColor.ORANGE 
+            };
+        } else {
+            // Colori del Lato Chiaro (Classici)
+            validColors = new CardColor[] { 
+                CardColor.RED, CardColor.GREEN, CardColor.BLUE, CardColor.YELLOW 
+            };
+        }
 
-        // Itera sulla mano dell'IA ('this.hand' è ereditato da Player)
+        // Inizializza i conteggi a 0 solo per i colori validi in questo momento
+        for (CardColor c : validColors) {
+            colorCounts.put(c, 0);
+        }
+
+        // 2. CONTA LE CARTE IN MANO
         for (Card card : this.hand) {
+            // Grazie alla tua refattorizzazione in DoubleSidedCard, card.getColor(game)
+            // restituisce automaticamente il colore del lato attivo (es. TEAL se è scuro).
             CardColor color = card.getColor(game);
             
-            // Contiamo solo le carte colorate, ignoriamo le WILD
+            // Incrementa solo se il colore è tra quelli validi (ignora WILD o colori dell'altro lato se presenti per errore)
             if (colorCounts.containsKey(color)) {
                 colorCounts.put(color, colorCounts.get(color) + 1);
             }
         }
 
-        // Ora trova il colore con il conteggio massimo
-        CardColor bestColor = CardColor.RED; // Colore di default se la mano è vuota o ha solo Jolly
+        // 3. TROVA IL MAX
+        // Impostiamo un default sicuro: il primo colore della lista valida.
+        CardColor bestColor = validColors[0]; 
         int maxCount = -1;
 
         for (Map.Entry<CardColor, Integer> entry : colorCounts.entrySet()) {

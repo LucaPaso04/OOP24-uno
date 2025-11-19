@@ -3,28 +3,14 @@ package uno.View.Scenes;
 import uno.Model.Cards.Card;
 import uno.Model.Game.Game;
 import uno.Model.Game.GameState;
-import uno.Model.Players.AIPlayer;
 import uno.Model.Players.Player;
 import uno.Model.Cards.Attributes.CardColor;
-import uno.Model.Cards.Attributes.CardValue;
 import uno.Controller.GameViewObserver;
 import uno.View.GameModelObserver;
 import uno.View.Components.ColorChooserPanel;
 import uno.View.Utils.CardImageLoader;
 import uno.View.Components.PlayerChooserPanel;
 
-// Imports per le Immagini
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import java.awt.Image;
-import java.net.URL;
-import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 
 import javax.swing.BorderFactory;
@@ -62,13 +48,13 @@ public class GameScene extends JPanel implements GameModelObserver {
     private static final Color BACKGROUND_COLOR = new Color(30, 30, 30);
     private static final Color PANEL_COLOR = new Color(50, 50, 50);
     private static final Color TEXT_COLOR = Color.WHITE;
-    private static final Color BUTTON_COLOR_DRAW = new Color(33, 150, 243); // Blu
+    //private static final Color BUTTON_COLOR_DRAW = new Color(33, 150, 243); // Blu
     private static final Color BUTTON_COLOR_PASS = new Color(244, 67, 54); // Rosso
     private static final Font BOLD_FONT = new Font("Arial", Font.BOLD, 14);
-    private static final Font NORMAL_FONT = new Font("Arial", Font.PLAIN, 12);
+    //private static final Font NORMAL_FONT = new Font("Arial", Font.PLAIN, 12);
     private static final Border HIGHLIGHT_BORDER = BorderFactory.createLineBorder(Color.ORANGE, 3);
     private static final Border WARNING_BORDER = BorderFactory.createLineBorder(Color.RED, 3);
-    private static final Border NORMAL_BORDER = BorderFactory.createEmptyBorder(3, 3, 3, 3); // Spessore per allineamento
+    //private static final Border NORMAL_BORDER = BorderFactory.createEmptyBorder(3, 3, 3, 3); // Spessore per allineamento
 
     private final Game gameModel;
     private GameViewObserver controllerObserver;

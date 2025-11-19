@@ -3,7 +3,6 @@ package uno.Model.Players;
 import uno.Model.Cards.Card;
 import uno.Model.Game.Game;
 import uno.Model.Game.GameState; // Importante per controllare lo stato
-import uno.Model.Cards.Attributes.CardColor;
 import uno.Model.Cards.Attributes.CardValue;
 
 import java.util.Comparator;

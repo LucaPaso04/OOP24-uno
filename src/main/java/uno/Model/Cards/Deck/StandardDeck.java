@@ -3,85 +3,70 @@ package uno.Model.Cards.Deck;
 import uno.Model.Cards.Attributes.CardColor;
 import uno.Model.Cards.Attributes.CardValue;
 import uno.Model.Cards.Card;
-import uno.Model.Cards.Types.NumberedCard;
-import uno.Model.Cards.Types.SkipCard;
-import uno.Model.Cards.Types.ReverseCard;
-import uno.Model.Cards.Types.DrawTwoCard;
-import uno.Model.Cards.Types.WildCard;
-import uno.Model.Cards.Types.WildDrawFourCard;
-
+import uno.Model.Cards.Types.DoubleSidedCard; // <-- Usiamo SOLO questa!
+import uno.Model.Cards.Behaviors.*; // Importa i comportamenti
 
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Rappresenta un mazzo di UNO classico da 108 carte.
- * Estende la classe Deck astratta e implementa il metodo
- * di creazione specifico per questa modalità di gioco.
- */
 public class StandardDeck extends Deck<Card> {
 
-    /**
-     * Costruisce un nuovo mazzo standard.
-     * Il costruttore della classe padre (Deck) chiamerà automaticamente
-     * createDeck() e poi shuffle().
-     */
+    // Istanza unica del dorso per risparmiare memoria
+    private final CardSideBehavior STANDARD_BACK = new BackSideBehavior();
+
     public StandardDeck() {
         super();
     }
 
-    /**
-     * Implementazione del metodo astratto per popolare la lista 'cards' 
-     * (protetta nella classe padre) con le 108 carte del gioco classico,
-     * utilizzando classi specifiche per ogni effetto.
-     */
     @Override
     protected void createDeck() {
-        // Lista dei 4 colori principali
-        final List<CardColor> colors = Arrays.asList(
-                CardColor.RED, 
-                CardColor.BLUE, 
-                CardColor.GREEN, 
-                CardColor.YELLOW
+        List<CardColor> colors = Arrays.asList(
+                CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW
         );
 
-        // Lista dei valori numerici da 1 a 9
-        final List<CardValue> numberValues = Arrays.asList(
+        List<CardValue> numberValues = Arrays.asList(
                 CardValue.ONE, CardValue.TWO, CardValue.THREE, CardValue.FOUR,
                 CardValue.FIVE, CardValue.SIX, CardValue.SEVEN, CardValue.EIGHT, CardValue.NINE
         );
 
-        // Itera sui 4 colori
-        for (final CardColor color : colors) {
-            
-            // 1. Aggiunge una carta ZERO per ogni colore (4 carte totali)
-            cards.add(new NumberedCard(color, CardValue.ZERO));
+        for (CardColor color : colors) {
+            // 1. ZERO (1 per colore)
+            addCard(new NumericBehavior(color, CardValue.ZERO));
 
-            // 2. Aggiunge due carte 1-9 per ogni colore (72 carte totali)
-            for (final CardValue value : numberValues) {
-                cards.add(new NumberedCard(color, value));
-                cards.add(new NumberedCard(color, value));
+            // 2. Numeri 1-9 (2 per colore)
+            for (CardValue value : numberValues) {
+                addCard(new NumericBehavior(color, value));
+                addCard(new NumericBehavior(color, value));
             }
 
-            // 3. Aggiunge due carte Azione (Salta, Inverti, PescaDue) per ogni colore (24 carte totali)
-            //    usando le nuove classi specifiche.
-            cards.add(new SkipCard(color));
-            cards.add(new SkipCard(color));
+            // 3. Azioni (2 per colore)
+            // Skip
+            addCard(new ActionBehavior(color, CardValue.SKIP, (g) -> g.skipPlayers(1)));
+            addCard(new ActionBehavior(color, CardValue.SKIP, (g) -> g.skipPlayers(1)));
 
-            cards.add(new ReverseCard(color));
-            cards.add(new ReverseCard(color));
+            // Reverse
+            addCard(new ActionBehavior(color, CardValue.REVERSE, (g) -> g.reversePlayOrder()));
+            addCard(new ActionBehavior(color, CardValue.REVERSE, (g) -> g.reversePlayOrder()));
 
-            cards.add(new DrawTwoCard(color));
-            cards.add(new DrawTwoCard(color));
+            // Draw Two
+            addCard(new DrawBehavior(color, CardValue.DRAW_TWO, 2));
+            addCard(new DrawBehavior(color, CardValue.DRAW_TWO, 2));
         }
 
-        // 4. Aggiunge 4 carte Jolly (Cambia Colore) e 4 Jolly Pesca Quattro (8 carte totali)
-        //    usando le nuove classi specifiche.
+        // 4. Jolly (4 Wild + 4 Wild Draw Four)
         for (int i = 0; i < 4; i++) {
-            cards.add(new WildCard());
-            cards.add(new WildDrawFourCard());
+            addCard(new WildBehavior(CardValue.WILD, 0));
+            addCard(new WildBehavior(CardValue.WILD_DRAW_FOUR, 4));
         }
-        
-        // Totale: 4 (Zero) + 72 (1-9) + 24 (Azione) + 8 (Jolly) = 108 carte
+    }
+
+    /**
+     * Helper per creare la DoubleSidedCard con il dorso standard
+     */
+    private void addCard(CardSideBehavior frontBehavior) {
+        // Creiamo una carta che ha il comportamento voluto DAVANTI
+        // e il dorso standard DIETRO.
+        Card card = new DoubleSidedCard(frontBehavior, STANDARD_BACK);
+        this.cards.add(card);
     }
 }

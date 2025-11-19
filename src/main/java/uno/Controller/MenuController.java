@@ -9,9 +9,6 @@ import uno.Model.Players.AIFlip;
 import uno.Model.Players.Player;
 import uno.View.GameFrame;
 import uno.View.Scenes.GameScene;
-import uno.View.Scenes.MenuScene;
-
-import javax.swing.JOptionPane;
 import java.util.ArrayList; // <-- IMPORTA
 import java.util.List;     // <-- IMPORTA
 
