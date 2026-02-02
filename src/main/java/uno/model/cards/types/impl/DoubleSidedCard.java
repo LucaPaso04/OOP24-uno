@@ -5,6 +5,7 @@ import uno.model.cards.attributes.CardValue;
 import uno.model.cards.behaviors.api.CardSideBehavior;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.Game;
+import uno.model.game.impl.GameImpl;
 
 import java.util.Objects;
 
@@ -70,24 +71,30 @@ public class DoubleSidedCard implements Card {
     public boolean canBePlayedOn(final Card topCard, final Game game) {
         final CardSideBehavior myFace = getActiveSide(game);
 
-        // Recuperiamo il colore attivo dal gioco (gestisce anche i jolly attivi)
-        CardColor activeColor = game.getCurrentColor().get();
-        if (activeColor == null) {
-             // Fallback se è la prima carta o reset
-            activeColor = topCard.getColor(game);
-        }
+        // FIX: Gestione sicura del Colore.
+        // 1. Prova a prendere il colore attivo dal gioco (es. impostato da un Jolly).
+        // 2. Se è vuoto (Optional.empty), usa il colore fisico della carta in cima agli scarti.
+        // Questo evita NoSuchElementException e gestisce lo stato transitorio.
+        final CardColor targetColor = game.getCurrentColor()
+                                        .orElse(topCard.getColor(game));
 
-        // 1. Match colore
-        if (myFace.getColor() == activeColor || myFace.getColor() == CardColor.WILD) {
+        // 1. La carta è un Jolly? (È sempre giocabile, a meno che non ci siano restrizioni specifiche)
+        if (myFace.getColor() == CardColor.WILD) {
             return true;
         }
 
-        // 2. Match Valore
+        // 2. Match Colore: Il mio colore corrisponde a quello attivo (o fisico)?
+        if (myFace.getColor() == targetColor) {
+            return true;
+        }
+
+        // 3. Match Valore: Il numero/simbolo corrisponde? (Es. 5 Rosso su 5 Blu)
+        // Nota: Il valore si confronta sempre con la carta fisica in cima
         if (myFace.getValue() == topCard.getValue(game)) {
             return true;
         }
 
-        return false; 
+        return false;
     }
 
     /**

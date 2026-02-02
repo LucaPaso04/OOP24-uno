@@ -112,7 +112,8 @@ public abstract class Player {
      */
     public void unoPenalty(final Game game) {
         System.out.println(name + " forgot UNO! Drawing 2 penalty cards.");
-        game.makeNextPlayerDraw(2); // Using game logic to apply draw
+        game.drawCardForPlayer(this);
+        game.drawCardForPlayer(this);
         // OR better: game.drawCardForPlayer(this); game.drawCardForPlayer(this);
     }
 

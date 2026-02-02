@@ -1,8 +1,11 @@
 package uno.model.players.impl;
 
+import uno.model.cards.attributes.CardColor;
 import uno.model.cards.types.api.Card;
 import uno.model.players.api.Player;
 import uno.model.game.api.Game;
+import uno.model.game.api.GameState;
+
 import java.util.Optional;
 
 /**
@@ -25,6 +28,10 @@ public abstract class AIPlayer extends Player {
     public void takeTurn(final Game game) {
         // 1. Simulate "thinking" time (optional, handled by Thread/Timer in Controller usually)
 
+        if (game.getCurrentPlayer() != this) {
+            return;
+        }
+
         // 2. Try to find a valid move
         final Optional<Card> chosenCard = chooseCardToPlay(game);
 
@@ -33,10 +40,8 @@ public abstract class AIPlayer extends Player {
             if (getHandSize() == 2) { // Will have 1 after playing
                 System.out.println(getName() + " calls UNO!");
                 hasCalledUno();
-                game.callUno(this); // Notify game
             }
 
-            // 4. Play the card
             game.playCard(chosenCard);
 
         } else {
@@ -59,14 +64,24 @@ public abstract class AIPlayer extends Player {
                 // Re-evaluate immediately after draw:
                 final Optional<Card> postDrawMove = chooseCardToPlay(game);
                 if (postDrawMove.isPresent()) {
+                    if (getHandSize() == 2) { // Will have 1 after playing
+                        System.out.println(getName() + " calls UNO!");
+                        hasCalledUno();
+                    }
                     game.playCard(postDrawMove);
                 } else {
-                    game.playerPassTurn();
+                    game.aiAdvanceTurn();
                 }
-
             } else {
-                game.playerPassTurn();
+                game.aiAdvanceTurn();
             }
+        }
+
+        if (game.getGameState() == GameState.WAITING_FOR_COLOR) {
+            CardColor chosenColor = chooseBestColor(game);
+            game.requestColorChoice();
+            game.setColor(chosenColor);
+            game.aiAdvanceTurn();
         }
     }
 
@@ -91,7 +106,12 @@ public abstract class AIPlayer extends Player {
      * @return true if the move is valid, false otherwise
      */
     protected boolean isMoveValid(final Card card, final Game game) {
-        final Optional<Card> topCard = game.getTopDiscardCard();
-        return topCard.isPresent() && card.canBePlayedOn(topCard.get(), game);
+        Optional<Card> topCard = game.getTopDiscardCard();
+    
+        if (topCard.isEmpty()) {
+            return true;
+        }
+
+        return card.canBePlayedOn(topCard.get(), game);
     }
 }

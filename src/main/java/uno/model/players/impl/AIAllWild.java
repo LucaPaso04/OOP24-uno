@@ -40,6 +40,7 @@ public class AIAllWild extends AIPlayer {
             if (target != null) {
                 System.out.println(this.getName() + " seleziona bersaglio: " + target.getName());
                 game.chosenPlayer(target);
+                game.aiAdvanceTurn();
             }
         }
     }
@@ -105,7 +106,7 @@ public class AIAllWild extends AIPlayer {
      */
     @Override
     protected CardColor chooseBestColor(final Game game) {
-        return CardColor.RED;
+        return CardColor.WILD;
     }
 
     // --- HELPER PRIVATI ---
@@ -128,10 +129,10 @@ public class AIAllWild extends AIPlayer {
      * @return true if aggressive.
      */
     private boolean isAggressiveCard(final CardValue val) {
-        return val == CardValue.WILD_TARGETED_DRAW_TWO 
-                || val == CardValue.WILD_DRAW_FOUR 
-                || val == CardValue.WILD_DRAW_TWO 
-                || val == CardValue.WILD_SKIP_TWO 
+        return val == CardValue.WILD_TARGETED_DRAW_TWO
+                || val == CardValue.WILD_DRAW_FOUR_ALLWILD 
+                || val == CardValue.WILD_DRAW_TWO_ALLWILD
+                || val == CardValue.WILD_SKIP_TWO
                 || val == CardValue.WILD_SKIP;
     }
 

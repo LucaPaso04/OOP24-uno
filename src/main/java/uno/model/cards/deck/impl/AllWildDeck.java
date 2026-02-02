@@ -45,7 +45,7 @@ public class AllWildDeck extends DeckImpl<Card> {
             // 2. Wild Draw 4 (Penalty)
             // Draws 4, usually skips the next player (Skip=1)
             createAndAddCard(new WildBehavior(
-                CardValue.WILD_DRAW_FOUR_ALLWILD, 4, true, false, 1, false
+                CardValue.WILD_DRAW_FOUR_ALLWILD, 4, false, false, 1, false
             ));
 
             // 3. Wild Draw 2 (Penalty)
