@@ -18,6 +18,10 @@ import uno.model.cards.behaviors.impl.NumericBehavior;
 import uno.model.cards.behaviors.impl.WildBehavior;
 import uno.model.cards.types.api.Card;
 import uno.model.cards.types.impl.DoubleSidedCard;
+import uno.model.game.api.Game;
+import uno.model.utils.api.GameLogger;
+
+import java.util.Locale;
 
 /**
  * Represents the UNO Flip deck (112 cards).
@@ -33,9 +37,10 @@ public class FlipDeck extends DeckImpl<Card> {
 
     /**
      * Constructs a new FlipDeck by loading the card mappings from JSON.
+     * @param logger logger
      */
-    public FlipDeck() {
-        super();
+    public FlipDeck(final GameLogger logger) {
+        super(logger);
         initializeDeck();
         shuffle();
     }
@@ -47,17 +52,10 @@ public class FlipDeck extends DeckImpl<Card> {
         final Gson gson = new Gson();
 
         try (InputStream is = getClass().getResourceAsStream(RESOURCE_PATH)) {
-            if (is == null) {
-                throw new IOException("Resource not found: " + RESOURCE_PATH);
-            }
 
             try (Reader reader = new InputStreamReader(is)) {
                 // Parse JSON array into Mapping objects
                 final Mapping[] mappings = gson.fromJson(reader, Mapping[].class);
-
-                if (mappings == null) {
-                    throw new IOException("JSON is empty or invalid.");
-                }
 
                 for (final Mapping mapping : mappings) {
                     // Generates the card(s) based on the mapping count
@@ -65,9 +63,7 @@ public class FlipDeck extends DeckImpl<Card> {
                 }
             }
         } catch (final IOException e) {
-            System.err.println("CRITICAL ERROR: Failed to load UNO Flip Deck. " + e.getMessage());
-            e.printStackTrace();
-            // In a real app, you might want to fallback to a hardcoded generation here
+            this.getLogger().logError("Errore durante la lettura del file di configurazione: " + RESOURCE_PATH, e);
         }
     }
 
@@ -79,13 +75,13 @@ public class FlipDeck extends DeckImpl<Card> {
     private void addCardMappingToDeck(final Mapping mapping) {
         // 1. Create Data Objects (Faces)
         final CardFace lightFace = new CardFace(
-            CardColor.valueOf(mapping.light.color.toUpperCase()),
-            CardValue.valueOf(mapping.light.value.toUpperCase())
+            CardColor.valueOf(mapping.light.color.toUpperCase(Locale.ROOT)),
+            CardValue.valueOf(mapping.light.value.toUpperCase(Locale.ROOT))
         );
 
         final CardFace darkFace = new CardFace(
-            CardColor.valueOf(mapping.dark.color.toUpperCase()),
-            CardValue.valueOf(mapping.dark.value.toUpperCase())
+            CardColor.valueOf(mapping.dark.color.toUpperCase(Locale.ROOT)),
+            CardValue.valueOf(mapping.dark.value.toUpperCase(Locale.ROOT))
         );
 
         // 2. Create Behaviors (Logic)
@@ -147,7 +143,7 @@ public class FlipDeck extends DeckImpl<Card> {
                 return new ActionBehavior(c, v, g -> g.skipPlayers(g.getPlayers().size() - 1));
 
             case REVERSE:
-                return new ActionBehavior(c, v, g -> g.reversePlayOrder());
+                return new ActionBehavior(c, v, Game::reversePlayOrder);
 
             // The FLIP Action
             case FLIP:

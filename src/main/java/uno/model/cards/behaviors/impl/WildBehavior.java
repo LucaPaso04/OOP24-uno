@@ -52,7 +52,7 @@ public class WildBehavior implements CardSideBehavior {
      * @param drawAmount How many cards the next player draws (0 if none).
      */
     public WildBehavior(final CardValue value, final int drawAmount) {
-        this(value, drawAmount, true, false, (drawAmount >= 4 ? 1 : 0), false);
+        this(value, drawAmount, true, false, drawAmount >= 4 ? 1 : 0, false);
     }
 
     /**
@@ -63,7 +63,7 @@ public class WildBehavior implements CardSideBehavior {
      * @param requiresColorChoice  True if the player must choose a color.
      */
     public WildBehavior(final CardValue value, final int drawAmount, final boolean requiresColorChoice) {
-        this(value, drawAmount, requiresColorChoice, false, (drawAmount > 0 ? 1 : 0), false);
+        this(value, drawAmount, requiresColorChoice, false, drawAmount > 0 ? 1 : 0, false);
     }
 
     /**

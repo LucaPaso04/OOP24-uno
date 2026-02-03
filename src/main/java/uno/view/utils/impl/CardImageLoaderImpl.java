@@ -7,12 +7,10 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Concrete implementation of CardImageLoader.
@@ -59,6 +57,9 @@ public class CardImageLoaderImpl implements CardImageLoader {
 
             "CARD_BACK"
     ); 
+
+    private static final java.util.logging.Logger LOGGER = 
+    java.util.logging.Logger.getLogger(CardImageLoaderImpl.class.getName());
 
     private final Map<String, ImageIcon> cardImageCache;
     private final Map<String, ImageIcon> transparentImageCache;
@@ -110,29 +111,19 @@ public class CardImageLoaderImpl implements CardImageLoader {
      * @param cardName The unique identifier name of the card.
      */
     private void loadImage(final String cardName) {
-        try {
-            // Assuming standard Maven/Gradle resource structure
-            final String path = "/images/cards/" + cardName + ".png";
-            final Optional<URL> imgURL = Optional.ofNullable(getClass().getResource(path));
+        final String path = "/images/cards/" + cardName + ".png";
+        final java.net.URL resource = getClass().getResource(path);
 
-            if (imgURL.isPresent()) {
-                final ImageIcon icon = new ImageIcon(imgURL.get());
+        if (resource != null) {
+            // Se la risorsa c'è, procediamo senza try-catch
+            final ImageIcon icon = new ImageIcon(resource);
+            final Image scaledImg = icon.getImage().getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH);
+            final ImageIcon scaledIcon = new ImageIcon(scaledImg);
 
-                // Scale the image
-                final Image scaledImg = icon.getImage().getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH);
-                final ImageIcon scaledIcon = new ImageIcon(scaledImg);
-
-                // Cache standard version
-                cardImageCache.put(cardName, scaledIcon);
-
-                // Cache transparent version
-                transparentImageCache.put(cardName, createTransparentIcon(scaledIcon, 0.5f));
-            } else {
-                System.err.println("Warning: Image not found at path: " + path);
-            }
-        } catch (final Exception e) {
-            System.err.println("Error loading card image: " + cardName);
-            e.printStackTrace();
+            cardImageCache.put(cardName, scaledIcon);
+            transparentImageCache.put(cardName, createTransparentIcon(scaledIcon, 0.5f));
+        } else {
+            LOGGER.warning("Risorsa non trovata: " + path);
         }
     }
 

@@ -58,7 +58,7 @@ public interface Card {
      * @param game The current game context.
      * @return true if the card allows changing color, false otherwise.
      */
-    default boolean isWild(Game game) {
+    default boolean isWild(final Game game) {
         // Assumiamo che il tuo enum CardColor abbia un metodo o un valore per identificare i jolly
         // Esempio generico (adatta al tuo enum):
         return getColor(game).name().contains("WILD");

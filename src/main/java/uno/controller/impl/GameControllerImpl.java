@@ -42,6 +42,7 @@ public class GameControllerImpl implements GameController {
      * @param gameModel
      * @param gameScene
      * @param mainFrame
+     * @param logger
      */
     public GameControllerImpl(final Game gameModel, final GameScene gameScene, 
         final GameFrame mainFrame, final GameLogger logger) {
@@ -176,11 +177,11 @@ public class GameControllerImpl implements GameController {
     public void onPlayCard(final Optional<Card> card) {
         try {
             gameModel.playCard(card);
-        } catch (final Exception e) {
+        } catch (final IllegalStateException e) {
             // Mostra un errore se la mossa non è valida
             JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene, 
                 e.getMessage(), 
-                "Mossa non valida", 
+                "Carta non giocabile!", 
                 JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -190,14 +191,13 @@ public class GameControllerImpl implements GameController {
      */
     @Override
     public void onDrawCard() {
-        System.out.println("L'utente clicca 'Pesca'");
         try {
             // Chiama il nuovo metodo con la logica di validazione
             gameModel.playerInitiatesDraw(); 
-        } catch (final Exception e) {
+        } catch (final IllegalStateException e) {
             JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene, 
                 e.getMessage(), // Messaggio d'errore (es. "Hai già pescato")
-                "Mossa non valida", 
+                "Non puoi pescare!", 
                 JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -207,13 +207,12 @@ public class GameControllerImpl implements GameController {
      */
     @Override
     public void onCallUno() {
-        System.out.println("L'utente clicca 'UNO!'");
         try {
             gameModel.callUno(gameModel.getPlayers().getFirst());
-        } catch (final Exception e) {
+        } catch (final IllegalStateException e) {
             JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene, 
                 e.getMessage(), // Messaggio d'errore (es. "Non puoi chiamare UNO ora")
-                "Mossa non valida", 
+                "Non puoi chiamare UNO!", 
                 JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -244,13 +243,12 @@ public class GameControllerImpl implements GameController {
      */
     @Override
     public void onPassTurn() {
-        System.out.println("L'utente clicca 'Passa'");
         try {
             gameModel.playerPassTurn();
-        } catch (final Exception e) {
+        } catch (final IllegalStateException e) {
             JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene, 
                 e.getMessage(), // Messaggio (es. "Non puoi passare se non hai pescato")
-                "Mossa non valida", 
+                "Non puoi passare!", 
                 JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -262,10 +260,6 @@ public class GameControllerImpl implements GameController {
      */
     @Override
     public void onColorChosen(final CardColor color) {
-        System.out.println("Colore scelto: " + color);
-        // Il GameModel riceverà il colore, imposterà il suo stato
-        // interno e notificherà la View (che si aggiornerà di nuovo).
-
         gameModel.setColor(color);
     }
 
@@ -276,7 +270,6 @@ public class GameControllerImpl implements GameController {
      */
     @Override
     public void onPlayerChosen(final Player player) {
-        System.out.println("Giocatore scelto: " + player.getName());
         gameModel.chosenPlayer(player);
     }
 }

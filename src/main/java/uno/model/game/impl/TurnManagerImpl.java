@@ -4,6 +4,7 @@ import uno.model.game.api.Game;
 import uno.model.game.api.TurnManager;
 import uno.model.players.api.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -23,7 +24,7 @@ public class TurnManagerImpl implements TurnManager {
      * @param players The list of participants.
      */
     public TurnManagerImpl(final List<Player> players) {
-        this.players = players;
+        this.players = new ArrayList<>(players);
 
         // Randomly choose the starting player
         final Random rand = new Random();
@@ -62,13 +63,11 @@ public class TurnManagerImpl implements TurnManager {
         final int direction = isClockwise ? 1 : -1;
 
         // Raw index calculation (can be negative or greater than size)
-        final int nextIndex = (currentPlayerIndex + (totalSteps * direction));
+        final int nextIndex = currentPlayerIndex + (totalSteps * direction);
 
         // 4. Wrap-around logic (Circular Buffer)
         // Formula: (a % n + n) % n handles negative results correctly in Java
         currentPlayerIndex = (nextIndex % n + n) % n; 
-
-        System.out.println("Turn passed. Next Player Index: " + currentPlayerIndex + " (" + getCurrentPlayer().getName() + ")");
 
         // 5. Apply rules for the start of the turn
         checkAndApplyStartTurnPenalty(game);
@@ -82,7 +81,7 @@ public class TurnManagerImpl implements TurnManager {
         final Player player = getCurrentPlayer();
 
         // If player starts turn with 1 card and didn't call UNO -> Penalty
-        if (player.getHandSize() == 1 && !player.getHasCalledUno()) {
+        if (player.getHandSize() == 1 && !player.isHasCalledUno()) {
             // Apply penalty (Draw 2 usually)
             // Note: game.makeNextPlayerDraw usually affects the *next* player relative to current,
             // but here we want to penalize 'player'.
@@ -107,7 +106,7 @@ public class TurnManagerImpl implements TurnManager {
         final int n = players.size();
         final int direction = isClockwise ? 1 : -1;
 
-        final int nextIndex = (currentPlayerIndex + (totalSteps * direction));
+        final int nextIndex = currentPlayerIndex + (totalSteps * direction);
 
         final int nextPlayerIndex = (nextIndex % n + n) % n; 
 

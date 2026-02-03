@@ -24,7 +24,9 @@ import java.util.Optional;
  * A panel that prompts the current player to choose a target opponent.
  * Used for specific cards (e.g., "Swap Hands" or targeted draws).
  */
-public class PlayerChooserPanelImpl extends JPanel implements ActionListener, PlayerChooserPanel {
+public final class PlayerChooserPanelImpl extends JPanel implements ActionListener, PlayerChooserPanel {
+
+    private static final long serialVersionUID = 1L;
 
     // UI Styling constants
     private static final Color PANEL_BACKGROUND = new Color(50, 50, 50);
@@ -93,7 +95,7 @@ public class PlayerChooserPanelImpl extends JPanel implements ActionListener, Pl
         button.setOpaque(true);
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        button.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+        //button.setAlignmentX(JPanel.CENTER_ALIGNMENT);
 
         // Fixed button size for uniformity
         final Dimension btnSize = BUTTON_SIZE;

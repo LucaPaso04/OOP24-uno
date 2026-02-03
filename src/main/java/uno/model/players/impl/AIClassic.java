@@ -46,7 +46,6 @@ public class AIClassic extends AIPlayer {
         }
 
         final boolean opponentHasUno = hasOpponentWithUno(game);
-        final boolean iAmClose = this.getHandSize() <= 3;
 
         final List<Card> actionCards = new ArrayList<>();
         final List<Card> numberCards = new ArrayList<>();
@@ -72,6 +71,7 @@ public class AIClassic extends AIPlayer {
             }
         }
 
+        final boolean iAmClose = this.getHandSize() <= 3;
         if (iAmClose) {
             if (!actionCards.isEmpty()) {
                 actionCards.sort((c1, c2) -> getActionCardPriority(c2.getValue(game)) 
@@ -197,7 +197,7 @@ public class AIClassic extends AIPlayer {
      */
     private boolean hasOpponentWithUno(final Game game) {
         for (final var player : game.getPlayers()) {
-            if (player != this && player.getHandSize() == 1) {
+            if (!player.equals(this) && player.getHandSize() == 1) {
                 return true;
             }
         }

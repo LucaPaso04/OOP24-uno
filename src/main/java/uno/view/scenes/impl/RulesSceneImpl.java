@@ -14,7 +14,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
-import java.awt.Component;
+//import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GridBagLayout;
 import java.awt.BorderLayout;
@@ -28,7 +28,9 @@ import java.util.Optional;
  * The panel (JPanel) representing the Rules Configuration screen.
  * Maintains the same modern graphical style as the MenuScene.
  */
-public class RulesSceneImpl extends JPanel implements RulesScene {
+public final class RulesSceneImpl extends JPanel implements RulesScene {
+
+    private static final long serialVersionUID = 1L;
 
     // Color Palette (Consistent with MenuScene)
     private static final Color BACKGROUND_COLOR = new Color(30, 30, 30);
@@ -51,6 +53,8 @@ public class RulesSceneImpl extends JPanel implements RulesScene {
     private static final int ARC = 20;
     private static final Dimension BUTTON_DIMENSION = new Dimension(350, 60);
     private static final EmptyBorder BUTTON_BORDER = new EmptyBorder(10, 20, 10, 20);
+    private static final String FONT = "Helvetica Neue";
+    private static final String CHECKBOX = "checkbox";
 
     // Input components
     private final JCheckBox unoPenaltyCheck;
@@ -73,9 +77,9 @@ public class RulesSceneImpl extends JPanel implements RulesScene {
 
         // 1. Title
         final JLabel title = new JLabel("House Rules");
-        title.setFont(new Font("Helvetica Neue", Font.BOLD, TITLE_FONT_SIZE));
+        title.setFont(new Font(FONT, Font.BOLD, TITLE_FONT_SIZE));
         title.setForeground(TEXT_COLOR);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // 2. Create Rule Panels
 
@@ -85,7 +89,7 @@ public class RulesSceneImpl extends JPanel implements RulesScene {
             "If DISABLED, players are not required to shout 'UNO!' when holding one card.",
             true 
         );
-        unoPenaltyCheck = (JCheckBox) rule1.getClientProperty("checkbox");
+        unoPenaltyCheck = (JCheckBox) rule1.getClientProperty(CHECKBOX);
 
         // Rule 2: Skip after Draw (Default: Off)
         final JPanel rule2 = createRulePanel(
@@ -93,7 +97,7 @@ public class RulesSceneImpl extends JPanel implements RulesScene {
             "If ENABLED, a player cannot play a card immediately after drawing it.",
             false
         );
-        skipAfterDrawCheck = (JCheckBox) rule2.getClientProperty("checkbox");
+        skipAfterDrawCheck = (JCheckBox) rule2.getClientProperty(CHECKBOX);
 
         // Rule 3: Mandatory Pass / No Reshuffle (Default: Off)
         final JPanel rule3 = createRulePanel(
@@ -101,28 +105,15 @@ public class RulesSceneImpl extends JPanel implements RulesScene {
             "If the draw deck is empty, the game ends in a draw (discard pile is not reshuffled).",
             false
         );
-        mandatoryPassCheck = (JCheckBox) rule3.getClientProperty("checkbox");
+        mandatoryPassCheck = (JCheckBox) rule3.getClientProperty(CHECKBOX);
 
         // 3. "Save and Back" Button
         final JButton backButton = createStyledButton("Save & Back to Menu");
         backButton.setMnemonic(KeyEvent.VK_B);
 
         backButton.addActionListener(e -> {
-            if (observer.isPresent()) {
-                // Determine logic to go back. 
-                // Assuming MenuObserver has a method for this, 
-                // otherwise the Controller handles scene switching manually.
-
-                // For now, we assume the controller will read the values via the interface getters
-                // when starting the next game.
-
-                // Example call: observer.onBackToMenu(); 
-                // Since onBackToMenu isn't in your snippet of MenuObserver, 
-                // you might need to add it or use an existing method.
-                System.out.println("Settings saved. Returning to menu...");
-
-                // Temporary fallback if method is missing in interface:
-                // observer.onQuit(); // Or specific navigation method
+            if (observer != null) {
+                throw new IllegalAccessError("as");
             }
         });
 
@@ -196,11 +187,11 @@ public class RulesSceneImpl extends JPanel implements RulesScene {
         textPanel.setOpaque(false);
 
         final JLabel lblTitle = new JLabel(titleText);
-        lblTitle.setFont(new Font("Helvetica Neue", Font.BOLD, LBL_TITLE_FONT_SIZE));
+        lblTitle.setFont(new Font(FONT, Font.BOLD, LBL_TITLE_FONT_SIZE));
         lblTitle.setForeground(TEXT_COLOR);
 
         final JLabel lblDesc = new JLabel("<html><body style='width: 450px'>" + descText + "</body></html>");
-        lblDesc.setFont(new Font("Helvetica Neue", Font.PLAIN, LBL_DESC_FONT_SIZE));
+        lblDesc.setFont(new Font(FONT, Font.PLAIN, LBL_DESC_FONT_SIZE));
         lblDesc.setForeground(DESC_COLOR);
 
         textPanel.add(lblTitle);
@@ -213,7 +204,7 @@ public class RulesSceneImpl extends JPanel implements RulesScene {
         checkBox.setSelected(defaultState);
 
         // Store checkbox reference in the panel for retrieval during construction
-        panel.putClientProperty("checkbox", checkBox);
+        panel.putClientProperty(CHECKBOX, checkBox);
 
         panel.add(textPanel, BorderLayout.CENTER);
         panel.add(checkBox, BorderLayout.EAST);
@@ -242,9 +233,9 @@ public class RulesSceneImpl extends JPanel implements RulesScene {
                 g2.dispose();
             }
         };
-        button.setFont(new Font("Helvetica Neue", Font.BOLD, BUTTON_FONT_SIZE));
+        button.setFont(new Font(FONT, Font.BOLD, BUTTON_FONT_SIZE));
         button.setForeground(BUTTON_TEXT_COLOR);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setMaximumSize(BUTTON_DIMENSION);
         button.setPreferredSize(BUTTON_DIMENSION);
         button.setBorder(BUTTON_BORDER);

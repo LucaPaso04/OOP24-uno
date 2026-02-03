@@ -22,6 +22,8 @@ import java.util.Optional;
  */
 public class GameImpl implements Game {
 
+    private static final String CARD_DETAIL = "N/A";
+
     private final List<GameModelObserver> observers = new ArrayList<>();
     private final Deck<Card> drawDeck;
     private final DiscardPileImpl discardPile;
@@ -46,7 +48,7 @@ public class GameImpl implements Game {
      */
     public GameImpl(final Deck<Card> deck, final List<Player> players, final String gameMode, final GameLogger logger) {
         this.drawDeck = deck;
-        this.players = players;
+        this.players = new ArrayList<>(players);
         this.logger = logger;
         this.winner = null;
         this.discardPile = new DiscardPileImpl();
@@ -83,8 +85,6 @@ public class GameImpl implements Game {
      */
     @Override
     public void playCard(final Optional<Card> card) {
-        final Player player = getCurrentPlayer();
-
         // --- INIZIO LOGICA DI VALIDAZIONE ---
 
         // 1. Controlla lo stato del gioco
@@ -92,6 +92,7 @@ public class GameImpl implements Game {
             throw new IllegalStateException("Non è possibile giocare una carta ora (Stato: " + this.currentState + ")");
         }
 
+        final Player player = getCurrentPlayer();
         // 2. Controlla se il giocatore ha la carta
         if (!player.getHand().contains(card)) {
             throw new IllegalStateException("Il giocatore non ha questa carta!");
@@ -118,8 +119,6 @@ public class GameImpl implements Game {
         }
 
         // Esegui effetto carta (polimorfismo)
-        System.out.println("Svolgo l'effetto: " + card.get().getValue(this));
-        System.out.println("La carta giocata è di classe: " + card.get().getClass().getSimpleName());
         if (card.get().getValue(this) == CardValue.WILD_FORCED_SWAP) {
             // Sposta la carta
             player.playCard(card);
@@ -139,8 +138,7 @@ public class GameImpl implements Game {
         if (player.hasWon()) {
             this.currentState = GameState.GAME_OVER;
             this.winner = player;
-            logger.logAction("SYSTEM", "GAME_OVER", "N/A", "Winner: " + this.winner.getName());
-            System.out.println("PARTITA FINITA! Il vincitore è " + this.winner.getName());
+            logger.logAction("SYSTEM", "GAME_OVER", CARD_DETAIL, "Winner: " + this.winner.getName());
             notifyObservers(); // Notifica la View che la partita è finita
             return; // Non avanzare il turno, la partita è bloccata
         }
@@ -193,12 +191,12 @@ public class GameImpl implements Game {
      */
     @Override
     public void playerInitiatesDraw() {
-        final Player player = getCurrentPlayer();
 
         if (currentState != GameState.RUNNING) {
             throw new IllegalStateException("Non puoi pescare ora.");
         }
 
+        final Player player = getCurrentPlayer();
         // 1. Regola: "Massimo una carta"
         if (hasCurrentPlayerDrawn(player)) {
             throw new IllegalStateException("Hai già pescato in questo turno. Devi giocare la carta o passare.");
@@ -210,7 +208,6 @@ public class GameImpl implements Game {
         }
 
         // Ok, il giocatore deve pescare
-        System.out.println(player.getName() + " non ha mosse, pesca una carta.");
         turnManager.setHasDrawnThisTurn(true); // Imposta il flag!
 
         drawCardForPlayer(player); // Pesca la carta
@@ -241,10 +238,9 @@ public class GameImpl implements Game {
         final Player currentPlayer = getCurrentPlayer();
         final String handSize = String.valueOf(currentPlayer.getHand().size()); // Dimensione della mano dopo la pescata
 
-        logger.logAction(currentPlayer.getName(), "PASS_TURN", "N/A", "HandSize: " + handSize);
+        logger.logAction(currentPlayer.getName(), "PASS_TURN", CARD_DETAIL, "HandSize: " + handSize);
 
         // Se sei qui, hai pescato e hai scelto di passare
-        System.out.println(getCurrentPlayer().getName() + " passa il turno.");
         turnManager.advanceTurn(this); // Avanza al prossimo giocatore
         notifyObservers();
     }
@@ -255,18 +251,15 @@ public class GameImpl implements Game {
     @Override
     public void drawCardForPlayer(final Player player) {
         if (drawDeck.isEmpty()) {
-            System.out.println("Mazzo di pesca vuoto. Rimescolo gli scarti...");
             final List<Card> cardsToReshuffle = discardPile.takeAllExceptTop();
 
             if (cardsToReshuffle.isEmpty()) {
-                System.out.println("Nessuna carta da rimescolare. Impossibile pescare.");
                 return; 
             }
             for (final Card card : cardsToReshuffle) {
                 drawDeck.addCard(card);
             }
             drawDeck.shuffle();
-            System.out.println("Mazzo rimescolato con " + cardsToReshuffle.size() + " carte.");
         }
 
         final Optional<Card> drawnCard = drawDeck.draw();
@@ -286,11 +279,11 @@ public class GameImpl implements Game {
     public void callUno(final Player player) {
         if (player.getHandSize() == 1) {
             player.hasCalledUno();
-            logger.logAction(player.getName(), "CALL_UNO_SUCCESS", "N/A", "HandSize: 1");
+            logger.logAction(player.getName(), "CALL_UNO_SUCCESS", CARD_DETAIL, "HandSize: 1");
         } else {
 
             logger.logAction(player.getName(), "CALL_UNO_FAILED", 
-            "N/A", "Initial HandSize: " + player.getHandSize() + ". Penalty: Draw 2.");
+            CARD_DETAIL, "Initial HandSize: " + player.getHandSize() + ". Penalty: Draw 2.");
 
             drawCardForPlayer(player);
             drawCardForPlayer(player);
@@ -400,7 +393,6 @@ public class GameImpl implements Game {
     @Override
     public void skipPlayers(final int n) {
         this.turnManager.skipPlayers(n);
-        System.out.println("Giocatore saltato!");
     }
 
     /**
@@ -409,7 +401,6 @@ public class GameImpl implements Game {
     @Override
     public void makeNextPlayerDraw(final int amount) {
         final Player nextPlayer = this.turnManager.peekNextPlayer();
-        System.out.println(nextPlayer.getName() + " pesca " + amount);
         for (int i = 0; i < amount; i++) {
             drawCardForPlayer(nextPlayer);
         }
@@ -422,7 +413,6 @@ public class GameImpl implements Game {
     @Override
     public void reversePlayOrder() {
         this.turnManager.reverseDirection();
-        System.out.println("Ordine invertito!");
     }
 
     /**
@@ -440,20 +430,15 @@ public class GameImpl implements Game {
     public void flipTheWorld() {
         this.isDarkSide = !this.isDarkSide; 
 
-        System.out.println("FLIP! Ora il gioco è sul lato: " + (isDarkSide ? "SCURO" : "CHIARO"));
-
         this.currentColor = Optional.of(this.currentPlayedCard.getColor(this)); 
 
         if (this.currentColor.get() == CardColor.WILD) {
             final CardColor[] coloredValues = {CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW};
-            final Random random = new java.util.Random();
+            final Random random = new Random();
             final CardColor chosenColor = coloredValues[random.nextInt(coloredValues.length)];
 
             this.currentColor = Optional.of(chosenColor);
-            System.out.println("Il lato rivelato è WILD! Colore scelto casualmente: " + chosenColor);
         }
-
-        System.out.println("Nuovo colore attivo dopo il FLIP: " + this.currentColor);
 
         notifyObservers();
     }
@@ -472,7 +457,6 @@ public class GameImpl implements Game {
     @Override
     public void requestColorChoice() {
         this.currentState = GameState.WAITING_FOR_COLOR;
-        System.out.println("In attesa della scelta del colore...");
         notifyObservers();
     }
 
@@ -482,7 +466,6 @@ public class GameImpl implements Game {
     @Override
     public void requestPlayerChoice() {
         this.currentState = GameState.WAITING_FOR_PLAYER;
-        System.out.println("In attesa della scelta del giocatore...");
         notifyObservers();
     }
 
@@ -498,7 +481,7 @@ public class GameImpl implements Game {
         // Deve prendere il valore della carta giocata (NON quella nel mazzo degli scarti)
         final Card playedCard = this.currentPlayedCard;
 
-        logger.logAction(getCurrentPlayer().getName(), "SET_COLOR", "N/A", color.toString());
+        logger.logAction(getCurrentPlayer().getName(), "SET_COLOR", CARD_DETAIL, color.toString());
 
         if (playedCard.getValue(this) == CardValue.WILD_DRAW_COLOR) {
             drawUntilColorChosenCard(color);
@@ -522,10 +505,9 @@ public class GameImpl implements Game {
 
         final Card playedCard = this.currentPlayedCard;
 
-        logger.logAction(getCurrentPlayer().getName(), "CHOOSEN_PLAYER", "N/A", player.getName());
+        logger.logAction(getCurrentPlayer().getName(), "CHOOSEN_PLAYER", CARD_DETAIL, player.getName());
 
         if (playedCard.getValue(this) == CardValue.WILD_FORCED_SWAP) {
-            System.out.println("Scambio forzato con: " + player.getName());
 
             final Player currentPlayer = getCurrentPlayer();
 
@@ -536,7 +518,6 @@ public class GameImpl implements Game {
         }
 
         if (playedCard.getValue(this) == CardValue.WILD_TARGETED_DRAW_TWO) {
-            System.out.println(player.getName() + " deve pescare 2 carte.");
             drawCardForPlayer(player);
             drawCardForPlayer(player);
         }
@@ -556,16 +537,12 @@ public class GameImpl implements Game {
             return;
         }
 
-        System.out.println(nextPlayer.getName() + " deve pescare fino a trovare una carta del colore scelto: " + color);
-
         while (true) {
             final Optional<Card> drawnCard = drawDeck.draw();
             if (drawnCard.isPresent()) {
                 nextPlayer.addCardToHand(drawnCard.get());
-                System.out.println(nextPlayer.getName() + " ha pescato: " + drawnCard.get());
 
                 if (drawnCard.get().getColor(this) == color) {
-                    System.out.println(nextPlayer.getName() + " ha trovato una carta del colore scelto: " + drawnCard);
                     break;
                 }
             }

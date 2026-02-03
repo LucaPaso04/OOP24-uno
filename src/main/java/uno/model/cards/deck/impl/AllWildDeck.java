@@ -6,6 +6,7 @@ import uno.model.cards.behaviors.impl.BackSideBehavior;
 import uno.model.cards.behaviors.impl.WildBehavior;
 import uno.model.cards.types.api.Card;
 import uno.model.cards.types.impl.DoubleSidedCard;
+import uno.model.utils.api.GameLogger;
 
 /**
  * Represents the deck for the "UNO All Wild" variant.
@@ -18,9 +19,10 @@ public class AllWildDeck extends DeckImpl<Card> {
 
     /**
      * Constructs an All Wild Deck with 112 Wild cards.
+     * @param logger logger
      */
-    public AllWildDeck() {
-        super();
+    public AllWildDeck(final GameLogger logger) {
+        super(logger);
         initializeDeck();
         shuffle();
     }

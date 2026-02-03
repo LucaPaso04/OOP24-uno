@@ -10,8 +10,10 @@ import java.awt.Dimension;
 /**
  * Concrete implementation of the main application window using Java Swing.
  */
-public class GameFrameImpl extends JFrame implements GameFrame {
+public final class GameFrameImpl extends JFrame implements GameFrame {
 
+    private static final long serialVersionUID = 1L;
+    
     private static final Dimension MIN_SIZE = new Dimension(1200, 800);
 
     /**
@@ -22,7 +24,6 @@ public class GameFrameImpl extends JFrame implements GameFrame {
     public GameFrameImpl(final String title) {
         super(title);
 
-        // Ensure the application closes when the window is closed
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Set the minimum size to ensure UI elements fit correctly

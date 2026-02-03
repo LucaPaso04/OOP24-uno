@@ -23,7 +23,9 @@ import java.util.List;
  * A panel that allows the player to choose a new color during the game.
  * It adapts its color palette based on whether the game is currently on the "Light" or "Dark" side.
  */
-public class ColorChooserPanelImpl extends JPanel implements ActionListener, ColorChooserPanel {
+public final class ColorChooserPanelImpl extends JPanel implements ActionListener, ColorChooserPanel {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Color PANEL_BACKGROUND = new Color(50, 50, 50);
     private static final Color TITLE_TEXT_COLOR = Color.WHITE;

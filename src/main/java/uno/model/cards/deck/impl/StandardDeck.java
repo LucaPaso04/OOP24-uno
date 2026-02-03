@@ -13,6 +13,8 @@ import uno.model.cards.behaviors.impl.NumericBehavior;
 import uno.model.cards.behaviors.impl.WildBehavior;
 import uno.model.cards.types.api.Card;
 import uno.model.cards.types.impl.DoubleSidedCard;
+import uno.model.utils.api.GameLogger;
+import uno.model.game.api.Game;
 
 /**
  * Concrete implementation of a Standard UNO Deck (108 cards).
@@ -24,9 +26,10 @@ public class StandardDeck extends DeckImpl<Card> {
 
     /**
      * Constructs a new StandardDeck by populating it with the standard UNO cards.
+     * @param logger logger
      */
-    public StandardDeck() {
-        super(); // 1. Inizializza la lista vuota nel genitore
+    public StandardDeck(final GameLogger logger) {
+        super(logger); // 1. Inizializza la lista vuota nel genitore
         initializeDeck(); // 2. Popola il mazzo
         shuffle(); // 3. Mischia alla fine
     }
@@ -63,8 +66,8 @@ public class StandardDeck extends DeckImpl<Card> {
             createAndAddCard(new ActionBehavior(color, CardValue.SKIP, g -> g.skipPlayers(1)));
 
             // Reverse
-            createAndAddCard(new ActionBehavior(color, CardValue.REVERSE, g -> g.reversePlayOrder()));
-            createAndAddCard(new ActionBehavior(color, CardValue.REVERSE, g -> g.reversePlayOrder()));
+            createAndAddCard(new ActionBehavior(color, CardValue.REVERSE, Game::reversePlayOrder));
+            createAndAddCard(new ActionBehavior(color, CardValue.REVERSE, Game::reversePlayOrder));
 
             // Draw Two
             createAndAddCard(new DrawBehavior(color, CardValue.DRAW_TWO, 2));

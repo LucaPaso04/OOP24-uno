@@ -32,8 +32,8 @@ import java.util.List;
  */
 public class MenuControllerImpl implements MenuController {
 
+    private static final boolean IS_ALL_WILD = true;
     private final GameFrame frame;
-    private final boolean isAllWild = true;
 
     /**
      * Constructor for MenuControllerImpl.
@@ -48,8 +48,6 @@ public class MenuControllerImpl implements MenuController {
     */
     @Override
     public void onStartClassicGame() {
-        System.out.println("Avvio modalità classica...");
-
         // --- IMPOSTAZIONE DELLA PARTITA ---
 
         // 1. Crea i giocatori
@@ -61,8 +59,8 @@ public class MenuControllerImpl implements MenuController {
         // puoi aggiungere altri giocatori qui...
 
         // 2. Crea il Model (Mazzo e Partita)
-        final StandardDeck deck = new StandardDeck();
         final GameLogger logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+        final StandardDeck deck = new StandardDeck(logger);
         final GameImpl gameModel = new GameImpl(deck, players, "CLASSIC", logger);
 
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
@@ -73,7 +71,7 @@ public class MenuControllerImpl implements MenuController {
             gameModel.getDiscardPile(), 
             players
         );
-        setup.initializeGame(!isAllWild);
+        setup.initializeGame(!IS_ALL_WILD);
 
         // 4. Crea la View del Gioco (GameScene)
         final GameSceneImpl gameScene = new GameSceneImpl(gameModel);
@@ -95,8 +93,6 @@ public class MenuControllerImpl implements MenuController {
     */
     @Override
     public void onStartFlipGame() {
-        System.out.println("Avvio modalità flip...");
-
         // --- IMPOSTAZIONE DELLA PARTITA ---
 
         // 1. Crea i giocatori
@@ -108,8 +104,8 @@ public class MenuControllerImpl implements MenuController {
         // puoi aggiungere altri giocatori qui...
 
         // 2. Crea il Model (Mazzo e Partita)
-        final Deck<Card> deck = new FlipDeck();
         final GameLogger logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+        final Deck<Card> deck = new FlipDeck(logger);
         final Game gameModel = new GameImpl(deck, players, "FLIP", logger);
 
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
@@ -120,7 +116,7 @@ public class MenuControllerImpl implements MenuController {
             gameModel.getDiscardPile(), 
             players
         );
-        setup.initializeGame(!isAllWild);
+        setup.initializeGame(!IS_ALL_WILD);
 
         // 4. Crea la View del Gioco (GameScene)
         final GameScene gameScene = new GameSceneImpl(gameModel);
@@ -143,7 +139,6 @@ public class MenuControllerImpl implements MenuController {
     */
     @Override
     public void onStartAllWildGame() {
-        System.out.println("Avvio modalità All Wild...");
         // --- IMPOSTAZIONE DELLA PARTITA ---
 
         // 1. Crea i giocatori
@@ -155,8 +150,8 @@ public class MenuControllerImpl implements MenuController {
         // puoi aggiungere altri giocatori qui...
 
         // 2. Crea il Model (Mazzo e Partita)
-        final AllWildDeck deck = new AllWildDeck();
         final GameLogger logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+        final AllWildDeck deck = new AllWildDeck(logger);
         final GameImpl gameModel = new GameImpl(deck, players, "ALL_WILD", logger);
 
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
@@ -167,7 +162,7 @@ public class MenuControllerImpl implements MenuController {
             gameModel.getDiscardPile(), 
             players
         );
-        setup.initializeGame(isAllWild);
+        setup.initializeGame(IS_ALL_WILD);
 
         // 4. Crea la View del Gioco (GameScene)
         final GameSceneImpl gameScene = new GameSceneImpl(gameModel);
@@ -189,7 +184,6 @@ public class MenuControllerImpl implements MenuController {
     */
     @Override
     public void onQuit() {
-        System.out.println("Uscita dall'applicazione.");
         System.exit(0);
     }
 

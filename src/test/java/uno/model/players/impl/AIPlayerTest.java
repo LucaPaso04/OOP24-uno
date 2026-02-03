@@ -37,15 +37,13 @@ class AIPlayerTest {
     @BeforeEach
     void setUp() {
         // Setup base
-        deck = new StandardDeck();
-
         aiClassic = new AIClassic("AI-Bot");
 
         List<Player> players = new ArrayList<>();
         players.add(aiClassic);
-
-        deck = new StandardDeck();
+        
         final GameLogger logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+        deck = new StandardDeck(logger);
         game = new GameImpl(deck, players, "CLASSIC", logger);
 
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)

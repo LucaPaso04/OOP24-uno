@@ -46,7 +46,9 @@ import java.util.List;
  * It defines how the game displays the state and handles user interaction requests
  * coming from the Controller.
  */
-public class GameSceneImpl extends JPanel implements GameScene {
+public final class GameSceneImpl extends JPanel implements GameScene {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Color BACKGROUND_COLOR = new Color(30, 30, 30);
     private static final Color PANEL_COLOR = new Color(50, 50, 50);
@@ -91,15 +93,14 @@ public class GameSceneImpl extends JPanel implements GameScene {
     private final Game gameModel;
     private Optional<GameViewObserver> controllerObserver = Optional.empty();
 
-    private JPanel playerHandPanel;
-    private JPanel westAIPanel, northAIPanel, eastAIPanel;
+    private final JPanel playerHandPanel;
+    private final JPanel westAIPanel, northAIPanel, eastAIPanel;
     private JLabel westAILabel, northAILabel, eastAILabel;
 
-    private JPanel centerPanel;
+    private final JPanel centerPanel;
     private JLabel discardPileCard;
     private JButton drawDeckButton;
     private JButton passButton;
-    private JButton settingsButton;
     private JLabel statusLabel;
     private JButton unoButton;
 
@@ -155,10 +156,6 @@ public class GameSceneImpl extends JPanel implements GameScene {
             controllerObserver.ifPresent(GameViewObserver::onCallUno);
         });
 
-        settingsButton.addActionListener(e -> {
-            controllerObserver.ifPresent(GameViewObserver::onBackToMenu);
-        });
-
         onGameUpdate();
     }
 
@@ -176,8 +173,8 @@ public class GameSceneImpl extends JPanel implements GameScene {
     @Override
     public void setHumanInputEnabled(final boolean enabled) {
         final GameState currentState = gameModel.getGameState();
-        final boolean shouldDisableUno = (currentState == GameState.WAITING_FOR_COLOR 
-            || currentState == GameState.WAITING_FOR_PLAYER);
+        final boolean shouldDisableUno = currentState == GameState.WAITING_FOR_COLOR 
+            || currentState == GameState.WAITING_FOR_PLAYER;
 
         this.unoButton.setEnabled(!shouldDisableUno);
 
@@ -302,7 +299,7 @@ public class GameSceneImpl extends JPanel implements GameScene {
         final JLabel cardLabel = new JLabel("X carte");
         cardLabel.setFont(BOLD_FONT);
         cardLabel.setForeground(TEXT_COLOR);
-        cardLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //cardLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         cardLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         if (title.contains("Ovest")) { 
@@ -327,7 +324,7 @@ public class GameSceneImpl extends JPanel implements GameScene {
      */
     private void updateOpponentPanel(final JPanel panel, final JLabel label, final Player ai) {
         label.setText(ai.getHandSize() + " carte");
-        if (gameModel.getCurrentPlayer() == ai) {
+        if (gameModel.getCurrentPlayer().equals(ai)) {
             final Color borderColor = ai.getHandSize() <= 1 ? Color.RED : Color.ORANGE;
             final Border border = ai.getHandSize() <= 1 ? WARNING_BORDER : HIGHLIGHT_BORDER;
 
@@ -493,10 +490,14 @@ public class GameSceneImpl extends JPanel implements GameScene {
         final JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         panel.setOpaque(false);
 
-        this.settingsButton = createStyledButton("Menu", SETTINGS_BUTTON_COLOR, Color.WHITE, 
+        final JButton settingsButton = createStyledButton("Menu", SETTINGS_BUTTON_COLOR, Color.WHITE, 
         SETTINGS_BUTTON_WIDTH, SETTINGS_BUTTON_HEIGHT);
 
-        panel.add(this.settingsButton);
+        settingsButton.addActionListener(e -> {
+            controllerObserver.ifPresent(GameViewObserver::onBackToMenu);
+        });
+
+        panel.add(settingsButton);
         return panel;
     }
 
@@ -516,7 +517,7 @@ public class GameSceneImpl extends JPanel implements GameScene {
         this.statusLabel = new JLabel("Turno di: ... \n Direzione: ...");
         this.statusLabel.setFont(BOLD_FONT);
         this.statusLabel.setForeground(TEXT_COLOR);
-        this.statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //this.statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.statusLabel.setBorder(STATUS_LABEL_BORDER);
 
         panel.add(this.statusLabel);
@@ -601,7 +602,7 @@ public class GameSceneImpl extends JPanel implements GameScene {
             case PURPLE: return PURPLE_COLOR;
             case PINK: return PINK_COLOR;
             case TEAL: return TEAL_COLOR;
-            case WILD: default: return Color.DARK_GRAY;
+            default: return Color.DARK_GRAY;
         }
     }
 
@@ -691,11 +692,8 @@ public class GameSceneImpl extends JPanel implements GameScene {
                     + gameModel.getCurrentPlayer().getName() 
                     + "<br>Direction: " + direction + "</div></html>");
                 break;
-            case GAME_OVER:
-                statusLabel.setText("Game Over!");
-                break;
             default:
-                statusLabel.setText("");
+                statusLabel.setText("Game Over!");
                 break;
         }
     }

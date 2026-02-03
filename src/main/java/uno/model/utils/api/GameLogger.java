@@ -15,5 +15,10 @@ public interface GameLogger {
      */
     void logAction(String playerName, String actionType, String cardDetails, String extraInfo);
 
+    /**
+     * Records errors.
+     * @param context
+     * @param e
+     */
     void logError(String context, Exception e);
 }

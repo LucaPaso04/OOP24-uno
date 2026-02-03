@@ -2,6 +2,7 @@ package uno.model.cards.deck.impl;
 
 import uno.model.cards.deck.api.Deck;
 import uno.model.cards.types.api.Card;
+import uno.model.utils.api.GameLogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,16 +18,17 @@ import java.util.Optional;
  */
 public abstract class DeckImpl<T extends Card> implements Deck<T> {
 
-    // Changed from protected to private for better encapsulation.
-    // Subclasses should use addCard() or refill() to modify contents.
+    private final GameLogger logger;
     private final List<T> cards;
 
     /**
      * Default constructor. Initializes an empty deck.
      * Concrete subclasses must call {@link #refill(List)} or {@link #addCard(Card)}
      * to populate it.
+     * @param logger logger
      */
-    public DeckImpl() {
+    public DeckImpl(final GameLogger logger) {
+        this.logger = logger;
         this.cards = new ArrayList<>();
     }
 
@@ -34,8 +36,10 @@ public abstract class DeckImpl<T extends Card> implements Deck<T> {
      * Constructor that accepts an initial set of cards.
      * Useful for testing or creating a deck from a known state.
      * @param initialCards The cards to start with.
+     * @param logger logger
      */
-    public DeckImpl(final List<T> initialCards) {
+    public DeckImpl(final List<T> initialCards, final GameLogger logger) {
+        this.logger = logger;
         this.cards = new ArrayList<>(initialCards);
         shuffle();
     }
@@ -44,7 +48,7 @@ public abstract class DeckImpl<T extends Card> implements Deck<T> {
      * {@inheritDoc}
      */
     @Override
-    public void shuffle() {
+    public final void shuffle() {
         if (!cards.isEmpty()) {
             Collections.shuffle(cards);
         }
@@ -54,7 +58,7 @@ public abstract class DeckImpl<T extends Card> implements Deck<T> {
      * {@inheritDoc}
      */
     @Override
-    public Optional<T> draw() {
+    public final Optional<T> draw() {
         if (cards.isEmpty()) {
             return Optional.empty();
         }
@@ -66,7 +70,7 @@ public abstract class DeckImpl<T extends Card> implements Deck<T> {
      * {@inheritDoc}
      */
     @Override
-    public Optional<T> peek() {
+    public final Optional<T> peek() {
         if (cards.isEmpty()) {
             return Optional.empty();
         }
@@ -77,7 +81,7 @@ public abstract class DeckImpl<T extends Card> implements Deck<T> {
      * {@inheritDoc}
      */
     @Override
-    public void addCard(final T card) {
+    public final void addCard(final T card) {
         if (card != null) {
             cards.add(card);
         }
@@ -87,7 +91,7 @@ public abstract class DeckImpl<T extends Card> implements Deck<T> {
      * {@inheritDoc}
      */
     @Override
-    public void refill(final List<T> newCards) {
+    public final void refill(final List<T> newCards) {
         if (newCards != null && !newCards.isEmpty()) {
             this.cards.addAll(newCards);
         }
@@ -97,7 +101,7 @@ public abstract class DeckImpl<T extends Card> implements Deck<T> {
      * {@inheritDoc}
      */
     @Override
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return cards.isEmpty();
     }
 
@@ -105,9 +109,18 @@ public abstract class DeckImpl<T extends Card> implements Deck<T> {
      * {@inheritDoc}
      */
     @Override
-    public int size() {
+    public final int size() {
         return cards.size();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final GameLogger getLogger() {
+        return this.logger;
+    }
+
 
     /**
      * {@inheritDoc}

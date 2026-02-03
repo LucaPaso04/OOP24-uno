@@ -7,6 +7,7 @@ import uno.model.game.api.Game;
 import uno.model.game.api.GameState;
 
 import java.util.Optional;
+import java.util.Objects;
 
 /**
  * Abstract AI Player class providing common functionality for AI players.
@@ -28,7 +29,7 @@ public abstract class AIPlayer extends Player {
     public void takeTurn(final Game game) {
         // 1. Simulate "thinking" time (optional, handled by Thread/Timer in Controller usually)
 
-        if (game.getCurrentPlayer() != this) {
+        if (!game.getCurrentPlayer().equals(this)) {
             return;
         }
 
@@ -38,7 +39,6 @@ public abstract class AIPlayer extends Player {
         if (chosenCard.isPresent()) {
             // 3. Before playing, check UNO condition
             if (getHandSize() == 2) { // Will have 1 after playing
-                System.out.println(getName() + " calls UNO!");
                 hasCalledUno();
             }
 
@@ -47,7 +47,6 @@ public abstract class AIPlayer extends Player {
         } else {
             // 5. No move? Draw a card.
             if (!game.hasCurrentPlayerDrawn(this)) {
-                System.out.println(getName() + " has no moves. Drawing...");
                 game.playerInitiatesDraw();
 
                 // 6. Try to play the drawn card immediately (standard rule)
@@ -65,7 +64,6 @@ public abstract class AIPlayer extends Player {
                 final Optional<Card> postDrawMove = chooseCardToPlay(game);
                 if (postDrawMove.isPresent()) {
                     if (getHandSize() == 2) { // Will have 1 after playing
-                        System.out.println(getName() + " calls UNO!");
                         hasCalledUno();
                     }
                     game.playCard(postDrawMove);
@@ -78,7 +76,7 @@ public abstract class AIPlayer extends Player {
         }
 
         if (game.getGameState() == GameState.WAITING_FOR_COLOR) {
-            CardColor chosenColor = chooseBestColor(game);
+            final CardColor chosenColor = chooseBestColor(game);
             game.requestColorChoice();
             game.setColor(chosenColor);
             game.aiAdvanceTurn();
@@ -97,7 +95,7 @@ public abstract class AIPlayer extends Player {
      * @param game The current game state
      * @return The best color to choose when playing a Wild card.
      */
-    protected abstract uno.model.cards.attributes.CardColor chooseBestColor(Game game);
+    protected abstract CardColor chooseBestColor(Game game);
 
     /**
      * Helper to check validity using Game logic.
@@ -106,12 +104,31 @@ public abstract class AIPlayer extends Player {
      * @return true if the move is valid, false otherwise
      */
     protected boolean isMoveValid(final Card card, final Game game) {
-        Optional<Card> topCard = game.getTopDiscardCard();
-    
-        if (topCard.isEmpty()) {
+        final Optional<Card> topCard = game.getTopDiscardCard();
+
+        return topCard.isEmpty() || card.canBePlayedOn(topCard.get(), game);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
             return true;
         }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Player player = (Player) o;
+        return Objects.equals(this.getName(), player.getName()); // Confronta per nome unico
+    }
 
-        return card.canBePlayedOn(topCard.get(), game);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getName());
     }
 }

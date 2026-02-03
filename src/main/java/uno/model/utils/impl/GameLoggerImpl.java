@@ -38,22 +38,22 @@ public class GameLoggerImpl implements GameLogger {
      * Helper method to create the directory structure using Optional to avoid null checks.
      */
     private void initializeLogDirectory() {
-        try {
-            final File logFile = new File(this.filePath);
+        final File logFile = new File(this.filePath);
 
-            Optional.ofNullable(logFile.getParentFile())
-                    .filter(parent -> !parent.exists())
-                    .ifPresent(parent -> {
-                        if (parent.mkdirs()) {
-                            System.out.println("Log directory created at: " + parent.getAbsolutePath());
-                        } else {
-                            System.err.println("CRITICAL ERROR: Could not create 'logs/' directory.");
-                        }
-                    });
-
-        } catch (final Exception e) {
-            System.err.println("Logger initialization error: " + e.getMessage());
-        }
+        // Uso corretto di Optional: 
+        // 1. Prendi il padre
+        // 2. Filtra se non esiste
+        // 3. ifPresent esegue l'azione solo se serve
+        Optional.ofNullable(logFile.getParentFile())
+                .filter(parent -> !parent.exists())
+                .ifPresent(parent -> {
+                    if (!parent.mkdirs()) {
+                        // Se mkdirs fallisce (es. permessi negati), logghiamo l'errore
+                        // Qui puoi usare il logger di sistema o il tuo
+                        java.util.logging.Logger.getLogger("UNO")
+                            .warning("Impossibile creare la directory per i log: " + parent.getPath());
+                    }
+                });
     }
 
     /**
@@ -70,7 +70,8 @@ public class GameLoggerImpl implements GameLogger {
             writer.write(logEntry);
             writer.newLine();
         } catch (final IOException e) {
-            System.err.println("Error writing to game log: " + e.getMessage());
+            java.util.logging.Logger.getGlobal().log(java.util.logging.Level.SEVERE, 
+                "Impossibile scrivere nel file di log: " + filePath, e);
         }
     }
 

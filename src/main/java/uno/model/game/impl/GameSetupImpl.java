@@ -9,6 +9,7 @@ import uno.model.game.api.GameSetup;
 import uno.model.players.api.Player;
 import uno.model.game.api.Game;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ public class GameSetupImpl implements GameSetup {
         this.game = game;
         this.deck = deck;
         this.discardPile = discardPile;
-        this.players = players;
+        this.players = new ArrayList<>(players);
     }
 
     /**
@@ -44,7 +45,6 @@ public class GameSetupImpl implements GameSetup {
      */
     @Override
     public void initializeGame(final boolean isAllWild) {
-        System.out.println("Starting Game Setup...");
 
         // 1. Deal cards
         dealInitialCards();
@@ -99,12 +99,10 @@ public class GameSetupImpl implements GameSetup {
                 discardPile.addCard(drawnCard.get());
                 game.setCurrentColor(drawnCard.get().getColor(game));
 
-                System.out.println("First Valid Card: " + drawnCard);
                 game.logSystemAction("SETUP", "FIRST_CARD", "Card: " + drawnCard);
                 validCardFound = true;
             } else {
                 // Fail: Invalid card (Wild, Action, Flip), put in discard and draw again
-                System.out.println("Invalid start card skipped: " + drawnCard);
                 discardPile.addCard(drawnCard.get()); 
                 // Note: Standard rules say "put back in deck", but putting in discard is a common variant
                 // to avoid infinite reshuffling loops.
@@ -116,7 +114,7 @@ public class GameSetupImpl implements GameSetup {
      * Draws any card from the deck and places it on the discard pile.
      */
     private void drawAndPlaceAnyCard() {
-        deck.draw().ifPresent(card -> discardPile.addCard(card));
+        deck.draw().ifPresent(discardPile::addCard);
     }
 
     /**

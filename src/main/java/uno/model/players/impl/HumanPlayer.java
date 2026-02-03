@@ -23,8 +23,5 @@ public class HumanPlayer extends Player {
     @Override
     public void takeTurn(final Game game) {
         // Human logic is passive: we wait for UI events.
-        // We can use this hook to log or update status.
-        System.out.println("It's " + getName() + "'s turn (Human). Waiting for input...");
-
     }
 }

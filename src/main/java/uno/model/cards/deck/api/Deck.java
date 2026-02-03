@@ -3,6 +3,7 @@ package uno.model.cards.deck.api;
 import java.util.List;
 import java.util.Optional;
 
+import uno.model.utils.api.GameLogger;
 import uno.model.cards.types.api.Card;
 
 /**
@@ -64,4 +65,10 @@ public interface Deck<T extends Card> {
      * @return The integer count of cards.
      */
     int size();
+
+    /**
+     * Getter of the logger.
+     * @return logger
+     */
+    GameLogger getLogger();
 }

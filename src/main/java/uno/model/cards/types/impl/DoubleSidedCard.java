@@ -78,23 +78,8 @@ public class DoubleSidedCard implements Card {
         final CardColor targetColor = game.getCurrentColor()
                                         .orElse(topCard.getColor(game));
 
-        // 1. La carta è un Jolly? (È sempre giocabile, a meno che non ci siano restrizioni specifiche)
-        if (myFace.getColor() == CardColor.WILD) {
-            return true;
-        }
-
-        // 2. Match Colore: Il mio colore corrisponde a quello attivo (o fisico)?
-        if (myFace.getColor() == targetColor) {
-            return true;
-        }
-
-        // 3. Match Valore: Il numero/simbolo corrisponde? (Es. 5 Rosso su 5 Blu)
-        // Nota: Il valore si confronta sempre con la carta fisica in cima
-        if (myFace.getValue() == topCard.getValue(game)) {
-            return true;
-        }
-
-        return false;
+        return myFace.getColor() == CardColor.WILD || myFace.getColor() == targetColor 
+            || myFace.getValue() == topCard.getValue(game);
     }
 
     /**

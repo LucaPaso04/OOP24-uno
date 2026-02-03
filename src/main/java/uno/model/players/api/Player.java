@@ -87,15 +87,7 @@ public abstract class Player {
      * @return true if successful.
      */
     public boolean playCard(final Optional<Card> card) {
-        if (card.isEmpty()) {
-            return false;
-        }
-
-        // We need to find the specific Optional instance or match the content
-        // Since Optional doesn't override equals for deep content matching easily in lists,
-        // we might need to iterate if references differ. 
-        // Assuming 'card' comes from getHand(), remove should work.
-        return this.hand.remove(card);
+        return !card.isEmpty() && this.hand.remove(card);
     }
 
     /**
@@ -111,10 +103,8 @@ public abstract class Player {
      * @param game The current game instance (interface).
      */
     public void unoPenalty(final Game game) {
-        System.out.println(name + " forgot UNO! Drawing 2 penalty cards.");
         game.drawCardForPlayer(this);
         game.drawCardForPlayer(this);
-        // OR better: game.drawCardForPlayer(this); game.drawCardForPlayer(this);
     }
 
     /**
@@ -128,7 +118,7 @@ public abstract class Player {
      * Checks if the player has called UNO.
      * @return true if the player has called UNO.
      */
-    public boolean getHasCalledUno() {
+    public boolean isHasCalledUno() {
         return this.hasCalledUno;
     }
 

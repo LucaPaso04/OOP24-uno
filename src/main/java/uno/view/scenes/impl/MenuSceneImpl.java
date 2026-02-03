@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
-import java.awt.Component;
+//import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -25,7 +25,9 @@ import java.awt.event.KeyEvent;
  * The panel (JPanel) representing the main menu screen.
  * This implementation uses a modern and accessible graphical style.
  */
-public class MenuSceneImpl extends JPanel implements MenuScene {
+public final class MenuSceneImpl extends JPanel implements MenuScene {
+
+    private static final long serialVersionUID = 1L;
 
     // Modern Color Palette
     private static final Color BACKGROUND_COLOR = new Color(30, 30, 30);
@@ -59,7 +61,7 @@ public class MenuSceneImpl extends JPanel implements MenuScene {
         final JLabel title = new JLabel("UNO");
         title.setFont(new Font("Helvetica Neue", Font.BOLD, TITLE_FONT_SIZE));
         title.setForeground(TITLE_COLOR);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(TITLE_BORDER); // Space below title
 
         // 2. Create Styled Buttons
@@ -164,7 +166,7 @@ public class MenuSceneImpl extends JPanel implements MenuScene {
         button.setFont(new Font("Helvetica Neue", Font.BOLD, BUTTON_FONT_SIZE));
         button.setBackground(BUTTON_COLOR);
         button.setForeground(BUTTON_TEXT_COLOR);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setMaximumSize(BUTTON_DIMENSION);
         button.setPreferredSize(BUTTON_DIMENSION);
         button.setMinimumSize(BUTTON_DIMENSION);

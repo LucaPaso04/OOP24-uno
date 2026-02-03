@@ -38,7 +38,6 @@ public class AIAllWild extends AIPlayer {
         if (game.getGameState() == GameState.WAITING_FOR_PLAYER) {
             final Player target = findBestTarget(game);
             if (target != null) {
-                System.out.println(this.getName() + " seleziona bersaglio: " + target.getName());
                 game.chosenPlayer(target);
                 game.aiAdvanceTurn();
             }
@@ -65,13 +64,10 @@ public class AIAllWild extends AIPlayer {
             .filter(c -> c.getValue(game) == CardValue.WILD_FORCED_SWAP)
             .findFirst();
 
-        if (swapCard.isPresent() && bestTarget != null) {
+        if (swapCard.isPresent() && bestTarget != null && this.getHandSize() > bestTarget.getHandSize()) {
             // CONVIENE SCAMBIARE? 
             // Sì, se io ho PIÙ carte del bersaglio (gli rifilo il mio mazzo grosso)
-            if (this.getHandSize() > bestTarget.getHandSize()) {
-                // System.out.println(this.name + " decide di scambiare le carte!");
                 return swapCard;
-            }
         }
 
         // --- 2. LOGICA ATTACCO (Priorità alle carte cattive) ---
@@ -88,13 +84,10 @@ public class AIAllWild extends AIPlayer {
         // Se non attacco e non scambio vantaggiosamente, gioca una carta qualsiasi.
         // MA: Evita di giocare lo Swap se mi danneggerebbe (ho meno carte del target).
         for (final Card card : hand) {
-            if (card.getValue(game) == CardValue.WILD_FORCED_SWAP) {
-                // Se ho meno carte del target, scambiare è un suicidio. Evita se possibile.
-                if (bestTarget != null && this.getHandSize() < bestTarget.getHandSize()) {
-                    continue; // Prova la prossima carta
-                }
+            if (!(card.getValue(game) == CardValue.WILD_FORCED_SWAP 
+                && bestTarget != null && this.getHandSize() < bestTarget.getHandSize())) {
+                return Optional.of(card);
             }
-            return Optional.of(card);
         }
 
         // Se sono arrivato qui, ho solo carte Swap svantaggiose. Devo giocarne una per forza.
@@ -118,7 +111,7 @@ public class AIAllWild extends AIPlayer {
     */
     private Player findBestTarget(final Game game) {
         return game.getPlayers().stream()
-                .filter(p -> p != this) 
+                .filter(p -> !p.equals(this)) 
                 .min(Comparator.comparingInt(Player::getHandSize))
                 .orElse(null);
     }
