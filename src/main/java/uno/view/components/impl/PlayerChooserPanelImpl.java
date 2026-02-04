@@ -24,6 +24,7 @@ import java.util.Optional;
  * A panel that prompts the current player to choose a target opponent.
  * Used for specific cards (e.g., "Swap Hands" or targeted draws).
  */
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings({ "SE_BAD_FIELD", "EI_EXPOSE_REP2" })
 public final class PlayerChooserPanelImpl extends JPanel implements ActionListener, PlayerChooserPanel {
 
     private static final long serialVersionUID = 1L;
@@ -44,7 +45,8 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
      * Constructs the player chooser panel.
      *
      * @param observer  The controller to notify when a player is picked.
-     * @param opponents The list of valid target players (usually excluding the current player).
+     * @param opponents The list of valid target players (usually excluding the
+     *                  current player).
      */
     public PlayerChooserPanelImpl(final Optional<GameViewObserver> observer, final List<Player> opponents) {
         this.observer = observer;
@@ -55,9 +57,8 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
         setBackground(PANEL_BACKGROUND);
 
         setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "Choose Opponent",
-            TitledBorder.LEFT, TitledBorder.TOP, UI_FONT, TITLE_TEXT_COLOR
-        ));
+                BorderFactory.createEtchedBorder(), "Choose Opponent",
+                TitledBorder.LEFT, TitledBorder.TOP, UI_FONT, TITLE_TEXT_COLOR));
 
         // Create a button for each valid opponent
         for (final Player opponent : opponents) {
@@ -65,7 +66,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
             // Logic from original code: specific filtering based on class type.
             // Assuming this filters out base 'Player' objects (e.g., Humans) if needed.
             if (opponent.getClass().equals(Player.class)) {
-                continue; 
+                continue;
             }
 
             // Create and add the button
@@ -83,6 +84,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
 
     /**
      * Helper method to create a consistent styled button.
+     * 
      * @param text The button label.
      * @return The styled JButton.
      */
@@ -95,7 +97,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
         button.setOpaque(true);
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        //button.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+        // button.setAlignmentX(JPanel.CENTER_ALIGNMENT);
 
         // Fixed button size for uniformity
         final Dimension btnSize = BUTTON_SIZE;
@@ -105,7 +107,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
         return button;
     }
 
-    /** 
+    /**
      * Handles button clicks to notify the observer of the chosen player.
      */
     @Override
@@ -122,7 +124,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
         });
     }
 
-    /** 
+    /**
      * {@inheritDoc}
      */
     @Override

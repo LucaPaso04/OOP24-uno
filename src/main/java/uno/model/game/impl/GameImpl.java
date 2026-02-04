@@ -9,28 +9,34 @@ import uno.model.game.api.GameState;
 import uno.model.players.api.Player;
 import uno.model.utils.api.GameLogger;
 import uno.view.api.GameModelObserver;
+import uno.model.game.api.DiscardPile;
+import uno.model.game.api.TurnManager;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 /**
  * Implementation of the UNO Game Model.
- * It maintains the game state, orchestrates turn flow, and manages rules execution.
+ * It maintains the game state, orchestrates turn flow, and manages rules
+ * execution.
  */
 public class GameImpl implements Game {
 
     private static final String CARD_DETAIL = "N/A";
+    private static final String SUPPRESS_EI_EXPOSE_REP = "EI_EXPOSE_REP";
+    private static final Random RANDOM = new Random();
 
     private final List<GameModelObserver> observers = new ArrayList<>();
     private final Deck<Card> drawDeck;
-    private final DiscardPileImpl discardPile;
+    private final DiscardPile discardPile;
     private final List<Player> players;
     private Player winner;
 
-    private final TurnManagerImpl turnManager;
+    private final TurnManager turnManager;
     private GameState currentState;
     private Optional<CardColor> currentColor;
     private Card currentPlayedCard;
@@ -41,11 +47,13 @@ public class GameImpl implements Game {
 
     /**
      * Constructor for GameImpl.
-     * @param deck deck of cards
-     * @param players list of players
+     * 
+     * @param deck     deck of cards
+     * @param players  list of players
      * @param gameMode game mode
-     * @param logger logger
+     * @param logger   logger
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public GameImpl(final Deck<Card> deck, final List<Player> players, final String gameMode, final GameLogger logger) {
         this.drawDeck = deck;
         this.players = new ArrayList<>(players);
@@ -56,7 +64,7 @@ public class GameImpl implements Game {
         this.turnManager = new TurnManagerImpl(players);
 
         this.currentState = GameState.RUNNING;
-        this.currentColor = Optional.empty(); 
+        this.currentColor = Optional.empty();
         this.currentPlayedCard = null;
 
         logger.logAction("SYSTEM", "GAME_START", gameMode, "Players: " + players.size());
@@ -104,9 +112,9 @@ public class GameImpl implements Game {
         }
 
         this.currentPlayedCard = card.get();
-        logger.logAction(player.getName(), "PLAY", 
-                    card.getClass().getSimpleName(), 
-                    card.get().getValue(this).toString());
+        logger.logAction(player.getName(), "PLAY",
+                card.getClass().getSimpleName(),
+                card.get().getValue(this).toString());
 
         // --- FINE LOGICA DI VALIDAZIONE ---
 
@@ -156,6 +164,7 @@ public class GameImpl implements Game {
 
     /**
      * Check if the played card is a valid move.
+     * 
      * @param cardToPlay The card the player wants to play.
      * @return true if the move is valid, false otherwise.
      */
@@ -166,6 +175,7 @@ public class GameImpl implements Game {
 
     /**
      * Verify if the player has at least one playable card.
+     * 
      * @param player The player to check.
      * @return true if the player has a playable card, false otherwise.
      */
@@ -254,7 +264,7 @@ public class GameImpl implements Game {
             final List<Card> cardsToReshuffle = discardPile.takeAllExceptTop();
 
             if (cardsToReshuffle.isEmpty()) {
-                return; 
+                return;
             }
             for (final Card card : cardsToReshuffle) {
                 drawDeck.addCard(card);
@@ -267,9 +277,9 @@ public class GameImpl implements Game {
             player.addCardToHand(drawnCard.get());
         }
 
-        logger.logAction(player.getName(), "DRAW", 
-                    drawnCard.isPresent() ? drawnCard.get().getClass().getSimpleName() : "NONE", 
-                    drawnCard.isPresent() ? drawnCard.get().getValue(this).toString() : "NONE");
+        logger.logAction(player.getName(), "DRAW",
+                drawnCard.isPresent() ? drawnCard.get().getClass().getSimpleName() : "NONE",
+                drawnCard.isPresent() ? drawnCard.get().getValue(this).toString() : "NONE");
     }
 
     /**
@@ -282,16 +292,16 @@ public class GameImpl implements Game {
             logger.logAction(player.getName(), "CALL_UNO_SUCCESS", CARD_DETAIL, "HandSize: 1");
         } else {
 
-            logger.logAction(player.getName(), "CALL_UNO_FAILED", 
-            CARD_DETAIL, "Initial HandSize: " + player.getHandSize() + ". Penalty: Draw 2.");
+            logger.logAction(player.getName(), "CALL_UNO_FAILED",
+                    CARD_DETAIL, "Initial HandSize: " + player.getHandSize() + ". Penalty: Draw 2.");
 
             drawCardForPlayer(player);
             drawCardForPlayer(player);
 
             notifyObservers();
 
-            throw new IllegalStateException("Non puoi chiamare UNO ora! Hai " 
-            + player.getHandSize() + " carte. Penalità applicata: hai pescato 2 carte.");
+            throw new IllegalStateException("Non puoi chiamare UNO ora! Hai "
+                    + player.getHandSize() + " carte. Penalità applicata: hai pescato 2 carte.");
         }
     }
 
@@ -343,6 +353,7 @@ public class GameImpl implements Game {
      * {@inheritDoc}
      */
     @Override
+    @SuppressFBWarnings(SUPPRESS_EI_EXPOSE_REP)
     public Deck<Card> getDrawDeck() {
         return this.drawDeck;
     }
@@ -351,7 +362,8 @@ public class GameImpl implements Game {
      * {@inheritDoc}
      */
     @Override
-    public DiscardPileImpl getDiscardPile() {
+    @SuppressFBWarnings(SUPPRESS_EI_EXPOSE_REP)
+    public DiscardPile getDiscardPile() {
         return this.discardPile;
     }
 
@@ -359,6 +371,7 @@ public class GameImpl implements Game {
      * {@inheritDoc}
      */
     @Override
+    @SuppressFBWarnings(SUPPRESS_EI_EXPOSE_REP)
     public List<Player> getPlayers() {
         return this.players;
     }
@@ -367,7 +380,8 @@ public class GameImpl implements Game {
      * {@inheritDoc}
      */
     @Override
-    public TurnManagerImpl getTurnManager() {
+    @SuppressFBWarnings(SUPPRESS_EI_EXPOSE_REP)
+    public TurnManager getTurnManager() {
         return this.turnManager;
     }
 
@@ -375,6 +389,7 @@ public class GameImpl implements Game {
      * {@inheritDoc}
      */
     @Override
+    @SuppressFBWarnings(SUPPRESS_EI_EXPOSE_REP)
     public Player getWinner() {
         return this.winner;
     }
@@ -428,14 +443,13 @@ public class GameImpl implements Game {
      */
     @Override
     public void flipTheWorld() {
-        this.isDarkSide = !this.isDarkSide; 
+        this.isDarkSide = !this.isDarkSide;
 
-        this.currentColor = Optional.of(this.currentPlayedCard.getColor(this)); 
+        this.currentColor = Optional.of(this.currentPlayedCard.getColor(this));
 
         if (this.currentColor.get() == CardColor.WILD) {
-            final CardColor[] coloredValues = {CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW};
-            final Random random = new Random();
-            final CardColor chosenColor = coloredValues[random.nextInt(coloredValues.length)];
+            final CardColor[] coloredValues = { CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW };
+            final CardColor chosenColor = coloredValues[RANDOM.nextInt(coloredValues.length)];
 
             this.currentColor = Optional.of(chosenColor);
         }
@@ -478,7 +492,8 @@ public class GameImpl implements Game {
             return;
         }
 
-        // Deve prendere il valore della carta giocata (NON quella nel mazzo degli scarti)
+        // Deve prendere il valore della carta giocata (NON quella nel mazzo degli
+        // scarti)
         final Card playedCard = this.currentPlayedCard;
 
         logger.logAction(getCurrentPlayer().getName(), "SET_COLOR", CARD_DETAIL, color.toString());
@@ -489,7 +504,7 @@ public class GameImpl implements Game {
         }
 
         this.currentColor = Optional.of(color);
-        this.currentState = GameState.RUNNING; 
+        this.currentState = GameState.RUNNING;
 
         notifyObservers();
     }
@@ -561,7 +576,7 @@ public class GameImpl implements Game {
     @Override
     public void aiAdvanceTurn() {
         this.turnManager.advanceTurn(this);
-        notifyObservers(); 
+        notifyObservers();
     }
 
     /**

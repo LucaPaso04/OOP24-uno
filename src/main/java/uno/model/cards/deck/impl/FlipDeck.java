@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
@@ -26,7 +27,8 @@ import java.util.Locale;
 /**
  * Represents the UNO Flip deck (112 cards).
  * This class loads the Light-to-Dark side mapping from a JSON resource file.
- * It maps specific behaviors (like {@link FlipBehavior} or {@link WildBehavior})
+ * It maps specific behaviors (like {@link FlipBehavior} or
+ * {@link WildBehavior})
  * based on the card values defined in the configuration.
  */
 public class FlipDeck extends DeckImpl<Card> {
@@ -37,6 +39,7 @@ public class FlipDeck extends DeckImpl<Card> {
 
     /**
      * Constructs a new FlipDeck by loading the card mappings from JSON.
+     * 
      * @param logger logger
      */
     public FlipDeck(final GameLogger logger) {
@@ -51,9 +54,9 @@ public class FlipDeck extends DeckImpl<Card> {
     private void initializeDeck() {
         final Gson gson = new Gson();
 
-        try (InputStream is = getClass().getResourceAsStream(RESOURCE_PATH)) {
+        try (InputStream is = FlipDeck.class.getResourceAsStream(RESOURCE_PATH)) {
 
-            try (Reader reader = new InputStreamReader(is)) {
+            try (Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
                 // Parse JSON array into Mapping objects
                 final Mapping[] mappings = gson.fromJson(reader, Mapping[].class);
 
@@ -70,19 +73,18 @@ public class FlipDeck extends DeckImpl<Card> {
     /**
      * Creates Card instances from a mapping and adds them to the deck.
      * Handles multiple copies (count) if defined in JSON.
+     * 
      * @param mapping The mapping defining light and dark sides and count.
      */
     private void addCardMappingToDeck(final Mapping mapping) {
         // 1. Create Data Objects (Faces)
         final CardFace lightFace = new CardFace(
-            CardColor.valueOf(mapping.light.color.toUpperCase(Locale.ROOT)),
-            CardValue.valueOf(mapping.light.value.toUpperCase(Locale.ROOT))
-        );
+                CardColor.valueOf(mapping.light.color.toUpperCase(Locale.ROOT)),
+                CardValue.valueOf(mapping.light.value.toUpperCase(Locale.ROOT)));
 
         final CardFace darkFace = new CardFace(
-            CardColor.valueOf(mapping.dark.color.toUpperCase(Locale.ROOT)),
-            CardValue.valueOf(mapping.dark.value.toUpperCase(Locale.ROOT))
-        );
+                CardColor.valueOf(mapping.dark.color.toUpperCase(Locale.ROOT)),
+                CardValue.valueOf(mapping.dark.value.toUpperCase(Locale.ROOT)));
 
         // 2. Create Behaviors (Logic)
         final CardSideBehavior lightBehavior = createBehavior(lightFace);
@@ -98,23 +100,26 @@ public class FlipDeck extends DeckImpl<Card> {
     }
 
     /**
-     * Factory method: Converts raw Card Data (Face) into Executable Logic (Behavior).
+     * Factory method: Converts raw Card Data (Face) into Executable Logic
+     * (Behavior).
+     * 
      * @param face The card face data (color and value).
      * @return The corresponding CardSideBehavior instance.
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings({ "DB_DUPLICATE_BRANCHES", "DB_DUPLICATE_SWITCH_CLAUSES" })
     private CardSideBehavior createBehavior(final CardFace face) {
         final CardColor c = face.color();
         final CardValue v = face.value();
 
         // --- A. WILD CARDS ---
-        if (c == CardColor.WILD || c == CardColor.WILD) {
+        if (c == CardColor.WILD) {
             switch (v) {
                 // LIGHT SIDE: Wild (Standard), Wild Draw 2
                 case WILD:
                     // Value, Draw, ColorChoice, DrawUntilColor, Skip
-                    return new WildBehavior(v, 0); 
+                    return new WildBehavior(v, 0);
                 case WILD_DRAW_TWO:
-                     // Draw 2, ColorChoice=True
+                    // Draw 2, ColorChoice=True
                     return new WildBehavior(v, 2);
 
                 // DARK SIDE: Wild (Standard), Wild Draw Color
@@ -130,15 +135,18 @@ public class FlipDeck extends DeckImpl<Card> {
         // --- B. ACTION & NUMBER CARDS ---
         switch (v) {
             // Draw Actions
-            case DRAW_ONE:      return new DrawBehavior(c, v, 1);
-            case DRAW_TWO:      return new DrawBehavior(c, v, 2);
-            case DRAW_FIVE:     return new DrawBehavior(c, v, DRAW_FIVE_COUNT); // Dark Side specific
+            case DRAW_ONE:
+                return new DrawBehavior(c, v, 1);
+            case DRAW_TWO:
+                return new DrawBehavior(c, v, 2);
+            case DRAW_FIVE:
+                return new DrawBehavior(c, v, DRAW_FIVE_COUNT); // Dark Side specific
 
             // Flow Actions
             case SKIP:
                 return new ActionBehavior(c, v, g -> g.skipPlayers(1));
 
-            case SKIP_EVERYONE: 
+            case SKIP_EVERYONE:
                 // Skips (PlayerCount - 1), effectively giving the turn back to self
                 return new ActionBehavior(c, v, g -> g.skipPlayers(g.getPlayers().size() - 1));
 
@@ -165,18 +173,18 @@ public class FlipDeck extends DeckImpl<Card> {
     }
 
     private static final class CardConfig {
-        @SerializedName("color") 
+        @SerializedName("color")
         private String color;
-        @SerializedName("value") 
+        @SerializedName("value")
         private String value;
     }
 
     private static final class Mapping {
-        @SerializedName("light") 
+        @SerializedName("light")
         private CardConfig light;
         @SerializedName("dark")
         private CardConfig dark;
-        @SerializedName("count") 
+        @SerializedName("count")
         private int count;
     }
 }

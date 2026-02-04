@@ -28,12 +28,15 @@ public class GameSetupImpl implements GameSetup {
 
     /**
      * Constructor for GameSetupImpl.
-     * @param game game instance
-     * @param deck deck of cards
+     * 
+     * @param game        game instance
+     * @param deck        deck of cards
      * @param discardPile discard pile
-     * @param players list of players
+     * @param players     list of players
      */
-    public GameSetupImpl(final Game game, final Deck<Card> deck, final DiscardPile discardPile, final List<Player> players) {
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("EI_EXPOSE_REP2")
+    public GameSetupImpl(final Game game, final Deck<Card> deck, final DiscardPile discardPile,
+            final List<Player> players) {
         this.game = game;
         this.deck = deck;
         this.discardPile = discardPile;
@@ -59,7 +62,7 @@ public class GameSetupImpl implements GameSetup {
     private void dealInitialCards() {
         for (int i = 0; i < INITIAL_HAND_SIZE; i++) {
             for (final Player player : this.players) {
-                // We assume Game has a method to orchestrate the draw, 
+                // We assume Game has a method to orchestrate the draw,
                 // or we can do it directly here:
                 deck.draw().ifPresent(player::addCardToHand);
             }
@@ -69,6 +72,7 @@ public class GameSetupImpl implements GameSetup {
 
     /**
      * Sets up the first card on the discard pile.
+     * 
      * @param isAllWild indicates if the game is in All Wild mode
      */
     private void setupFirstCard(final boolean isAllWild) {
@@ -103,8 +107,9 @@ public class GameSetupImpl implements GameSetup {
                 validCardFound = true;
             } else {
                 // Fail: Invalid card (Wild, Action, Flip), put in discard and draw again
-                discardPile.addCard(drawnCard.get()); 
-                // Note: Standard rules say "put back in deck", but putting in discard is a common variant
+                discardPile.addCard(drawnCard.get());
+                // Note: Standard rules say "put back in deck", but putting in discard is a
+                // common variant
                 // to avoid infinite reshuffling loops.
             }
         }
@@ -119,6 +124,7 @@ public class GameSetupImpl implements GameSetup {
 
     /**
      * Checks if the drawn card is a valid starting card.
+     * 
      * @param cardOpt the drawn card
      * @return true if valid, false otherwise
      */
@@ -131,11 +137,11 @@ public class GameSetupImpl implements GameSetup {
 
         // List of prohibited starting cards
         return v != CardValue.WILD
-                && v != CardValue.WILD_DRAW_FOUR 
+                && v != CardValue.WILD_DRAW_FOUR
                 && v != CardValue.WILD_DRAW_COLOR
-                && v != CardValue.DRAW_TWO 
-                && v != CardValue.REVERSE 
-                && v != CardValue.SKIP 
+                && v != CardValue.DRAW_TWO
+                && v != CardValue.REVERSE
+                && v != CardValue.SKIP
                 && v != CardValue.FLIP;
     }
 }

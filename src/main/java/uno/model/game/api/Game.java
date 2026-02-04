@@ -124,13 +124,13 @@ public interface Game {
      * Gets the TurnManager responsible for managing player turns.
      * @return The {@link TurnManagerImpl} instance.
      */
-    TurnManagerImpl getTurnManager();
+    TurnManager getTurnManager();
 
     /**
      * Gets the discard pile of the game.
      * @return The {@link DiscardPileImpl} instance.
      */
-    DiscardPileImpl getDiscardPile();
+    DiscardPile getDiscardPile();
 
     /**
      * Gets the draw deck of the game.

@@ -13,6 +13,8 @@ import java.util.Random;
  */
 public class TurnManagerImpl implements TurnManager {
 
+    private static final Random RANDOM = new Random();
+
     private final List<Player> players;
     private int currentPlayerIndex;
     private boolean isClockwise; // true = Clockwise, false = Counter-Clockwise
@@ -21,14 +23,14 @@ public class TurnManagerImpl implements TurnManager {
 
     /**
      * Initializes the turn manager.
+     * 
      * @param players The list of participants.
      */
     public TurnManagerImpl(final List<Player> players) {
         this.players = new ArrayList<>(players);
 
         // Randomly choose the starting player
-        final Random rand = new Random();
-        this.currentPlayerIndex = rand.nextInt(players.size());
+        this.currentPlayerIndex = RANDOM.nextInt(players.size());
 
         this.isClockwise = true;
         this.hasDrawnThisTurn = false;
@@ -53,7 +55,7 @@ public class TurnManagerImpl implements TurnManager {
         // 1. Calculate total steps:
         // skipSize = 0 -> step 1 (Next player)
         // skipSize = 1 -> step 2 (Skip one player)
-        final int totalSteps = this.skipSize + 1; 
+        final int totalSteps = this.skipSize + 1;
 
         // 2. Reset flags for the NEW turn
         this.skipSize = 0;
@@ -67,7 +69,7 @@ public class TurnManagerImpl implements TurnManager {
 
         // 4. Wrap-around logic (Circular Buffer)
         // Formula: (a % n + n) % n handles negative results correctly in Java
-        currentPlayerIndex = (nextIndex % n + n) % n; 
+        currentPlayerIndex = (nextIndex % n + n) % n;
 
         // 5. Apply rules for the start of the turn
         checkAndApplyStartTurnPenalty(game);
@@ -75,6 +77,7 @@ public class TurnManagerImpl implements TurnManager {
 
     /**
      * Checks and applies any penalties at the start of the turn.
+     * 
      * @param game The current game instance.
      */
     private void checkAndApplyStartTurnPenalty(final Game game) {
@@ -83,9 +86,11 @@ public class TurnManagerImpl implements TurnManager {
         // If player starts turn with 1 card and didn't call UNO -> Penalty
         if (player.getHandSize() == 1 && !player.isHasCalledUno()) {
             // Apply penalty (Draw 2 usually)
-            // Note: game.makeNextPlayerDraw usually affects the *next* player relative to current,
+            // Note: game.makeNextPlayerDraw usually affects the *next* player relative to
+            // current,
             // but here we want to penalize 'player'.
-            // Assuming player.unoPenalty() handles the drawing logic directly or calls game methods.
+            // Assuming player.unoPenalty() handles the drawing logic directly or calls game
+            // methods.
             player.unoPenalty(game);
 
             // This exception seems to be used for control flow in your Controller.
@@ -102,13 +107,13 @@ public class TurnManagerImpl implements TurnManager {
      */
     @Override
     public Player peekNextPlayer() {
-        final int totalSteps = this.skipSize + 1; 
+        final int totalSteps = this.skipSize + 1;
         final int n = players.size();
         final int direction = isClockwise ? 1 : -1;
 
         final int nextIndex = currentPlayerIndex + (totalSteps * direction);
 
-        final int nextPlayerIndex = (nextIndex % n + n) % n; 
+        final int nextPlayerIndex = (nextIndex % n + n) % n;
 
         return players.get(nextPlayerIndex);
     }
@@ -118,6 +123,9 @@ public class TurnManagerImpl implements TurnManager {
      */
     @Override
     public void reverseDirection() {
+        if (players.size() == 2) {
+            skipPlayers(1);
+        }
         isClockwise = !isClockwise;
     }
 

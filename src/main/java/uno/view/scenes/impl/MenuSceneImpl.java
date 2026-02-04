@@ -25,6 +25,7 @@ import java.awt.event.KeyEvent;
  * The panel (JPanel) representing the main menu screen.
  * This implementation uses a modern and accessible graphical style.
  */
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_BAD_FIELD")
 public final class MenuSceneImpl extends JPanel implements MenuScene {
 
     private static final long serialVersionUID = 1L;
@@ -61,15 +62,15 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
         final JLabel title = new JLabel("UNO");
         title.setFont(new Font("Helvetica Neue", Font.BOLD, TITLE_FONT_SIZE));
         title.setForeground(TITLE_COLOR);
-        //title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBorder(TITLE_BORDER); // Space below title
 
         // 2. Create Styled Buttons
         final JButton classicButton = createStyledButton("Classic Mode");
-        classicButton.setMnemonic(KeyEvent.VK_C); 
+        classicButton.setMnemonic(KeyEvent.VK_C);
 
         final JButton flipButton = createStyledButton("Flip Mode");
-        flipButton.setMnemonic(KeyEvent.VK_F); 
+        flipButton.setMnemonic(KeyEvent.VK_F);
 
         final JButton allWildButton = createStyledButton("All Wild Mode");
         allWildButton.setMnemonic(KeyEvent.VK_W);
@@ -79,19 +80,19 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
         rulesButton.setMnemonic(KeyEvent.VK_R); // Accessibility (Alt+R)
 
         final JButton quitButton = createStyledButton("Exit Game");
-        quitButton.setMnemonic(KeyEvent.VK_E); 
+        quitButton.setMnemonic(KeyEvent.VK_E);
 
         // 3. Add components to the inner panel
         contentPanel.add(title);
         contentPanel.add(classicButton);
-        contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION)); 
+        contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION));
         contentPanel.add(flipButton);
         contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION));
         contentPanel.add(allWildButton);
         contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION));
         // Add rules button with spacing
-        contentPanel.add(rulesButton); 
-        contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION)); 
+        contentPanel.add(rulesButton);
+        contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION));
 
         contentPanel.add(quitButton);
 
@@ -140,6 +141,7 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
 
     /**
      * Helper method to create a unified styled button with hover effects.
+     * 
      * @param text the button text
      * @return the styled JButton
      */
@@ -157,7 +159,7 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
                 }
 
                 // Rounded corners (radius 20)
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), ARC, ARC); 
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), ARC, ARC);
                 super.paintComponent(g);
                 g2.dispose();
             }
@@ -166,14 +168,14 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
         button.setFont(new Font("Helvetica Neue", Font.BOLD, BUTTON_FONT_SIZE));
         button.setBackground(BUTTON_COLOR);
         button.setForeground(BUTTON_TEXT_COLOR);
-        //button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setMaximumSize(BUTTON_DIMENSION);
         button.setPreferredSize(BUTTON_DIMENSION);
         button.setMinimumSize(BUTTON_DIMENSION);
 
         button.setBorder(BUTTON_BORDER);
         button.setFocusPainted(false);
-        button.setContentAreaFilled(false); 
+        button.setContentAreaFilled(false);
         button.setOpaque(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 

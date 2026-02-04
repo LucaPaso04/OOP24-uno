@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -22,25 +23,28 @@ public class GameLoggerImpl implements GameLogger {
     /**
      * Initializes the logger and ensures the directory structure exists.
      *
-     * @param matchId A unique identifier for the current match (used in the filename).
+     * @param matchId A unique identifier for the current match (used in the
+     *                filename).
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR")
     public GameLoggerImpl(final String matchId) {
         // Retrieve current working directory
         final String userDir = System.getProperty("user.dir");
 
         // Construct the file path using safe separators
-        this.filePath = userDir + File.separator + "logs" + File.separator + "log_match_" + matchId + ".txt"; 
+        this.filePath = userDir + File.separator + "logs" + File.separator + "log_match_" + matchId + ".txt";
 
         initializeLogDirectory();
     }
 
     /**
-     * Helper method to create the directory structure using Optional to avoid null checks.
+     * Helper method to create the directory structure using Optional to avoid null
+     * checks.
      */
     private void initializeLogDirectory() {
         final File logFile = new File(this.filePath);
 
-        // Uso corretto di Optional: 
+        // Uso corretto di Optional:
         // 1. Prendi il padre
         // 2. Filtra se non esiste
         // 3. ifPresent esegue l'azione solo se serve
@@ -51,7 +55,7 @@ public class GameLoggerImpl implements GameLogger {
                         // Se mkdirs fallisce (es. permessi negati), logghiamo l'errore
                         // Qui puoi usare il logger di sistema o il tuo
                         java.util.logging.Logger.getLogger("UNO")
-                            .warning("Impossibile creare la directory per i log: " + parent.getPath());
+                                .warning("Impossibile creare la directory per i log: " + parent.getPath());
                     }
                 });
     }
@@ -60,18 +64,19 @@ public class GameLoggerImpl implements GameLogger {
      * {@inheritDoc}
      */
     @Override
-    public void logAction(final String playerName, final String actionType, final String cardDetails, final String extraInfo) {
+    public void logAction(final String playerName, final String actionType, final String cardDetails,
+            final String extraInfo) {
         final String timestamp = dtf.format(LocalDateTime.now());
 
-        final String logEntry = String.format("%s;%s;%s;%s;%s", 
-            timestamp, playerName, actionType, cardDetails, extraInfo);
+        final String logEntry = String.format("%s;%s;%s;%s;%s",
+                timestamp, playerName, actionType, cardDetails, extraInfo);
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, StandardCharsets.UTF_8, true))) {
             writer.write(logEntry);
             writer.newLine();
         } catch (final IOException e) {
-            java.util.logging.Logger.getGlobal().log(java.util.logging.Level.SEVERE, 
-                "Impossibile scrivere nel file di log: " + filePath, e);
+            java.util.logging.Logger.getGlobal().log(java.util.logging.Level.SEVERE,
+                    "Impossibile scrivere nel file di log: " + filePath, e);
         }
     }
 
@@ -83,6 +88,6 @@ public class GameLoggerImpl implements GameLogger {
         this.logAction("SYSTEM_ERROR", context, e.getClass().getSimpleName(), e.getMessage());
 
         java.util.logging.Logger.getLogger("UNO")
-            .log(java.util.logging.Level.SEVERE, context, e);
+                .log(java.util.logging.Level.SEVERE, context, e);
     }
 }

@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 /**
  * Implementation of {@link CardSideBehavior} for action cards.
  * This class uses a functional approach to execute specific game logic
- * defined at construction time (e.g., Skip, Reverse, Draw Two).
+ * defined at construction time (e.g., Skip, Reverse).
  */
 public class ActionBehavior implements CardSideBehavior {
 

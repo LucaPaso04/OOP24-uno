@@ -1,6 +1,7 @@
 package uno.view.scenes.impl;
 
 import uno.controller.api.GameViewObserver;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.GameState;
@@ -31,10 +32,10 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component; 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font; 
+import java.awt.Font;
 import java.awt.Cursor;
 import java.awt.GridBagLayout;
 import javax.swing.border.EmptyBorder;
@@ -42,10 +43,13 @@ import javax.swing.border.TitledBorder;
 import java.util.List;
 
 /**
- * Implementation of the GameScene interface representing the main Game Board view.
- * It defines how the game displays the state and handles user interaction requests
+ * Implementation of the GameScene interface representing the main Game Board
+ * view.
+ * It defines how the game displays the state and handles user interaction
+ * requests
  * coming from the Controller.
  */
+@SuppressFBWarnings("SE_BAD_FIELD")
 public final class GameSceneImpl extends JPanel implements GameScene {
 
     private static final long serialVersionUID = 1L;
@@ -62,10 +66,10 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     private static final int CARD_HEIGHT = 120;
 
     private static final Insets GBC_INSETS = new Insets(0, 5, 0, 5);
-    private static final EmptyBorder STATUS_LABEL_BORDER = new EmptyBorder(5, 5, 5, 5); 
+    private static final EmptyBorder STATUS_LABEL_BORDER = new EmptyBorder(5, 5, 5, 5);
     private static final Color SETTINGS_BUTTON_COLOR = new Color(70, 70, 70);
     private static final int SETTINGS_BUTTON_WIDTH = 80;
-    private static final int SETTINGS_BUTTON_HEIGHT = 30; 
+    private static final int SETTINGS_BUTTON_HEIGHT = 30;
     private static final int GRID_FIVE = 5;
 
     private static final Dimension SCROLL_PANE_DIMENSION = new Dimension(800, 180);
@@ -106,12 +110,14 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Constructor for GameSceneImpl.
+     * 
      * @param gameModel The game model instance to observe and represent.
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public GameSceneImpl(final Game gameModel) {
         super(new BorderLayout(10, 10));
         this.gameModel = gameModel;
-        this.gameModel.addObserver(this); 
+        this.gameModel.addObserver(this);
         this.cardImageLoader = new CardImageLoaderImpl(CARD_WIDTH, CARD_HEIGHT);
         setBackground(BACKGROUND_COLOR);
         setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -148,7 +154,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
             controllerObserver.ifPresent(GameViewObserver::onDrawCard);
         });
 
-        passButton.addActionListener(e -> { 
+        passButton.addActionListener(e -> {
             controllerObserver.ifPresent(GameViewObserver::onPassTurn);
         });
 
@@ -173,8 +179,8 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     @Override
     public void setHumanInputEnabled(final boolean enabled) {
         final GameState currentState = gameModel.getGameState();
-        final boolean shouldDisableUno = currentState == GameState.WAITING_FOR_COLOR 
-            || currentState == GameState.WAITING_FOR_PLAYER;
+        final boolean shouldDisableUno = currentState == GameState.WAITING_FOR_COLOR
+                || currentState == GameState.WAITING_FOR_PLAYER;
 
         this.unoButton.setEnabled(!shouldDisableUno);
 
@@ -185,7 +191,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
         for (final Component comp : playerHandPanel.getComponents()) {
             if (comp instanceof JButton) {
-                comp.setEnabled(enabled); 
+                comp.setEnabled(enabled);
             }
         }
     }
@@ -195,12 +201,11 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      */
     @Override
     public void showColorChooser(final boolean isDarkSide) {
-        final ColorChooserPanel panel = new ColorChooserPanelImpl(this.controllerObserver, isDarkSide); 
+        final ColorChooserPanel panel = new ColorChooserPanelImpl(this.controllerObserver, isDarkSide);
 
         final JOptionPane pane = new JOptionPane(
-            panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, 
-            null, new Object[]{}, null
-        );
+                panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION,
+                null, new Object[] {}, null);
 
         final JDialog dialog = pane.createDialog(this, "Scegli un Colore");
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -213,12 +218,11 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     @Override
     public void showPlayerChooser(final List<Player> opponents) {
 
-        final PlayerChooserPanel panel = new PlayerChooserPanelImpl(this.controllerObserver, opponents); 
+        final PlayerChooserPanel panel = new PlayerChooserPanelImpl(this.controllerObserver, opponents);
 
         final JOptionPane pane = new JOptionPane(
-            panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, 
-            null, new Object[]{}, null
-        );
+                panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION,
+                null, new Object[] {}, null);
 
         final JDialog dialog = pane.createDialog(this, "Scegli un Giocatore");
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -230,7 +234,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      */
     @Override
     public void onGameUpdate() {
-        updateStatusLabel(); 
+        updateStatusLabel();
         updateDiscardPile();
         updateHumanHand();
         updateAIPanels();
@@ -249,18 +253,17 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     public void showWinnerPopup(final String winnerName) {
         setHumanInputEnabled(false);
 
-        final Object[] options = {"Torna al Menu",  "Chiudi Gioco"};
+        final Object[] options = { "Torna al Menu", "Chiudi Gioco" };
 
         final int choice = JOptionPane.showOptionDialog(
-            this,
-            winnerName + " ha vinto la partita!\nCosa vuoi fare?",
-            "Partita Terminata",
-            JOptionPane.YES_NO_CANCEL_OPTION,
-            JOptionPane.INFORMATION_MESSAGE,
-            null,
-            options,
-            options[0]
-        );
+                this,
+                winnerName + " ha vinto la partita!\nCosa vuoi fare?",
+                "Partita Terminata",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]);
 
         if (controllerObserver.isPresent()) {
             switch (choice) {
@@ -268,10 +271,10 @@ public final class GameSceneImpl extends JPanel implements GameScene {
                     controllerObserver.ifPresent(GameViewObserver::onBackToMenu);
                     break;
                 case 1:
-                    System.exit(0);
+                    closeApplication();
                     break;
                 case JOptionPane.CLOSED_OPTION:
-                    System.exit(0); 
+                    closeApplication();
                     break;
                 default:
                     break;
@@ -283,6 +286,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Creates a panel for an AI opponent with a title and card count label.
+     * 
      * @param title The title of the opponent panel.
      * @return The created JPanel.
      */
@@ -291,23 +295,22 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(PANEL_COLOR);
         panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), title, 
-            TitledBorder.CENTER, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR
-        ));
+                BorderFactory.createEtchedBorder(), title,
+                TitledBorder.CENTER, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR));
         panel.setPreferredSize(PANEL_DIMENSION);
 
         final JLabel cardLabel = new JLabel("X carte");
         cardLabel.setFont(BOLD_FONT);
         cardLabel.setForeground(TEXT_COLOR);
-        //cardLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // cardLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         cardLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        if (title.contains("Ovest")) { 
-            this.westAILabel = cardLabel; 
-        } else if (title.contains("Nord")) { 
-            this.northAILabel = cardLabel; 
-        } else if (title.contains("Est")) { 
-            this.eastAILabel = cardLabel; 
+        if (title.contains("Ovest")) {
+            this.westAILabel = cardLabel;
+        } else if (title.contains("Nord")) {
+            this.northAILabel = cardLabel;
+        } else if (title.contains("Est")) {
+            this.eastAILabel = cardLabel;
         }
 
         panel.add(Box.createVerticalGlue());
@@ -317,10 +320,12 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     }
 
     /**
-     * Updates an AI opponent panel with the current card count and highlights if it's their turn.
+     * Updates an AI opponent panel with the current card count and highlights if
+     * it's their turn.
+     * 
      * @param panel The panel to update.
      * @param label The label within the panel to update.
-     * @param ai The AI player associated with the panel.
+     * @param ai    The AI player associated with the panel.
      */
     private void updateOpponentPanel(final JPanel panel, final JLabel label, final Player ai) {
         label.setText(ai.getHandSize() + " carte");
@@ -329,19 +334,19 @@ public final class GameSceneImpl extends JPanel implements GameScene {
             final Border border = ai.getHandSize() <= 1 ? WARNING_BORDER : HIGHLIGHT_BORDER;
 
             panel.setBorder(BorderFactory.createTitledBorder(
-                border, ai.getName(),
-                TitledBorder.CENTER, TitledBorder.TOP, BOLD_FONT, borderColor
-            ));
+                    border, ai.getName(),
+                    TitledBorder.CENTER, TitledBorder.TOP, BOLD_FONT, borderColor));
         } else {
             panel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), ai.getName(),
-                TitledBorder.CENTER, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR
-            ));
+                    BorderFactory.createEtchedBorder(), ai.getName(),
+                    TitledBorder.CENTER, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR));
         }
     }
 
     /**
-     * Creates the central panel containing the draw deck, discard pile, status info, and action buttons.
+     * Creates the central panel containing the draw deck, discard pile, status
+     * info, and action buttons.
+     * 
      * @return The created JPanel.
      */
     private JPanel createCenterPanel() {
@@ -358,13 +363,14 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         this.discardPileCard.setFont(BOLD_FONT);
         this.discardPileCard.setHorizontalAlignment(JLabel.CENTER);
         this.discardPileCard.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        this.discardPileCard.setOpaque(true); 
+        this.discardPileCard.setOpaque(true);
 
-        this.passButton = createStyledButton("Passa", BUTTON_COLOR_PASS, Color.WHITE, PASS_BUTTON_WIDTH, PASS_BUTTON_HEIGHT);
+        this.passButton = createStyledButton("Passa", BUTTON_COLOR_PASS, Color.WHITE, PASS_BUTTON_WIDTH,
+                PASS_BUTTON_HEIGHT);
 
         this.unoButton = createStyledButton("UNO!", UNO_BUTTON_COLOR, Color.BLACK, UNO_BUTTON_WIDTH, UNO_BUTTON_HEIGHT);
 
-        final JPanel settingsPanel = createSettingsPanel(); 
+        final JPanel settingsPanel = createSettingsPanel();
         final JPanel infoPanel = createInfoPanel();
         final JPanel horizontalSpacerLeft = new JPanel();
         horizontalSpacerLeft.setOpaque(false);
@@ -376,12 +382,12 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         // Layout using GridBagLayout
 
         // --- Row 0 (Top Row) ---
-        gbc.gridx = 0; 
+        gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 1; 
-        gbc.anchor = GridBagConstraints.NORTHWEST; 
-        gbc.weightx = 0.0; 
-        gbc.weighty = 0.0; 
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.weightx = 0.0;
+        gbc.weighty = 0.0;
         gbc.fill = GridBagConstraints.NONE;
         panel.add(settingsPanel, gbc);
 
@@ -397,7 +403,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         panel.add(verticalSpacerTop, gbc);
 
         // Left Spacer: Column 1, Row 1
-        gbc.gridx = 1; 
+        gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.weightx = 0.5;
@@ -413,19 +419,19 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         gbc.weighty = 0.0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
-        panel.add(drawDeckButton, gbc); 
+        panel.add(drawDeckButton, gbc);
 
         // Discard Pile: Column 3, Row 1
-        gbc.gridx = 3; 
+        gbc.gridx = 3;
         gbc.gridy = 1;
-        gbc.weightx = 0.0; 
-        gbc.weighty = 0.0; 
+        gbc.weightx = 0.0;
+        gbc.weighty = 0.0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
-        panel.add(discardPileCard, gbc); 
+        panel.add(discardPileCard, gbc);
 
         // Right Spacer: Column 4, Row 1
-        gbc.gridx = 4; 
+        gbc.gridx = 4;
         gbc.gridy = 1;
         gbc.weightx = 0.5;
         gbc.weighty = 0.0;
@@ -434,24 +440,24 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         panel.add(horizontalSpacerRight, gbc);
 
         // Info Panel: Column 5, Row 0
-        gbc.gridx = GRID_FIVE; 
+        gbc.gridx = GRID_FIVE;
         gbc.gridy = 0;
-        gbc.weightx = 0.0; 
-        gbc.weighty = 0.0; 
-        gbc.fill = GridBagConstraints.NONE; 
+        gbc.weightx = 0.0;
+        gbc.weighty = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.NORTHEAST;
         panel.add(infoPanel, gbc);
 
         // --- Row 2 (Bottom Row) ---
 
         // Pass Button: Column 2, Row 2
-        gbc.gridx = 2; 
+        gbc.gridx = 2;
         gbc.gridy = 2;
         gbc.weightx = 0.0;
-        gbc.weighty = 1.0; 
+        gbc.weighty = 1.0;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
-        panel.add(passButton, gbc); 
+        panel.add(passButton, gbc);
 
         // UNO Button: Column 3, Row 2
         gbc.gridx = GRID_FIVE;
@@ -467,16 +473,16 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Creates the panel displaying the human player's hand of cards.
+     * 
      * @return The created JPanel.
      */
     private JPanel createPlayerHandPanel() {
-        final JPanel panel = new JPanel(new GridBagLayout()); 
+        final JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(PANEL_COLOR);
 
         final TitledBorder border = BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "La tua Mano",
-            TitledBorder.CENTER, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR
-        );
+                BorderFactory.createEtchedBorder(), "La tua Mano",
+                TitledBorder.CENTER, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR);
 
         panel.setBorder(border);
         return panel;
@@ -484,14 +490,15 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Creates the settings panel containing the "Menu" button.
+     * 
      * @return The created JPanel.
      */
     private JPanel createSettingsPanel() {
         final JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         panel.setOpaque(false);
 
-        final JButton settingsButton = createStyledButton("Menu", SETTINGS_BUTTON_COLOR, Color.WHITE, 
-        SETTINGS_BUTTON_WIDTH, SETTINGS_BUTTON_HEIGHT);
+        final JButton settingsButton = createStyledButton("Menu", SETTINGS_BUTTON_COLOR, Color.WHITE,
+                SETTINGS_BUTTON_WIDTH, SETTINGS_BUTTON_HEIGHT);
 
         settingsButton.addActionListener(e -> {
             controllerObserver.ifPresent(GameViewObserver::onBackToMenu);
@@ -503,6 +510,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Creates the info panel displaying current game status.
+     * 
      * @return The created JPanel.
      */
     private JPanel createInfoPanel() {
@@ -510,14 +518,13 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(PANEL_COLOR);
         panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "Info Partita",
-            TitledBorder.LEFT, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR
-        ));
+                BorderFactory.createEtchedBorder(), "Info Partita",
+                TitledBorder.LEFT, TitledBorder.TOP, BOLD_FONT, TEXT_COLOR));
 
         this.statusLabel = new JLabel("Turno di: ... \n Direzione: ...");
         this.statusLabel.setFont(BOLD_FONT);
         this.statusLabel.setForeground(TEXT_COLOR);
-        //this.statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // this.statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.statusLabel.setBorder(STATUS_LABEL_BORDER);
 
         panel.add(this.statusLabel);
@@ -527,7 +534,8 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Styles a JButton to look like a card using the card image loader.
-     * @param button The JButton to style.
+     * 
+     * @param button   The JButton to style.
      * @param cardName The name of the card image to load.
      */
     private void styleAsCardButton(final JButton button, final String cardName) {
@@ -551,6 +559,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Creates a JButton representing a card in the player's hand.
+     * 
      * @param card The card to create a button for.
      * @return The created JButton.
      */
@@ -563,14 +572,16 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Creates a styled JButton with specified colors and dimensions.
-     * @param text The button text.
-     * @param bg The background color.
-     * @param fg The foreground color.
-     * @param width The button width.
+     * 
+     * @param text   The button text.
+     * @param bg     The background color.
+     * @param fg     The foreground color.
+     * @param width  The button width.
      * @param height The button height.
      * @return The styled JButton.
      */
-    private JButton createStyledButton(final String text, final Color bg, final Color fg, final int width, final int height) {
+    private JButton createStyledButton(final String text, final Color bg, final Color fg, final int width,
+            final int height) {
         final JButton button = new JButton(text);
         button.setFont(BOLD_FONT);
         button.setBackground(bg);
@@ -585,6 +596,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Converts a CardColor to a corresponding Color for UI representation.
+     * 
      * @param cardColor The CardColor to convert.
      * @return The corresponding Color.
      */
@@ -594,20 +606,29 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         }
 
         switch (cardColor.get()) {
-            case RED: return RED_COLOR;
-            case BLUE: return BLUE_COLOR;
-            case GREEN: return GREEN_COLOR;
-            case YELLOW: return YELLOW_COLOR;
-            case ORANGE: return ORANGE_COLOR;
-            case PURPLE: return PURPLE_COLOR;
-            case PINK: return PINK_COLOR;
-            case TEAL: return TEAL_COLOR;
-            default: return Color.DARK_GRAY;
+            case RED:
+                return RED_COLOR;
+            case BLUE:
+                return BLUE_COLOR;
+            case GREEN:
+                return GREEN_COLOR;
+            case YELLOW:
+                return YELLOW_COLOR;
+            case ORANGE:
+                return ORANGE_COLOR;
+            case PURPLE:
+                return PURPLE_COLOR;
+            case PINK:
+                return PINK_COLOR;
+            case TEAL:
+                return TEAL_COLOR;
+            default:
+                return Color.DARK_GRAY;
         }
     }
 
     /**
-     * Updates the visual representation of the discard pile, 
+     * Updates the visual representation of the discard pile,
      * including the top card image and the active color border.
      */
     private void updateDiscardPile() {
@@ -617,7 +638,8 @@ public final class GameSceneImpl extends JPanel implements GameScene {
             discardPileCard.setBackground(Color.LIGHT_GRAY);
         } else {
             final Optional<Card> topCard = gameModel.getTopDiscardCard();
-            final String cardName = topCard.get().getColor(gameModel).name() + "_" + topCard.get().getValue(gameModel).name();
+            final String cardName = topCard.get().getColor(gameModel).name() + "_"
+                    + topCard.get().getValue(gameModel).name();
             final Optional<ImageIcon> icon = Optional.of(cardImageLoader.getImage(cardName));
 
             if (icon.isPresent()) {
@@ -625,8 +647,9 @@ public final class GameSceneImpl extends JPanel implements GameScene {
                 discardPileCard.setText(null);
             } else {
                 discardPileCard.setIcon(null);
-                discardPileCard.setText("<html><div style='text-align: center;'>" 
-                + topCard.get().getValue(gameModel) + "<br>" + topCard.get().getColor(gameModel) + "</div></html>");
+                discardPileCard.setText("<html><div style='text-align: center;'>"
+                        + topCard.get().getValue(gameModel) + "<br>" + topCard.get().getColor(gameModel)
+                        + "</div></html>");
             }
 
             applyActiveColorBorder(gameModel.getCurrentColor());
@@ -634,7 +657,9 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     }
 
     /**
-     * Applies a double border to the discard pile card to show the current color in play.
+     * Applies a double border to the discard pile card to show the current color in
+     * play.
+     * 
      * @param activeColor The current color set in the game model.
      */
     private void applyActiveColorBorder(final Optional<CardColor> activeColor) {
@@ -650,9 +675,9 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * Refreshes the human player's hand panel by recreating card buttons.
      */
     private void updateHumanHand() {
-        playerHandPanel.removeAll(); 
+        playerHandPanel.removeAll();
 
-        final Player humanPlayer = gameModel.getPlayers().get(0); 
+        final Player humanPlayer = gameModel.getPlayers().get(0);
 
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -674,7 +699,8 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Updates the central status label based on the current game state.
-     * It shows whose turn it is, the rotation direction, or specific action requests.
+     * It shows whose turn it is, the rotation direction, or specific action
+     * requests.
      */
     private void updateStatusLabel() {
         final GameState currentState = gameModel.getGameState();
@@ -688,9 +714,9 @@ public final class GameSceneImpl extends JPanel implements GameScene {
                 break;
             case RUNNING:
                 final String direction = gameModel.isClockwise() ? "Clockwise" : "Counter-clockwise";
-                statusLabel.setText("<html><div style='text-align: center;'>Turn: " 
-                    + gameModel.getCurrentPlayer().getName() 
-                    + "<br>Direction: " + direction + "</div></html>");
+                statusLabel.setText("<html><div style='text-align: center;'>Turn: "
+                        + gameModel.getCurrentPlayer().getName()
+                        + "<br>Direction: " + direction + "</div></html>");
                 break;
             default:
                 statusLabel.setText("Game Over!");
@@ -711,5 +737,11 @@ public final class GameSceneImpl extends JPanel implements GameScene {
             updateOpponentPanel(northAIPanel, northAILabel, players.get(2));
             updateOpponentPanel(eastAIPanel, eastAILabel, players.get(3));
         }
+
+    }
+
+    @SuppressFBWarnings("DM_EXIT")
+    private void closeApplication() {
+        System.exit(0);
     }
 }

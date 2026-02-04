@@ -28,6 +28,7 @@ import java.util.Optional;
  * The panel (JPanel) representing the Rules Configuration screen.
  * Maintains the same modern graphical style as the MenuScene.
  */
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_BAD_FIELD")
 public final class RulesSceneImpl extends JPanel implements RulesScene {
 
     private static final long serialVersionUID = 1L;
@@ -79,32 +80,29 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
         final JLabel title = new JLabel("House Rules");
         title.setFont(new Font(FONT, Font.BOLD, TITLE_FONT_SIZE));
         title.setForeground(TEXT_COLOR);
-        //title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // 2. Create Rule Panels
 
         // Rule 1: UNO Penalty (Default: On)
         final JPanel rule1 = createRulePanel(
-            "UNO Penalty", 
-            "If DISABLED, players are not required to shout 'UNO!' when holding one card.",
-            true 
-        );
+                "UNO Penalty",
+                "If DISABLED, players are not required to shout 'UNO!' when holding one card.",
+                true);
         unoPenaltyCheck = (JCheckBox) rule1.getClientProperty(CHECKBOX);
 
         // Rule 2: Skip after Draw (Default: Off)
         final JPanel rule2 = createRulePanel(
-            "Skip After Draw", 
-            "If ENABLED, a player cannot play a card immediately after drawing it.",
-            false
-        );
+                "Skip After Draw",
+                "If ENABLED, a player cannot play a card immediately after drawing it.",
+                false);
         skipAfterDrawCheck = (JCheckBox) rule2.getClientProperty(CHECKBOX);
 
         // Rule 3: Mandatory Pass / No Reshuffle (Default: Off)
         final JPanel rule3 = createRulePanel(
-            "No Reshuffle (Hardcore)", 
-            "If the draw deck is empty, the game ends in a draw (discard pile is not reshuffled).",
-            false
-        );
+                "No Reshuffle (Hardcore)",
+                "If the draw deck is empty, the game ends in a draw (discard pile is not reshuffled).",
+                false);
         mandatoryPassCheck = (JCheckBox) rule3.getClientProperty(CHECKBOX);
 
         // 3. "Save and Back" Button
@@ -119,13 +117,13 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
 
         // 4. Assembly
         contentPanel.add(title);
-        contentPanel.add(Box.createRigidArea(RIGID_AREA_1)); 
+        contentPanel.add(Box.createRigidArea(RIGID_AREA_1));
         contentPanel.add(rule1);
         contentPanel.add(Box.createRigidArea(RIGID_AREA_2));
         contentPanel.add(rule2);
         contentPanel.add(Box.createRigidArea(RIGID_AREA_2));
         contentPanel.add(rule3);
-        contentPanel.add(Box.createRigidArea(RIGID_AREA_3)); 
+        contentPanel.add(Box.createRigidArea(RIGID_AREA_3));
         contentPanel.add(backButton);
 
         add(contentPanel);
@@ -168,9 +166,11 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
     // --- GUI Helper Methods ---
 
     /**
-     * Creates a horizontal panel containing Title+Description on the left and a Checkbox on the right.
-     * @param titleText The title of the rule.
-     * @param descText The description of the rule.
+     * Creates a horizontal panel containing Title+Description on the left and a
+     * Checkbox on the right.
+     * 
+     * @param titleText    The title of the rule.
+     * @param descText     The description of the rule.
      * @param defaultState The default state of the checkbox.
      * @return The constructed JPanel.
      */
@@ -214,6 +214,7 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
 
     /**
      * Creates a styled button consistent with MenuScene.
+     * 
      * @param text The button text.
      * @return The styled JButton.
      */
@@ -235,7 +236,7 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
         };
         button.setFont(new Font(FONT, Font.BOLD, BUTTON_FONT_SIZE));
         button.setForeground(BUTTON_TEXT_COLOR);
-        //button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setMaximumSize(BUTTON_DIMENSION);
         button.setPreferredSize(BUTTON_DIMENSION);
         button.setBorder(BUTTON_BORDER);

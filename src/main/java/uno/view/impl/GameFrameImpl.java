@@ -13,7 +13,7 @@ import java.awt.Dimension;
 public final class GameFrameImpl extends JFrame implements GameFrame {
 
     private static final long serialVersionUID = 1L;
-    
+
     private static final Dimension MIN_SIZE = new Dimension(1200, 800);
 
     /**
@@ -24,16 +24,16 @@ public final class GameFrameImpl extends JFrame implements GameFrame {
     public GameFrameImpl(final String title) {
         super(title);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         // Set the minimum size to ensure UI elements fit correctly
         setMinimumSize(MIN_SIZE);
 
         // Center the window on the screen
-        setLocationRelativeTo(null); 
+        setLocationRelativeTo(null);
     }
 
-    /** 
+    /**
      * {@inheritDoc}
      */
     @Override

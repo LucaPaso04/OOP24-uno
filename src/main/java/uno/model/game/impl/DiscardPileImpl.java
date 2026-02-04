@@ -4,7 +4,6 @@ import uno.model.cards.types.api.Card;
 import uno.model.game.api.DiscardPile;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,15 +91,6 @@ public class DiscardPileImpl implements DiscardPile {
     @Override
     public int size() {
         return cards.size();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void reverse() {
-        // Essential for UNO Flip mechanics
-        Collections.reverse(cards);
     }
 
     /**

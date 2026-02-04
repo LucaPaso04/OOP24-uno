@@ -68,7 +68,7 @@
             "dark":  { "color": "TEAL",    "value": "SKIP_EVERYONE" }
         },
         {
-            "light": { "color": "GREEN", "value": "REVERSE" },
+            "light": { "color": "GREEN", "value": "FLIP" },
             "dark":  { "color": "WILD",    "value": "WILD_DRAW_COLOR" }
         },
         {
@@ -120,7 +120,7 @@
             "dark":  { "color": "PINK",    "value": "EIGHT" }
         },
         {
-            "light": { "color": "GREEN", "value": "REVERSE" },
+            "light": { "color": "GREEN", "value": "FLIP" },
             "dark":  { "color": "TEAL",    "value": "THREE" }
         },
         {

@@ -28,7 +28,8 @@ import java.util.List;
 
 /**
  * Concrete implementation of the MenuController.
- * It manages the transitions from the Menu Scene to the Game Scene based on user selection.
+ * It manages the transitions from the Menu Scene to the Game Scene based on
+ * user selection.
  */
 public class MenuControllerImpl implements MenuController {
 
@@ -37,15 +38,17 @@ public class MenuControllerImpl implements MenuController {
 
     /**
      * Constructor for MenuControllerImpl.
+     * 
      * @param frame
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("EI_EXPOSE_REP2")
     public MenuControllerImpl(final GameFrame frame) {
         this.frame = frame;
     }
 
-    /** 
+    /**
      * Handles the action of starting a Classic game.
-    */
+     */
     @Override
     public void onStartClassicGame() {
         // --- IMPOSTAZIONE DELLA PARTITA ---
@@ -66,11 +69,10 @@ public class MenuControllerImpl implements MenuController {
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
         // Questo popola le mani dei giocatori e la pila degli scarti.
         final GameSetupImpl setup = new GameSetupImpl(
-            gameModel, 
-            deck, 
-            gameModel.getDiscardPile(), 
-            players
-        );
+                gameModel,
+                deck,
+                gameModel.getDiscardPile(),
+                players);
         setup.initializeGame(!IS_ALL_WILD);
 
         // 4. Crea la View del Gioco (GameScene)
@@ -88,9 +90,9 @@ public class MenuControllerImpl implements MenuController {
         gameController.showStartingPlayerPopupAndStartGame();
     }
 
-    /** 
+    /**
      * Handles the action of starting a Flip game.
-    */
+     */
     @Override
     public void onStartFlipGame() {
         // --- IMPOSTAZIONE DELLA PARTITA ---
@@ -111,11 +113,10 @@ public class MenuControllerImpl implements MenuController {
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
         // Questo popola le mani dei giocatori e la pila degli scarti.
         final GameSetup setup = new GameSetupImpl(
-            gameModel, 
-            deck, 
-            gameModel.getDiscardPile(), 
-            players
-        );
+                gameModel,
+                deck,
+                gameModel.getDiscardPile(),
+                players);
         setup.initializeGame(!IS_ALL_WILD);
 
         // 4. Crea la View del Gioco (GameScene)
@@ -133,10 +134,9 @@ public class MenuControllerImpl implements MenuController {
         gameController.showStartingPlayerPopupAndStartGame();
     }
 
-
-    /** 
+    /**
      * Handles the action of starting an All Wild game.
-    */
+     */
     @Override
     public void onStartAllWildGame() {
         // --- IMPOSTAZIONE DELLA PARTITA ---
@@ -157,11 +157,10 @@ public class MenuControllerImpl implements MenuController {
         // 3. Esegui il setup (distribuisci carte, gira la prima carta)
         // Questo popola le mani dei giocatori e la pila degli scarti.
         final GameSetupImpl setup = new GameSetupImpl(
-            gameModel, 
-            deck, 
-            gameModel.getDiscardPile(), 
-            players
-        );
+                gameModel,
+                deck,
+                gameModel.getDiscardPile(),
+                players);
         setup.initializeGame(IS_ALL_WILD);
 
         // 4. Crea la View del Gioco (GameScene)
@@ -179,17 +178,18 @@ public class MenuControllerImpl implements MenuController {
         gameController.showStartingPlayerPopupAndStartGame();
     }
 
-    /** 
+    /**
      * Handles the action of quitting the application.
-    */
+     */
     @Override
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DM_EXIT")
     public void onQuit() {
         System.exit(0);
     }
 
-    /** 
+    /**
      * Handles the action of opening the rules scene.
-    */
+     */
     @Override
     public void onOpenRules() {
         final RulesSceneImpl rulesScene = new RulesSceneImpl();

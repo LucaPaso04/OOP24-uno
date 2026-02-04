@@ -18,8 +18,8 @@ plugins {
      * In order to create it, launch the "shadowJar" task.
      * The runnable jar will be found in build/libs/projectname-all.jar
      */
-    id("com.gradleup.shadow") version "9.2.0"
-    id("org.danilopianini.gradle-java-qa") version "1.96.0"
+    id("com.gradleup.shadow") version "9.3.1"
+    id("org.danilopianini.gradle-java-qa") version "1.165.0"
 }
 
 repositories {
@@ -28,14 +28,15 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.spotbugs:spotbugs-annotations:4.9.3")
+    compileOnly("com.github.spotbugs:spotbugs-annotations:4.9.8")
 
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
 
+    val jUnitVersion = "5.11.4"
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$jUnitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jUnitVersion")
 
     // This dependency is used by the application.
     implementation(libs.guava)
@@ -54,9 +55,19 @@ application {
     mainClass = "uno.Main"
 }
 
-tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
+tasks.test {
     useJUnitPlatform()
+    testLogging {
+        events(*org.gradle.api.tasks.testing.logging.TestLogEvent.values())
+        showStandardStreams = true
+    }
+}
 
-    failOnNoDiscoveredTests = false
+tasks.javadoc {
+    options.encoding = "UTF-8"
+    isFailOnError = false
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }

@@ -21,8 +21,10 @@ import java.util.List;
 
 /**
  * A panel that allows the player to choose a new color during the game.
- * It adapts its color palette based on whether the game is currently on the "Light" or "Dark" side.
+ * It adapts its color palette based on whether the game is currently on the
+ * "Light" or "Dark" side.
  */
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_BAD_FIELD")
 public final class ColorChooserPanelImpl extends JPanel implements ActionListener, ColorChooserPanel {
 
     private static final long serialVersionUID = 1L;
@@ -48,7 +50,8 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
      * Constructs the panel with the appropriate colors.
      *
      * @param observer   The controller to notify when a color is picked.
-     * @param isDarkSide True if using Uno Flip dark side colors, false for standard colors.
+     * @param isDarkSide True if using Uno Flip dark side colors, false for standard
+     *                   colors.
      */
     public ColorChooserPanelImpl(final Optional<GameViewObserver> observer, final boolean isDarkSide) {
         this.observer = observer;
@@ -58,14 +61,13 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
         setBackground(PANEL_BACKGROUND);
 
         setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "Pick a Color",
-            TitledBorder.LEFT, TitledBorder.TOP, UI_FONT, TITLE_TEXT_COLOR
-        ));
+                BorderFactory.createEtchedBorder(), "Pick a Color",
+                TitledBorder.LEFT, TitledBorder.TOP, UI_FONT, TITLE_TEXT_COLOR));
 
         // 1. Determine which colors to display
-        final List<CardColor> colorsToOffer = isDarkSide 
-            ? List.of(CardColor.PINK, CardColor.TEAL, CardColor.ORANGE, CardColor.PURPLE) 
-            :   List.of(CardColor.RED, CardColor.GREEN, CardColor.BLUE, CardColor.YELLOW);
+        final List<CardColor> colorsToOffer = isDarkSide
+                ? List.of(CardColor.PINK, CardColor.TEAL, CardColor.ORANGE, CardColor.PURPLE)
+                : List.of(CardColor.RED, CardColor.GREEN, CardColor.BLUE, CardColor.YELLOW);
 
         // 2. Add buttons dynamically based on the side
         for (final CardColor colorEnum : colorsToOffer) {
@@ -77,7 +79,8 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
 
     /**
      * Helper to map CardColor to AWT colors and add the button to the panel.
-     * @param colorEnum The CardColor to create a button for.
+     * 
+     * @param colorEnum  The CardColor to create a button for.
      * @param isDarkSide Whether the current side is dark (Uno Flip).
      */
     private void setupButtonForColor(final CardColor colorEnum, final boolean isDarkSide) {
@@ -87,19 +90,48 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
 
         if (isDarkSide) {
             switch (colorEnum) {
-                case PINK:   bgColor = PINK_COLOR; fgColor = Color.BLACK; label = "PINK"; break;
-                case TEAL:   bgColor = TEAL_COLOR; label = "TEAL"; break;
-                case ORANGE: bgColor = ORANGE_COLOR; fgColor = Color.BLACK; label = "ORANGE"; break;
-                case PURPLE: bgColor = PURPLE_COLOR; label = "PURPLE"; break;
-                default: return;
+                case PINK:
+                    bgColor = PINK_COLOR;
+                    fgColor = Color.BLACK;
+                    label = "PINK";
+                    break;
+                case TEAL:
+                    bgColor = TEAL_COLOR;
+                    label = "TEAL";
+                    break;
+                case ORANGE:
+                    bgColor = ORANGE_COLOR;
+                    fgColor = Color.BLACK;
+                    label = "ORANGE";
+                    break;
+                case PURPLE:
+                    bgColor = PURPLE_COLOR;
+                    label = "PURPLE";
+                    break;
+                default:
+                    return;
             }
         } else {
             switch (colorEnum) {
-                case RED:    bgColor = RED_COLOR; label = "RED"; break;
-                case GREEN:  bgColor = GREEN_COLOR; label = "GREEN"; break;
-                case BLUE:   bgColor = BLUE_COLOR; label = "BLUE"; break;
-                case YELLOW: bgColor = YELLOW_COLOR; fgColor = Color.BLACK; label = "YELLOW"; break;
-                default: return;
+                case RED:
+                    bgColor = RED_COLOR;
+                    label = "RED";
+                    break;
+                case GREEN:
+                    bgColor = GREEN_COLOR;
+                    label = "GREEN";
+                    break;
+                case BLUE:
+                    bgColor = BLUE_COLOR;
+                    label = "BLUE";
+                    break;
+                case YELLOW:
+                    bgColor = YELLOW_COLOR;
+                    fgColor = Color.BLACK;
+                    label = "YELLOW";
+                    break;
+                default:
+                    return;
             }
         }
 
@@ -132,7 +164,7 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
         closeChooser();
     }
 
-    /** 
+    /**
      * {@inheritDoc}
      */
     @Override

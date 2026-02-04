@@ -22,7 +22,8 @@ import java.util.Optional;
 
 /**
  * Concrete implementation of the GameController interface.
- * It manages the interaction logic between the GameScene (View) and the Game (Model).
+ * It manages the interaction logic between the GameScene (View) and the Game
+ * (Model).
  */
 
 public class GameControllerImpl implements GameController {
@@ -39,13 +40,16 @@ public class GameControllerImpl implements GameController {
 
     /**
      * Costruttore del GameControllerImpl.
+     * 
      * @param gameModel
      * @param gameScene
      * @param mainFrame
      * @param logger
      */
-    public GameControllerImpl(final Game gameModel, final GameScene gameScene, 
-        final GameFrame mainFrame, final GameLogger logger) {
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings({ "EI_EXPOSE_REP2",
+            "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" })
+    public GameControllerImpl(final Game gameModel, final GameScene gameScene,
+            final GameFrame mainFrame, final GameLogger logger) {
         this.gameModel = gameModel;
         this.gameScene = gameScene;
         this.mainFrame = mainFrame;
@@ -80,7 +84,8 @@ public class GameControllerImpl implements GameController {
             dialog.dispose(); // Chiude il dialog e sblocca il codice qui sotto
         }).start();
 
-        // 5. Mostriamo il dialog. Il codice SI FERMA QUI finché il dialog non si chiude.
+        // 5. Mostriamo il dialog. Il codice SI FERMA QUI finché il dialog non si
+        // chiude.
         dialog.setVisible(true);
 
         // 6. ORA che il popup è sparito, facciamo partire il gioco
@@ -124,7 +129,6 @@ public class GameControllerImpl implements GameController {
             }
         }
 
-
         // Ogni volta che il gioco si aggiorna, controlliamo chi sta giocando
         checkAndRunAITurn();
     }
@@ -144,7 +148,7 @@ public class GameControllerImpl implements GameController {
         if (currentPlayer instanceof AIPlayer) {
 
             // Disabilita la UI umana per evitare input concorrenti
-            gameScene.setHumanInputEnabled(false); 
+            gameScene.setHumanInputEnabled(false);
 
             // L'IA non gioca subito. Creiamo un Timer per un breve ritardo.
 
@@ -179,10 +183,10 @@ public class GameControllerImpl implements GameController {
             gameModel.playCard(card);
         } catch (final IllegalStateException e) {
             // Mostra un errore se la mossa non è valida
-            JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene, 
-                e.getMessage(), 
-                "Carta non giocabile!", 
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene,
+                    e.getMessage(),
+                    "Carta non giocabile!",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -193,12 +197,12 @@ public class GameControllerImpl implements GameController {
     public void onDrawCard() {
         try {
             // Chiama il nuovo metodo con la logica di validazione
-            gameModel.playerInitiatesDraw(); 
+            gameModel.playerInitiatesDraw();
         } catch (final IllegalStateException e) {
-            JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene, 
-                e.getMessage(), // Messaggio d'errore (es. "Hai già pescato")
-                "Non puoi pescare!", 
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene,
+                    e.getMessage(), // Messaggio d'errore (es. "Hai già pescato")
+                    "Non puoi pescare!",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -210,10 +214,10 @@ public class GameControllerImpl implements GameController {
         try {
             gameModel.callUno(gameModel.getPlayers().getFirst());
         } catch (final IllegalStateException e) {
-            JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene, 
-                e.getMessage(), // Messaggio d'errore (es. "Non puoi chiamare UNO ora")
-                "Non puoi chiamare UNO!", 
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene,
+                    e.getMessage(), // Messaggio d'errore (es. "Non puoi chiamare UNO ora")
+                    "Non puoi chiamare UNO!",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -224,10 +228,10 @@ public class GameControllerImpl implements GameController {
     public void onBackToMenu() {
         // Logica per tornare al menu
         final int choice = JOptionPane.showConfirmDialog(
-            (javax.swing.JPanel) gameScene, 
-            "Sei sicuro di voler tornare al menu? La partita sarà persa.",
-            "Torna al Menu", 
-            JOptionPane.YES_NO_OPTION);
+                (javax.swing.JPanel) gameScene,
+                "Sei sicuro di voler tornare al menu? La partita sarà persa.",
+                "Torna al Menu",
+                JOptionPane.YES_NO_OPTION);
 
         if (choice == JOptionPane.YES_OPTION) {
             // Ricrea il controller e la scena del menu
@@ -246,16 +250,17 @@ public class GameControllerImpl implements GameController {
         try {
             gameModel.playerPassTurn();
         } catch (final IllegalStateException e) {
-            JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene, 
-                e.getMessage(), // Messaggio (es. "Non puoi passare se non hai pescato")
-                "Non puoi passare!", 
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog((javax.swing.JPanel) gameScene,
+                    e.getMessage(), // Messaggio (es. "Non puoi passare se non hai pescato")
+                    "Non puoi passare!",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     /**
      * Implementa il metodo dell'interfaccia.
      * Riceve il colore scelto dalla View e lo passa al Modello.
+     * 
      * @param color Il colore scelto.
      */
     @Override
@@ -266,6 +271,7 @@ public class GameControllerImpl implements GameController {
     /**
      * Implementa il metodo dell'interfaccia.
      * Riceve il giocatore scelto dalla View e lo passa al Modello.
+     * 
      * @param player Il giocatore scelto.
      */
     @Override

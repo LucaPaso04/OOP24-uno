@@ -51,11 +51,4 @@ public interface DiscardPile {
      * @return The size of the pile.
      */
     int size();
-
-    /**
-     * Reverses the order of the pile.
-     * Essential for UNO Flip: when the game flips, the discard pile
-     * is physically turned over, meaning the bottom card becomes the new top card.
-     */
-    void reverse();
 }
