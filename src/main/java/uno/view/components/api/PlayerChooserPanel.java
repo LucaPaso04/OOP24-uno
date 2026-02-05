@@ -4,6 +4,7 @@ package uno.view.components.api;
  * Interface representing a UI component used to select a specific Player 
  * (e.g., for targeted effects like swapping hands).
  */
+@FunctionalInterface
 public interface PlayerChooserPanel {
 
     /**

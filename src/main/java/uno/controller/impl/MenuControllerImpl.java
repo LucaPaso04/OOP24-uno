@@ -6,7 +6,7 @@ import uno.model.cards.deck.impl.FlipDeck;
 import uno.model.cards.deck.impl.StandardDeck;
 import uno.model.game.impl.GameImpl;
 import uno.model.game.impl.GameSetupImpl;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.model.players.impl.AIAllWild;
 import uno.model.players.impl.AIClassic;
 import uno.model.players.impl.AIFlip;
@@ -34,12 +34,16 @@ import java.util.List;
 public class MenuControllerImpl implements MenuController {
 
     private static final boolean IS_ALL_WILD = true;
+    private static final String HUMAN_NAME = "Giocatore 1";
+    private static final String AI_ONE_NAME = "IA-1";
+    private static final String AI_TWO_NAME = "IA-2";
+    private static final String AI_THREE_NAME = "IA-3";
     private final GameFrame frame;
 
     /**
      * Constructor for MenuControllerImpl.
      * 
-     * @param frame
+     * @param frame frame
      */
     @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("EI_EXPOSE_REP2")
     public MenuControllerImpl(final GameFrame frame) {
@@ -54,11 +58,11 @@ public class MenuControllerImpl implements MenuController {
         // --- IMPOSTAZIONE DELLA PARTITA ---
 
         // 1. Crea i giocatori
-        final List<Player> players = new ArrayList<>();
-        players.add(new HumanPlayer("Giocatore 1")); // Giocatore umano
-        players.add(new AIClassic("IA-1")); // Avversario
-        players.add(new AIClassic("IA-2"));
-        players.add(new AIClassic("IA-3"));
+        final List<AbstractPlayer> players = new ArrayList<>();
+        players.add(new HumanPlayer(HUMAN_NAME)); // Giocatore umano
+        players.add(new AIClassic(AI_ONE_NAME)); // Avversario
+        players.add(new AIClassic(AI_TWO_NAME));
+        players.add(new AIClassic(AI_THREE_NAME));
         // puoi aggiungere altri giocatori qui...
 
         // 2. Crea il Model (Mazzo e Partita)
@@ -98,11 +102,11 @@ public class MenuControllerImpl implements MenuController {
         // --- IMPOSTAZIONE DELLA PARTITA ---
 
         // 1. Crea i giocatori
-        final List<Player> players = new ArrayList<>();
-        players.add(new HumanPlayer("Giocatore 1")); // Giocatore umano
-        players.add(new AIFlip("IA-1")); // Avversario
-        players.add(new AIFlip("IA-2"));
-        players.add(new AIFlip("IA-3"));
+        final List<AbstractPlayer> players = new ArrayList<>();
+        players.add(new HumanPlayer(HUMAN_NAME)); // Giocatore umano
+        players.add(new AIFlip(AI_ONE_NAME)); // Avversario
+        players.add(new AIFlip(AI_TWO_NAME));
+        players.add(new AIFlip(AI_THREE_NAME));
         // puoi aggiungere altri giocatori qui...
 
         // 2. Crea il Model (Mazzo e Partita)
@@ -142,11 +146,11 @@ public class MenuControllerImpl implements MenuController {
         // --- IMPOSTAZIONE DELLA PARTITA ---
 
         // 1. Crea i giocatori
-        final List<Player> players = new ArrayList<>();
-        players.add(new HumanPlayer("Giocatore 1")); // Giocatore umano
-        players.add(new AIAllWild("IA-1")); // Avversario
-        players.add(new AIAllWild("IA-2"));
-        players.add(new AIAllWild("IA-3"));
+        final List<AbstractPlayer> players = new ArrayList<>();
+        players.add(new HumanPlayer(HUMAN_NAME)); // Giocatore umano
+        players.add(new AIAllWild(AI_ONE_NAME)); // Avversario
+        players.add(new AIAllWild(AI_TWO_NAME));
+        players.add(new AIAllWild(AI_THREE_NAME));
         // puoi aggiungere altri giocatori qui...
 
         // 2. Crea il Model (Mazzo e Partita)

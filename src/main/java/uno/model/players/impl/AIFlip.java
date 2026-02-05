@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * It understands the dual-sided nature of the game and adjusts its strategy
  * based on whether the game is currently on the Light Side or Dark Side.
  */
-public class AIFlip extends AIPlayer {
+public class AIFlip extends AbstractAIPlayer {
 
     private static final int SCORE_FIVE = 5;
     private static final int SCORE_TEN = 10;
@@ -28,6 +28,7 @@ public class AIFlip extends AIPlayer {
 
     /**
      * Constructor for AIFlip player.
+     * 
      * @param name the name of the player
      */
     public AIFlip(final String name) {
@@ -76,9 +77,9 @@ public class AIFlip extends AIPlayer {
         final CardColor[] validColors;
 
         if (game.isDarkSide()) {
-            validColors = new CardColor[] { CardColor.TEAL, CardColor.PINK, CardColor.PURPLE, CardColor.ORANGE };
+            validColors = new CardColor[] {CardColor.TEAL, CardColor.PINK, CardColor.PURPLE, CardColor.ORANGE };
         } else {
-            validColors = new CardColor[] { CardColor.RED, CardColor.GREEN, CardColor.BLUE, CardColor.YELLOW };
+            validColors = new CardColor[] {CardColor.RED, CardColor.GREEN, CardColor.BLUE, CardColor.YELLOW };
         }
 
         final Map<CardColor, Integer> colorCounts = new EnumMap<>(CardColor.class);
@@ -103,6 +104,7 @@ public class AIFlip extends AIPlayer {
 
     /**
      * Get all playable cards from hand based on current game state.
+     * 
      * @param game the current game state
      * @return list of playable cards
      */
@@ -119,6 +121,7 @@ public class AIFlip extends AIPlayer {
     /**
      * Calculate a score for a card to determine its priority.
      * Higher score means higher priority to play.
+     * 
      * @param c the card to score
      * @param game the current game state
      * @return the score of the card

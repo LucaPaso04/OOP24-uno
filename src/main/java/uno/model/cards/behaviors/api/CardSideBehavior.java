@@ -13,12 +13,14 @@ public interface CardSideBehavior {
 
     /**
      * Retrieves the static color of this specific card side.
+     * 
      * @return The {@link CardColor} associated with this side.
      */
     CardColor getColor();
 
     /**
      * Retrieves the face value or type of this specific card side.
+     * 
      * @return The {@link CardValue} (e.g., NUMBER, SKIP, WILD).
      */
     CardValue getValue();
@@ -27,6 +29,7 @@ public interface CardSideBehavior {
      * Executes the specific game logic associated with this card side.
      * For number cards, this might simply pass the turn.
      * For action cards, this triggers effects like skipping, reversing, or drawing cards.
+     * 
      * @param game The current game instance to apply effects on. Must not be null.
      */
     void executeEffect(Game game);
@@ -34,6 +37,7 @@ public interface CardSideBehavior {
     /**
      * Returns a string representation of this card side, typically combining color and value.
      * Useful for logging and debugging.
+     * 
      * @return A string description (e.g., "RED_FIVE" or "WILD_COLOR").
      */
     @Override
@@ -42,6 +46,7 @@ public interface CardSideBehavior {
     /**
      * Checks if this side represents a Wild card based on its color logic.
      * This avoids code duplication in implementing classes.
+     * 
      * @return true if the card allows changing color, false otherwise.
      */
     default boolean isWild() {

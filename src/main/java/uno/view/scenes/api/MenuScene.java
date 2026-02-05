@@ -6,6 +6,7 @@ import uno.controller.api.MenuObserver;
  * Interface representing the Main Menu screen of the application.
  * It defines the mechanism to attach a controller (observer) to handle user inputs.
  */
+@FunctionalInterface
 public interface MenuScene {
 
     /**

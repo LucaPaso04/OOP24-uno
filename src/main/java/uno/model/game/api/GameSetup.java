@@ -5,6 +5,7 @@ package uno.model.game.api;
  * It handles the initial distribution of cards to players and the determination
  * of the starting card on the discard pile, applying specific rules based on the game mode.
  */
+@FunctionalInterface
 public interface GameSetup {
 
     /**

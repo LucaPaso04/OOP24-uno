@@ -20,10 +20,9 @@ import uno.model.cards.types.impl.DoubleSidedCard;
 import uno.model.game.api.Game;
 import uno.model.game.impl.GameImpl;
 import uno.model.game.impl.GameSetupImpl;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.model.players.impl.AIClassic;
 import uno.model.utils.api.GameLogger;
-import uno.model.utils.impl.GameLoggerImpl;
 
 /**
  * Test class for verification of Card Behaviors using the Strategy Pattern.
@@ -38,12 +37,12 @@ class FlipBehaviorTest {
         void setUp() {
                 // Creiamo un logger fittizio (mock) poiché non ci interessa testare il logging
                 // qui.
-                final GameLogger logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+                final GameLogger logger = new uno.model.utils.impl.TestLogger();
                 // Setup base
                 aiClassic1 = new AIClassic("AI-Bot-1");
                 final AIClassic aiClassic2 = new AIClassic("AI-Bot-2");
 
-                final List<Player> players = new ArrayList<>();
+                final List<AbstractPlayer> players = new ArrayList<>();
                 players.add(aiClassic1);
                 players.add(aiClassic2);
                 final Deck<Card> deck = new StandardDeck(logger);

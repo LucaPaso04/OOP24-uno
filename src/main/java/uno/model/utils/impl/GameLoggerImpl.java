@@ -26,7 +26,6 @@ public class GameLoggerImpl implements GameLogger {
      * @param matchId A unique identifier for the current match (used in the
      *                filename).
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR")
     public GameLoggerImpl(final String matchId) {
         // Retrieve current working directory
         final String userDir = System.getProperty("user.dir");

@@ -16,10 +16,9 @@ import uno.model.cards.deck.api.Deck;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.Game;
 import uno.model.game.impl.GameImpl;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.model.players.impl.AIClassic;
 import uno.model.utils.api.GameLogger;
-import uno.model.utils.impl.GameLoggerImpl;
 
 class StandardDeckTest {
 
@@ -38,11 +37,11 @@ class StandardDeckTest {
     void setUp() {
         // Creiamo un logger fittizio (mock) poiché non ci interessa testare il logging
         // qui
-        logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+        logger = new uno.model.utils.impl.TestLogger();
         // Setup base
         final AIClassic aiClassic = new AIClassic("AI-Bot");
 
-        final List<Player> players = new ArrayList<>();
+        final List<AbstractPlayer> players = new ArrayList<>();
         players.add(aiClassic);
         deck = new StandardDeck(logger);
 

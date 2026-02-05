@@ -22,6 +22,7 @@ public class DoubleSidedCard implements Card {
 
     /**
      * Constructs a card with two distinct behaviors.
+     * 
      * @param lightSide The behavior when the game is in Light Mode.
      * @param darkSide  The behavior when the game is in Dark Mode.
      */
@@ -33,6 +34,7 @@ public class DoubleSidedCard implements Card {
 
     /**
      * Helper method to determine which behavior is currently active.
+     * 
      * @param game The current game context.
      * @return The active {@link CardSideBehavior} based on the game's side state.
      */

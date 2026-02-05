@@ -24,8 +24,7 @@ public class ActionBehavior implements CardSideBehavior {
      *
      * @param color  The color of this card side.
      * @param value  The value/type (e.g., SKIP, REVERSE).
-     * @param action A functional consumer that defines what happens to the {@link GameImpl} 
-     * when this card is played.
+     * @param action A functional consumer that defines what happens to the {@link GameImpl} when this card is played.
      */
     public ActionBehavior(final CardColor color, final CardValue value, final Consumer<Game> action) {
         this.color = color;

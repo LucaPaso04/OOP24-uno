@@ -1,7 +1,7 @@
 package uno.view.components.impl;
 
 import uno.controller.api.GameViewObserver;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.view.components.api.PlayerChooserPanel;
 
 import javax.swing.JPanel;
@@ -39,7 +39,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
     private static final Dimension SPACER_SIZE = new Dimension(0, 5);
 
     private final Optional<GameViewObserver> observer;
-    private final List<Player> availableOpponents;
+    private final List<AbstractPlayer> availableOpponents;
 
     /**
      * Constructs the player chooser panel.
@@ -48,7 +48,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
      * @param opponents The list of valid target players (usually excluding the
      *                  current player).
      */
-    public PlayerChooserPanelImpl(final Optional<GameViewObserver> observer, final List<Player> opponents) {
+    public PlayerChooserPanelImpl(final Optional<GameViewObserver> observer, final List<AbstractPlayer> opponents) {
         this.observer = observer;
         this.availableOpponents = opponents;
 
@@ -61,11 +61,11 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
                 TitledBorder.LEFT, TitledBorder.TOP, UI_FONT, TITLE_TEXT_COLOR));
 
         // Create a button for each valid opponent
-        for (final Player opponent : opponents) {
+        for (final AbstractPlayer opponent : opponents) {
 
             // Logic from original code: specific filtering based on class type.
             // Assuming this filters out base 'Player' objects (e.g., Humans) if needed.
-            if (opponent.getClass().equals(Player.class)) {
+            if (opponent.getClass().equals(AbstractPlayer.class)) {
                 continue;
             }
 
@@ -114,7 +114,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
     public void actionPerformed(final ActionEvent e) {
         final String chosenName = e.getActionCommand();
 
-        final Optional<Player> chosenPlayer = availableOpponents.stream()
+        final Optional<AbstractPlayer> chosenPlayer = availableOpponents.stream()
                 .filter(p -> p.getName().equals(chosenName))
                 .findFirst();
 

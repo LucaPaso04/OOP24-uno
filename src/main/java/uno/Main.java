@@ -17,6 +17,7 @@ public final class Main {
 
     /**
      * Main method to launch the UNO application.
+     * 
      * @param args command line arguments
      */
     public static void main(final String[] args) {

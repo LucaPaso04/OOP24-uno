@@ -23,6 +23,7 @@ public final class BackSideBehavior implements CardSideBehavior {
 
     /**
      * Retrieves the singleton instance of the card back behavior.
+     * 
      * @return The shared instance.
      */
     public static BackSideBehavior getInstance() {

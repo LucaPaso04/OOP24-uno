@@ -13,12 +13,13 @@ import uno.model.utils.api.GameLogger;
  * In this mode, every single card is a Wild card. Colors do not matter for matching,
  * but specific cards have powerful action effects (Skip Two, Targeted Draw, Swap).
  */
-public class AllWildDeck extends DeckImpl<Card> {
+public class AllWildDeck extends AbstractDeckImpl<Card> {
 
     private static final int CARDS_OF_EACH_TYPE = 14;
 
     /**
      * Constructs an All Wild Deck with 112 Wild cards.
+     * 
      * @param logger logger
      */
     public AllWildDeck(final GameLogger logger) {
@@ -91,6 +92,7 @@ public class AllWildDeck extends DeckImpl<Card> {
     /**
      * Helper to create the DoubleSidedCard.
      * Front is the Wild Action, Back is Standard.
+     * 
      * @param frontBehavior The behavior for the front side of the card.
      */
     private void createAndAddCard(final CardSideBehavior frontBehavior) {

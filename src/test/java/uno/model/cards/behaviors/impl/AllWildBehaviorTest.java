@@ -17,10 +17,9 @@ import uno.model.cards.types.impl.DoubleSidedCard;
 import uno.model.game.api.Game;
 import uno.model.game.impl.GameImpl;
 import uno.model.game.impl.GameSetupImpl;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.model.players.impl.AIAllWild;
 import uno.model.utils.api.GameLogger;
-import uno.model.utils.impl.GameLoggerImpl;
 
 class AllWildBehaviorTest {
 
@@ -31,13 +30,13 @@ class AllWildBehaviorTest {
 
     @BeforeEach
     void setUp() {
-        final GameLogger logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+        final GameLogger logger = new uno.model.utils.impl.TestLogger();
 
         p1 = new AIAllWild("AI-1");
         p2 = new AIAllWild("AI-2");
         p3 = new AIAllWild("AI-3");
 
-        final List<Player> players = new ArrayList<>();
+        final List<AbstractPlayer> players = new ArrayList<>();
         players.add(p1);
         players.add(p2);
         players.add(p3);

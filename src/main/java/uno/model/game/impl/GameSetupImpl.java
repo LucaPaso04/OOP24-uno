@@ -6,7 +6,7 @@ import uno.model.cards.deck.api.Deck;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.DiscardPile;
 import uno.model.game.api.GameSetup;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.model.game.api.Game;
 
 import java.util.ArrayList;
@@ -19,12 +19,13 @@ import java.util.Optional;
 public class GameSetupImpl implements GameSetup {
 
     /** The size of the initial hand dealt to each player. */
-    public static final int INITIAL_HAND_SIZE = 7;
+    private static final int INITIAL_HAND_SIZE = 7;
+    private static final String LOGGER_ACTION_TYPE = "SETUP";
 
     private final Game game;
     private final Deck<Card> deck;
     private final DiscardPile discardPile;
-    private final List<Player> players;
+    private final List<AbstractPlayer> players;
 
     /**
      * Constructor for GameSetupImpl.
@@ -36,7 +37,7 @@ public class GameSetupImpl implements GameSetup {
      */
     @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("EI_EXPOSE_REP2")
     public GameSetupImpl(final Game game, final Deck<Card> deck, final DiscardPile discardPile,
-            final List<Player> players) {
+            final List<AbstractPlayer> players) {
         this.game = game;
         this.deck = deck;
         this.discardPile = discardPile;
@@ -61,13 +62,13 @@ public class GameSetupImpl implements GameSetup {
      */
     private void dealInitialCards() {
         for (int i = 0; i < INITIAL_HAND_SIZE; i++) {
-            for (final Player player : this.players) {
+            for (final AbstractPlayer player : this.players) {
                 // We assume Game has a method to orchestrate the draw,
                 // or we can do it directly here:
                 deck.draw().ifPresent(player::addCardToHand);
             }
         }
-        game.logSystemAction("SETUP", "DEAL_CARDS", "Dealt 7 cards to " + players.size() + " players.");
+        game.logSystemAction(LOGGER_ACTION_TYPE, "DEAL_CARDS", "Dealt 7 cards to " + players.size() + " players.");
     }
 
     /**
@@ -81,7 +82,7 @@ public class GameSetupImpl implements GameSetup {
         if (isAllWild) {
             drawAndPlaceAnyCard();
             game.setCurrentColor(CardColor.WILD);
-            game.logSystemAction("SETUP", "FIRST_CARD", "Mode: All Wild. Color set to WILD.");
+            game.logSystemAction(LOGGER_ACTION_TYPE, "FIRST_CARD", "Mode: All Wild. Color set to WILD.");
             return;
         }
 
@@ -103,7 +104,7 @@ public class GameSetupImpl implements GameSetup {
                 discardPile.addCard(drawnCard.get());
                 game.setCurrentColor(drawnCard.get().getColor(game));
 
-                game.logSystemAction("SETUP", "FIRST_CARD", "Card: " + drawnCard);
+                game.logSystemAction(LOGGER_ACTION_TYPE, "FIRST_CARD", "Card: " + drawnCard);
                 validCardFound = true;
             } else {
                 // Fail: Invalid card (Wild, Action, Flip), put in discard and draw again

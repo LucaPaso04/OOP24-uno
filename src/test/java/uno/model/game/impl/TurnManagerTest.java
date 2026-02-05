@@ -23,15 +23,14 @@ import uno.model.cards.types.api.Card;
 import uno.model.cards.types.impl.DoubleSidedCard;
 import uno.model.game.api.Game;
 import uno.model.game.api.TurnManager;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.model.players.impl.AIClassic;
 import uno.model.utils.api.GameLogger;
-import uno.model.utils.impl.GameLoggerImpl;
 
 class TurnManagerTest {
 
     private TurnManager turnManager;
-    private List<Player> players;
+    private List<AbstractPlayer> players;
     private Game game;
 
     @BeforeEach
@@ -43,7 +42,7 @@ class TurnManagerTest {
         players.add(new AIClassic("P3"));
         players.add(new AIClassic("P4"));
 
-        final GameLogger logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+        final GameLogger logger = new uno.model.utils.impl.TestLogger();
         final Deck<Card> deck = new StandardDeck(logger);
         game = new GameImpl(deck, players, "CLASSIC", logger);
 
@@ -67,12 +66,12 @@ class TurnManagerTest {
 
     @Test
     void testAdvanceTurnClockwise() {
-        final Player current = turnManager.getCurrentPlayer();
+        final AbstractPlayer current = turnManager.getCurrentPlayer();
         final int startIndex = players.indexOf(current);
 
         turnManager.advanceTurn(game);
 
-        final Player next = turnManager.getCurrentPlayer();
+        final AbstractPlayer next = turnManager.getCurrentPlayer();
         final int nextIndex = players.indexOf(next);
 
         final int expectedIndex = (startIndex + 1) % players.size();
@@ -84,12 +83,12 @@ class TurnManagerTest {
         turnManager.reverseDirection();
         assertFalse(turnManager.isClockwise());
 
-        final Player current = turnManager.getCurrentPlayer();
+        final AbstractPlayer current = turnManager.getCurrentPlayer();
         final int startIndex = players.indexOf(current);
 
         turnManager.advanceTurn(game);
 
-        final Player next = turnManager.getCurrentPlayer();
+        final AbstractPlayer next = turnManager.getCurrentPlayer();
         final int nextIndex = players.indexOf(next);
 
         final int expectedIndex = (startIndex - 1 + players.size()) % players.size();
@@ -98,7 +97,7 @@ class TurnManagerTest {
 
     @Test
     void testSkipPlayer() {
-        final Player current = turnManager.getCurrentPlayer();
+        final AbstractPlayer current = turnManager.getCurrentPlayer();
         final int startIndex = players.indexOf(current);
 
         turnManager.skipPlayers(1);
@@ -115,7 +114,7 @@ class TurnManagerTest {
 
     @Test
     void testSkipTwoPlayers() {
-        final Player current = turnManager.getCurrentPlayer();
+        final AbstractPlayer current = turnManager.getCurrentPlayer();
         final int startIndex = players.indexOf(current);
 
         turnManager.skipPlayers(2);
@@ -131,7 +130,7 @@ class TurnManagerTest {
         turnManager.reverseDirection();
         turnManager.skipPlayers(1);
 
-        final Player current = turnManager.getCurrentPlayer();
+        final AbstractPlayer current = turnManager.getCurrentPlayer();
         final int startIndex = players.indexOf(current);
 
         turnManager.advanceTurn(game);
@@ -152,10 +151,10 @@ class TurnManagerTest {
 
     @Test
     void testPeekDoesNotAlterState() {
-        final Player current = turnManager.getCurrentPlayer();
+        final AbstractPlayer current = turnManager.getCurrentPlayer();
         final boolean direction = turnManager.isClockwise();
 
-        final Player peeked = turnManager.peekNextPlayer();
+        final AbstractPlayer peeked = turnManager.peekNextPlayer();
 
         assertNotNull(peeked);
         assertNotEquals(current, peeked);
@@ -166,7 +165,7 @@ class TurnManagerTest {
 
     @Test
     void testUnoPenaltyCheck() {
-        final Player next = turnManager.peekNextPlayer();
+        final AbstractPlayer next = turnManager.peekNextPlayer();
 
         final Card redNine = new DoubleSidedCard(
                 new NumericBehavior(CardColor.RED, CardValue.NINE),

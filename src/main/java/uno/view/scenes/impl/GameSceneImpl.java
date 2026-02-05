@@ -5,7 +5,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.GameState;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.view.components.impl.ColorChooserPanelImpl;
 import uno.view.components.impl.PlayerChooserPanelImpl;
 import uno.view.scenes.api.GameScene;
@@ -98,8 +98,12 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     private Optional<GameViewObserver> controllerObserver = Optional.empty();
 
     private final JPanel playerHandPanel;
-    private final JPanel westAIPanel, northAIPanel, eastAIPanel;
-    private JLabel westAILabel, northAILabel, eastAILabel;
+    private final JPanel westAIPanel;
+    private final JPanel northAIPanel;
+    private final JPanel eastAIPanel;
+    private JLabel westAILabel;
+    private JLabel northAILabel;
+    private JLabel eastAILabel;
 
     private final JPanel centerPanel;
     private JLabel discardPileCard;
@@ -216,7 +220,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * {@inheritDoc}
      */
     @Override
-    public void showPlayerChooser(final List<Player> opponents) {
+    public void showPlayerChooser(final List<AbstractPlayer> opponents) {
 
         final PlayerChooserPanel panel = new PlayerChooserPanelImpl(this.controllerObserver, opponents);
 
@@ -239,7 +243,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         updateHumanHand();
         updateAIPanels();
 
-        final boolean isHumanTurn = gameModel.getCurrentPlayer().getClass() == Player.class;
+        final boolean isHumanTurn = gameModel.getCurrentPlayer().getClass() == AbstractPlayer.class;
         setHumanInputEnabled(isHumanTurn && gameModel.getGameState() == GameState.RUNNING);
 
         revalidate();
@@ -253,7 +257,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     public void showWinnerPopup(final String winnerName) {
         setHumanInputEnabled(false);
 
-        final Object[] options = { "Torna al Menu", "Chiudi Gioco" };
+        final Object[] options = {"Torna al Menu", "Chiudi Gioco" };
 
         final int choice = JOptionPane.showOptionDialog(
                 this,
@@ -327,7 +331,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * @param label The label within the panel to update.
      * @param ai    The AI player associated with the panel.
      */
-    private void updateOpponentPanel(final JPanel panel, final JLabel label, final Player ai) {
+    private void updateOpponentPanel(final JPanel panel, final JLabel label, final AbstractPlayer ai) {
         label.setText(ai.getHandSize() + " carte");
         if (gameModel.getCurrentPlayer().equals(ai)) {
             final Color borderColor = ai.getHandSize() <= 1 ? Color.RED : Color.ORANGE;
@@ -546,7 +550,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
             button.setDisabledIcon(transparentIcon);
             button.setText(null);
         } else {
-            button.setText(cardName.replace("_", " "));
+            button.setText(cardName.replace("", " "));
             button.setForeground(Color.WHITE);
         }
 
@@ -677,7 +681,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     private void updateHumanHand() {
         playerHandPanel.removeAll();
 
-        final Player humanPlayer = gameModel.getPlayers().get(0);
+        final AbstractPlayer humanPlayer = gameModel.getPlayers().get(0);
 
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -730,7 +734,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      */
     private void updateAIPanels() {
 
-        final List<Player> players = gameModel.getPlayers();
+        final List<AbstractPlayer> players = gameModel.getPlayers();
 
         if (players.size() >= 4) {
             updateOpponentPanel(westAIPanel, westAILabel, players.get(1));

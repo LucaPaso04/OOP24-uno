@@ -2,7 +2,7 @@ package uno.model.game.impl;
 
 import uno.model.game.api.Game;
 import uno.model.game.api.TurnManager;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ public class TurnManagerImpl implements TurnManager {
 
     private static final Random RANDOM = new Random();
 
-    private final List<Player> players;
+    private final List<AbstractPlayer> players;
     private int currentPlayerIndex;
     private boolean isClockwise; // true = Clockwise, false = Counter-Clockwise
     private boolean hasDrawnThisTurn;
@@ -26,7 +26,7 @@ public class TurnManagerImpl implements TurnManager {
      * 
      * @param players The list of participants.
      */
-    public TurnManagerImpl(final List<Player> players) {
+    public TurnManagerImpl(final List<AbstractPlayer> players) {
         this.players = new ArrayList<>(players);
 
         // Randomly choose the starting player
@@ -41,7 +41,7 @@ public class TurnManagerImpl implements TurnManager {
      * {@inheritDoc}
      */
     @Override
-    public Player getCurrentPlayer() {
+    public AbstractPlayer getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
 
@@ -81,7 +81,7 @@ public class TurnManagerImpl implements TurnManager {
      * @param game The current game instance.
      */
     private void checkAndApplyStartTurnPenalty(final Game game) {
-        final Player player = getCurrentPlayer();
+        final AbstractPlayer player = getCurrentPlayer();
 
         // If player starts turn with 1 card and didn't call UNO -> Penalty
         if (player.getHandSize() == 1 && !player.isHasCalledUno()) {
@@ -106,7 +106,7 @@ public class TurnManagerImpl implements TurnManager {
      * {@inheritDoc}
      */
     @Override
-    public Player peekNextPlayer() {
+    public AbstractPlayer peekNextPlayer() {
         final int totalSteps = this.skipSize + 1;
         final int n = players.size();
         final int direction = isClockwise ? 1 : -1;

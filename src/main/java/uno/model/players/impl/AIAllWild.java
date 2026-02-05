@@ -10,16 +10,17 @@ import uno.model.cards.attributes.CardValue;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.Game;
 import uno.model.game.api.GameState;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 
 /**
  * AI implementation for UNO All Wild.
  * Focuses on aggressive targeting and strategic use of "Forced Swap".
  */
-public class AIAllWild extends AIPlayer {
+public class AIAllWild extends AbstractAIPlayer {
 
     /**
      * Constructor for AIAllWild.
+     * 
      * @param name The name of the player.
      */
     public AIAllWild(final String name) {
@@ -36,7 +37,7 @@ public class AIAllWild extends AIPlayer {
 
         // 2. Controllo Extra: Se il gioco aspetta un giocatore (es. per Swap o Targeted Draw)
         if (game.getGameState() == GameState.WAITING_FOR_PLAYER) {
-            final Player target = findBestTarget(game);
+            final AbstractPlayer target = findBestTarget(game);
             if (target != null) {
                 game.chosenPlayer(target);
                 game.aiAdvanceTurn();
@@ -56,7 +57,7 @@ public class AIAllWild extends AIPlayer {
         }
 
         // Analisi bersaglio migliore (chi ha meno carte)
-        final Player bestTarget = findBestTarget(game);
+        final AbstractPlayer bestTarget = findBestTarget(game);
 
         // --- 1. LOGICA SWAP (Scambio Forzato) ---
         // Cerchiamo se abbiamo la carta scambio
@@ -67,7 +68,7 @@ public class AIAllWild extends AIPlayer {
         if (swapCard.isPresent() && bestTarget != null && this.getHandSize() > bestTarget.getHandSize()) {
             // CONVIENE SCAMBIARE? 
             // Sì, se io ho PIÙ carte del bersaglio (gli rifilo il mio mazzo grosso)
-                return swapCard;
+            return swapCard;
         }
 
         // --- 2. LOGICA ATTACCO (Priorità alle carte cattive) ---
@@ -106,18 +107,20 @@ public class AIAllWild extends AIPlayer {
 
     /**
      * Find the best target player (the one with the fewest cards).
+     * 
      * @param game Current game instance.
      * @return The best target player.
-    */
-    private Player findBestTarget(final Game game) {
+     */
+    private AbstractPlayer findBestTarget(final Game game) {
         return game.getPlayers().stream()
                 .filter(p -> !p.equals(this)) 
-                .min(Comparator.comparingInt(Player::getHandSize))
+                .min(Comparator.comparingInt(AbstractPlayer::getHandSize))
                 .orElse(null);
     }
 
     /**
      * Check if the card is an aggressive type.
+     * 
      * @param val Card value to check.
      * @return true if aggressive.
      */
@@ -131,6 +134,7 @@ public class AIAllWild extends AIPlayer {
 
     /**
      * Get playable cards from hand.
+     * 
      * @param game Current game instance.
      * @return List of playable cards.
      */

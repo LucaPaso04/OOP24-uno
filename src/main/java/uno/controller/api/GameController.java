@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.types.api.Card;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.view.api.GameModelObserver;
 
 /**
@@ -22,6 +22,7 @@ public interface GameController extends GameViewObserver, GameModelObserver {
 
     /**
      * Handles the action of a player attempting to play a specific card.
+     * 
      * @param card The card the player intends to play.
      */
     @Override
@@ -49,6 +50,7 @@ public interface GameController extends GameViewObserver, GameModelObserver {
     /**
      * Handles the event where a color has been selected from the UI 
      * (e.g., after playing a Wild card).
+     * 
      * @param color The selected color.
      */
     @Override
@@ -57,10 +59,11 @@ public interface GameController extends GameViewObserver, GameModelObserver {
     /**
      * Handles the selection of a target player 
      * (e.g., for specific card effects in variants).
+     * 
      * @param player The selected target player.
      */
     @Override
-    void onPlayerChosen(Player player);
+    void onPlayerChosen(AbstractPlayer player);
 
     /**
      * Handles the logic for exiting the current game session and returning to the main menu.

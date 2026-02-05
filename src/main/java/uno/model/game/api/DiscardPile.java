@@ -15,12 +15,14 @@ public interface DiscardPile {
     /**
      * Places a card on top of the pile.
      * This becomes the new active card that players must match.
+     * 
      * @param card The card to add. Must not be null.
      */
     void addCard(Card card);
 
     /**
      * Retrieves the card currently on top of the pile without removing it.
+     * 
      * @return An {@link Optional} containing the top card, or {@code empty} if the pile is empty.
      */
     Optional<Card> getTopCard();
@@ -29,6 +31,7 @@ public interface DiscardPile {
      * Extracts all cards from the pile EXCEPT the top one.
      * This is used when the Draw Deck is empty. The pile is cleared (leaving only the top card),
      * and the extracted cards are returned to be shuffled into the new Draw Deck.
+     * 
      * @return A list of cards to be recycled.
      */
     List<Card> takeAllExceptTop();
@@ -36,18 +39,21 @@ public interface DiscardPile {
     /**
      * Returns a safe copy of all cards currently in the pile.
      * Useful for the View/GUI to render the stack or for debug logging.
+     * 
      * @return A list of all cards.
      */
     List<Card> getSnapshot();
 
     /**
      * Checks if the pile is empty.
+     * 
      * @return true if no cards are in the pile.
      */
     boolean isEmpty();
 
     /**
      * Returns the current number of cards in the pile.
+     * 
      * @return The size of the pile.
      */
     int size();

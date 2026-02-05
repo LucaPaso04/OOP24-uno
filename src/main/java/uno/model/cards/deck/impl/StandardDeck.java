@@ -18,14 +18,15 @@ import uno.model.game.api.Game;
 
 /**
  * Concrete implementation of a Standard UNO Deck (108 cards).
- * It extends {@link DeckImpl} and initializes the cards in the constructor
+ * It extends {@link AbstractDeckImpl} and initializes the cards in the constructor
  * by creating {@link DoubleSidedCard} instances where the back side is always
  * the standard {@link BackSideBehavior}.
  */
-public class StandardDeck extends DeckImpl<Card> {
+public class StandardDeck extends AbstractDeckImpl<Card> {
 
     /**
      * Constructs a new StandardDeck by populating it with the standard UNO cards.
+     * 
      * @param logger logger
      */
     public StandardDeck(final GameLogger logger) {
@@ -87,6 +88,7 @@ public class StandardDeck extends DeckImpl<Card> {
     /**
      * Helper method to wrap a behavior into a standard DoubleSidedCard.
      * Uses the parent's addCard() method to insert it into the protected list.
+     * 
      * @param frontBehavior The behavior for the front side of the card.
      */
     private void createAndAddCard(final CardSideBehavior frontBehavior) {

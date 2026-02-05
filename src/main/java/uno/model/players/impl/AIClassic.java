@@ -14,7 +14,7 @@ import uno.model.game.api.Game;
 /**
  * AI player implementation for classic UNO strategy.
  */
-public class AIClassic extends AIPlayer {
+public class AIClassic extends AbstractAIPlayer {
 
     private static final int NUMBER_ONE = 1;
     private static final int NUMBER_TWO = 1;
@@ -28,6 +28,7 @@ public class AIClassic extends AIPlayer {
 
     /**
      * Constructor for AIClassic.
+     * 
      * @param name The name of the AI player.
      */
     public AIClassic(final String name) {
@@ -157,6 +158,7 @@ public class AIClassic extends AIPlayer {
 
     /**
      * Find the best offensive card to play when an opponent has UNO.
+     * 
      * @param actionCards available action cards
      * @param wildCards  available wild cards
      * @param game The current game instance.
@@ -169,7 +171,6 @@ public class AIClassic extends AIPlayer {
                 return card;
             }
         }
-
 
         for (final Card card : actionCards) {
             if (card.getValue(game) == CardValue.DRAW_TWO) {
@@ -192,6 +193,7 @@ public class AIClassic extends AIPlayer {
 
     /**
      * Check if any opponent has only one card left (UNO).
+     * 
      * @param game The current game instance.
      * @return True if any opponent has UNO, false otherwise.
      */
@@ -206,6 +208,7 @@ public class AIClassic extends AIPlayer {
 
     /**
      * Get all playable cards from hand.
+     * 
      * @param game The current game instance.
      * @return List of playable cards.
      */
@@ -221,6 +224,7 @@ public class AIClassic extends AIPlayer {
 
     /**
      * Check if a card is an action card.
+     * 
      * @param value The card value.
      * @return True if it's an action card, false otherwise.
      */
@@ -234,6 +238,7 @@ public class AIClassic extends AIPlayer {
 
     /**
      * Get priority of action cards for decision making.
+     * 
      * @param value The card value.
      * @return The priority score.
      */
@@ -250,6 +255,7 @@ public class AIClassic extends AIPlayer {
 
     /**
      * Get numeric value of a card for comparison.
+     * 
      * @param card The card to evaluate.
      * @param game The current game instance.
      * @return The numeric value of the card.

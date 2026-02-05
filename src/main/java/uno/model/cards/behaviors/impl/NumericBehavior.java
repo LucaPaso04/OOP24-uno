@@ -18,6 +18,7 @@ public class NumericBehavior implements CardSideBehavior {
 
     /**
      * Constructs a standard numeric card behavior.
+     * 
      * @param color The card color (e.g., RED, BLUE).
      * @param value The numeric value (ZERO to NINE).
      */

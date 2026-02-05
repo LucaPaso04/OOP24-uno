@@ -1,7 +1,7 @@
 package uno.view.scenes.api;
 
 import uno.controller.api.GameViewObserver;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.view.api.GameModelObserver; // Assumendo che questa sia l'interfaccia Observer generica
 
 import java.util.List;
@@ -47,5 +47,5 @@ public interface GameScene extends GameModelObserver {
      *
      * @param opponents The list of available opponents to choose from.
      */
-    void showPlayerChooser(List<Player> opponents);
+    void showPlayerChooser(List<AbstractPlayer> opponents);
 }

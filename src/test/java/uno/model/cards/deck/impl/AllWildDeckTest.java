@@ -15,10 +15,9 @@ import uno.model.cards.deck.api.Deck;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.Game;
 import uno.model.game.impl.GameImpl;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.model.players.impl.AIClassic;
 import uno.model.utils.api.GameLogger;
-import uno.model.utils.impl.GameLoggerImpl;
 
 class AllWildDeckTest {
 
@@ -33,9 +32,9 @@ class AllWildDeckTest {
     @BeforeEach
     void setUp() {
         // Setup logger e giocatori
-        final GameLogger logger = new GameLoggerImpl(String.valueOf(System.currentTimeMillis()));
+        final GameLogger logger = new uno.model.utils.impl.TestLogger();
         final AIClassic aiClassic = new AIClassic("AI-Bot");
-        final List<Player> players = new ArrayList<>();
+        final List<AbstractPlayer> players = new ArrayList<>();
         players.add(aiClassic);
 
         // Inizializziamo il mazzo AllWild
@@ -100,7 +99,7 @@ class AllWildDeckTest {
 
     @Test
     void testShuffleChangesOrder() {
-        final GameLogger logger = new GameLoggerImpl("shuffle-test");
+        final GameLogger logger = new uno.model.utils.impl.TestLogger();
         final Deck<Card> deck1 = new AllWildDeck(logger);
         final Deck<Card> deck2 = new AllWildDeck(logger);
 
@@ -127,7 +126,7 @@ class AllWildDeckTest {
 
         // Simuliamo pila degli scarti
         final List<Card> discardPile = new ArrayList<>();
-        final AllWildDeck tempDeck = new AllWildDeck(new GameLoggerImpl("temp"));
+        final AllWildDeck tempDeck = new AllWildDeck(new uno.model.utils.impl.TestLogger());
         for (int i = 0; i < DISCARD_SIZE; i++) {
             tempDeck.draw().ifPresent(discardPile::add);
         }

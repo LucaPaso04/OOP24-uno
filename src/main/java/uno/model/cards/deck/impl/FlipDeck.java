@@ -31,7 +31,7 @@ import java.util.Locale;
  * {@link WildBehavior})
  * based on the card values defined in the configuration.
  */
-public class FlipDeck extends DeckImpl<Card> {
+public class FlipDeck extends AbstractDeckImpl<Card> {
 
     private static final String RESOURCE_PATH = "/json/flipmap.json";
 
@@ -106,7 +106,6 @@ public class FlipDeck extends DeckImpl<Card> {
      * @param face The card face data (color and value).
      * @return The corresponding CardSideBehavior instance.
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings({ "DB_DUPLICATE_BRANCHES", "DB_DUPLICATE_SWITCH_CLAUSES" })
     private CardSideBehavior createBehavior(final CardFace face) {
         final CardColor c = face.color();
         final CardValue v = face.value();
@@ -116,17 +115,12 @@ public class FlipDeck extends DeckImpl<Card> {
             switch (v) {
                 // LIGHT SIDE: Wild (Standard), Wild Draw 2
                 case WILD:
+                case WILD_DRAW_COLOR:
                     // Value, Draw, ColorChoice, DrawUntilColor, Skip
                     return new WildBehavior(v, 0);
                 case WILD_DRAW_TWO:
                     // Draw 2, ColorChoice=True
                     return new WildBehavior(v, 2);
-
-                // DARK SIDE: Wild (Standard), Wild Draw Color
-                case WILD_DRAW_COLOR:
-                    // The "Mean" Card: Draw ?, ColorChoice=True, DrawUntilColor=TRUE, Skip=1
-                    return new WildBehavior(v, 0);
-
                 default:
                     return new WildBehavior(v, 0);
             }

@@ -18,6 +18,7 @@ public class FlipBehavior implements CardSideBehavior {
 
     /**
      * Constructs a Flip behavior.
+     * 
      * @param color The specific color of the Flip card (e.g., RED, TEAL).
      * @param value The value, typically {@code FLIP}.
      */

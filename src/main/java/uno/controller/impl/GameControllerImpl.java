@@ -4,9 +4,9 @@ import uno.controller.api.GameController;
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.GameState;
-import uno.model.players.impl.AIPlayer;
+import uno.model.players.impl.AbstractAIPlayer;
 import uno.model.players.impl.HumanPlayer;
-import uno.model.players.api.Player;
+import uno.model.players.api.AbstractPlayer;
 import uno.view.scenes.impl.MenuSceneImpl;
 import uno.model.game.api.Game;
 import uno.view.scenes.api.GameScene;
@@ -19,6 +19,7 @@ import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Optional;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Concrete implementation of the GameController interface.
@@ -41,13 +42,14 @@ public class GameControllerImpl implements GameController {
     /**
      * Costruttore del GameControllerImpl.
      * 
-     * @param gameModel
-     * @param gameScene
-     * @param mainFrame
-     * @param logger
+     * @param gameModel model
+     * @param gameScene scene
+     * @param mainFrame frame
+     * @param logger logger
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings({ "EI_EXPOSE_REP2",
-            "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" })
+    @SuppressFBWarnings(
+    value = "EI_EXPOSE_REP2",
+    justification = "Il controller deve operare sulle istanze condivise di Model e View (MVC Pattern)")
     public GameControllerImpl(final Game gameModel, final GameScene gameScene,
             final GameFrame mainFrame, final GameLogger logger) {
         this.gameModel = gameModel;
@@ -64,7 +66,7 @@ public class GameControllerImpl implements GameController {
     @Override
     public void showStartingPlayerPopupAndStartGame() {
         // 1. Otteniamo il giocatore che inizia (scelto a caso dal TurnManager)
-        final Player startingPlayer = gameModel.getCurrentPlayer();
+        final AbstractPlayer startingPlayer = gameModel.getCurrentPlayer();
         final String msg = "Inizia: " + startingPlayer.getName();
 
         // 2. Creiamo il pannello del messaggio
@@ -110,7 +112,7 @@ public class GameControllerImpl implements GameController {
             gameScene.setHumanInputEnabled(false); // Disabilita tutti i bottoni
 
             // Mostra il messaggio di vittoria
-            final Player winner = gameModel.getWinner();
+            final AbstractPlayer winner = gameModel.getWinner();
             gameScene.showWinnerPopup(winner.getName());
             return; // Non fare nient'altro
         }
@@ -142,10 +144,10 @@ public class GameControllerImpl implements GameController {
             return;
         }
 
-        final Player currentPlayer = gameModel.getCurrentPlayer();
+        final AbstractPlayer currentPlayer = gameModel.getCurrentPlayer();
 
         // Controlla se il giocatore è un'istanza di AIPlayer
-        if (currentPlayer instanceof AIPlayer) {
+        if (currentPlayer instanceof AbstractAIPlayer) {
 
             // Disabilita la UI umana per evitare input concorrenti
             gameScene.setHumanInputEnabled(false);
@@ -275,7 +277,7 @@ public class GameControllerImpl implements GameController {
      * @param player Il giocatore scelto.
      */
     @Override
-    public void onPlayerChosen(final Player player) {
+    public void onPlayerChosen(final AbstractPlayer player) {
         gameModel.chosenPlayer(player);
     }
 }

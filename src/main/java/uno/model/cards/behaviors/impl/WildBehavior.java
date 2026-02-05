@@ -4,6 +4,7 @@ import uno.model.cards.attributes.CardColor;
 import uno.model.cards.attributes.CardValue;
 import uno.model.cards.behaviors.api.CardSideBehavior;
 import uno.model.game.api.Game;
+
 /**
  * Implementation of {@link CardSideBehavior} for Wild cards.
  * This class handles all "Jolly" type cards, including Standard Wilds,
@@ -22,6 +23,7 @@ public class WildBehavior implements CardSideBehavior {
     /**
      * Master Constructor.
      * Allows full configuration of a Wild Card's behavior.
+     * 
      * @param value                The card value (name).
      * @param drawAmount           How many cards the next player draws (0 if none).
      * @param requiresColorChoice  True if the player must choose a color (Standard Wilds).
@@ -48,6 +50,7 @@ public class WildBehavior implements CardSideBehavior {
     /**
      * Constructor for Standard Wilds (Wild, Wild Draw 4).
      * Automatically assumes color choice is needed and no specific target player.
+     * 
      * @param value      The card value (name).
      * @param drawAmount How many cards the next player draws (0 if none).
      */
@@ -58,6 +61,7 @@ public class WildBehavior implements CardSideBehavior {
     /**
      * Constructor for "All Wild" variants or special cards.
      * Allows defining if color choice is needed explicitly.
+     * 
      * @param value                The card value (name).
      * @param drawAmount           How many cards the next player draws (0 if none).
      * @param requiresColorChoice  True if the player must choose a color.
@@ -115,6 +119,7 @@ public class WildBehavior implements CardSideBehavior {
 
     /**
      * Returns the number of cards this Wild card forces the next player to draw.
+     * 
      * @return The draw amount.
      */
     public int getDrawAmount() { 

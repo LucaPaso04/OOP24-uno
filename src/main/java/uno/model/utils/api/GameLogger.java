@@ -8,6 +8,7 @@ public interface GameLogger {
 
     /**
      * Records a specific action performed by a player during the game.
+     * 
      * @param playerName  The name of the player performing the action.
      * @param actionType  The type of action (e.g., "PLAY_CARD", "DRAW", "UNO_CALL").
      * @param cardDetails Specifics about the card involved (e.g., "RED_FIVE"), or "N/A".
@@ -17,8 +18,9 @@ public interface GameLogger {
 
     /**
      * Records errors.
-     * @param context
-     * @param e
+     * 
+     * @param context context
+     * @param e exception
      */
     void logError(String context, Exception e);
 }

@@ -18,6 +18,7 @@ public class DrawBehavior implements CardSideBehavior {
 
     /**
      * Constructs a behavior that forces a draw action.
+     * 
      * @param color        The color of the card side.
      * @param value        The face value (e.g., DRAW_TWO, WILD_DRAW_FOUR).
      * @param amountToDraw The number of cards the victim must draw (e.g., 2, 4, 5).
@@ -56,6 +57,7 @@ public class DrawBehavior implements CardSideBehavior {
     /**
      * Specific getter for this behavior.
      * Useful for AI evaluation (e.g., determining threat level) or scoring.
+     * 
      * @return The number of cards this behavior forces to draw.
      */
     public int getDrawAmount() {
