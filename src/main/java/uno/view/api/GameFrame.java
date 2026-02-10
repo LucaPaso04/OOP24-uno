@@ -1,6 +1,6 @@
 package uno.view.api;
 
-import javax.swing.JPanel;
+import java.awt.Container;
 
 /**
  * Interface representing the main application window.
@@ -12,9 +12,9 @@ public interface GameFrame {
     /**
      * Replaces the currently displayed content with a new scene.
      *
-     * @param scene The JPanel representing the new scene to display.
+     * @param scene The Container representing the new scene to display.
      */
-    void showScene(JPanel scene);
+    void showScene(Container scene);
 
     /**
      * Controls the visibility of the main window.

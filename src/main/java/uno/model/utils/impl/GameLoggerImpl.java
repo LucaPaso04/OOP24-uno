@@ -17,6 +17,9 @@ import java.util.Optional;
  */
 public class GameLoggerImpl implements GameLogger {
 
+    private static final int MAX_LOG_FILES = 5;
+    private static final String UNO = "UNO";
+
     private final String filePath;
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -53,10 +56,31 @@ public class GameLoggerImpl implements GameLogger {
                     if (!parent.mkdirs()) {
                         // Se mkdirs fallisce (es. permessi negati), logghiamo l'errore
                         // Qui puoi usare il logger di sistema o il tuo
-                        java.util.logging.Logger.getLogger("UNO")
+                        java.util.logging.Logger.getLogger(UNO)
                                 .warning("Impossibile creare la directory per i log: " + parent.getPath());
                     }
                 });
+
+        cleanOldLogs(logFile.getParentFile());
+    }
+
+    private void cleanOldLogs(final File logDir) {
+        if (logDir == null || !logDir.exists() || !logDir.isDirectory()) {
+            return;
+        }
+
+        final File[] logFiles = logDir.listFiles((dir, name) -> name.startsWith("log_match_") && name.endsWith(".txt"));
+
+        if (logFiles != null && logFiles.length >= MAX_LOG_FILES) {
+            java.util.Arrays.sort(logFiles, java.util.Comparator.comparingLong(File::lastModified));
+
+            for (int i = 0; i < logFiles.length - MAX_LOG_FILES + 1; i++) {
+                if (!logFiles[i].delete()) {
+                    java.util.logging.Logger.getLogger(UNO)
+                            .warning("Impossibile eliminare il vecchio file di log: " + logFiles[i].getPath());
+                }
+            }
+        }
     }
 
     /**
@@ -86,7 +110,7 @@ public class GameLoggerImpl implements GameLogger {
     public void logError(final String context, final Exception e) {
         this.logAction("SYSTEM_ERROR", context, e.getClass().getSimpleName(), e.getMessage());
 
-        java.util.logging.Logger.getLogger("UNO")
+        java.util.logging.Logger.getLogger(UNO)
                 .log(java.util.logging.Level.SEVERE, context, e);
     }
 }

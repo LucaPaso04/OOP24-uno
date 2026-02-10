@@ -4,6 +4,11 @@ import java.util.List;
 
 import uno.model.players.api.AbstractPlayer;
 
+/**
+ * Interface for managing the scoring system in the Uno game. It defines the method
+ * to calculate the points for a round based on the winner and the opponents' hands.
+ */
+@FunctionalInterface
 public interface ScoreManager {
     /**
      * Calculates the total points from all opponents' hands.
@@ -13,5 +18,5 @@ public interface ScoreManager {
      * @param game    The current game context.
      * @return The total points calculated from opponents' hands.
      */
-    int calculateRoundPoints(final AbstractPlayer winner, final List<AbstractPlayer> players, final Game game);
+    int calculateRoundPoints(AbstractPlayer winner, List<AbstractPlayer> players, Game game);
 }

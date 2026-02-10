@@ -1,9 +1,9 @@
 package uno.model.cards.behaviors.impl;
 
+import uno.model.game.api.Game;
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.attributes.CardValue;
 import uno.model.cards.behaviors.api.CardSideBehavior;
-import uno.model.game.api.Game;
 
 /**
  * Implementation of {@link CardSideBehavior} for standard numeric cards (0-9).
@@ -33,9 +33,7 @@ public class NumericBehavior implements CardSideBehavior {
     @Override
     public void executeEffect(final Game game) {
         // Intentionally empty.
-        // Numeric cards do not modify game flow (no skips, no draws).
-        // The Game controller handles the standard "next turn" progression automatically
-        // after this method returns.
+        // Numeric cards have no special effect when played.
     }
 
     /**

@@ -1,23 +1,31 @@
 package uno.controller.impl;
 
 import uno.controller.api.MenuController;
+import uno.controller.api.GameController;
+import uno.model.game.api.Game;
+import uno.model.game.api.GameMode;
+import uno.model.game.api.GameRules;
+import uno.model.game.api.GameFactory;
+import uno.model.game.impl.GameRulesImpl;
+import uno.model.game.impl.GameFactoryImpl;
 import uno.model.players.api.AbstractPlayer;
 import uno.model.players.impl.AIAllWild;
 import uno.model.players.impl.AIClassic;
 import uno.model.players.impl.AIFlip;
 import uno.model.players.impl.HumanPlayer;
+import uno.view.api.GameFrame;
+import uno.view.scenes.api.GameScene;
+import uno.view.scenes.api.RulesScene;
+import uno.view.scenes.api.MenuScene;
 import uno.view.scenes.impl.GameSceneImpl;
 import uno.view.scenes.impl.MenuSceneImpl;
 import uno.view.scenes.impl.RulesSceneImpl;
-import uno.model.game.api.Game;
-import uno.model.game.api.GameRules;
-import uno.model.game.impl.GameRulesImpl;
-import uno.view.api.GameFrame;
 
-import uno.model.game.impl.GameFactoryImpl;
-import uno.model.game.api.GameMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.Container;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Concrete implementation of the MenuController.
@@ -26,26 +34,27 @@ import java.util.List;
  */
 public class MenuControllerImpl implements MenuController {
 
-    private static final String HUMAN_NAME = "Giocatore 1";
+    private static final String HUMAN_NAME = "Player";
     private static final String AI_ONE_NAME = "IA-1";
     private static final String AI_TWO_NAME = "IA-2";
     private static final String AI_THREE_NAME = "IA-3";
+
     private final GameFrame frame;
     private GameRules currentRules;
 
     /**
      * Constructor for MenuControllerImpl.
      * 
-     * @param frame frame
+     * @param frame the main application frame to control scene transitions
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("EI_EXPOSE_REP2")
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public MenuControllerImpl(final GameFrame frame) {
         this.frame = frame;
         this.currentRules = GameRulesImpl.defaultRules();
     }
 
     /**
-     * Handles the action of starting a Classic game.
+     * {@inheritDoc}
      */
     @Override
     public void onStartClassicGame() {
@@ -53,7 +62,7 @@ public class MenuControllerImpl implements MenuController {
     }
 
     /**
-     * Handles the action of starting a Flip game.
+     * {@inheritDoc}
      */
     @Override
     public void onStartFlipGame() {
@@ -61,41 +70,44 @@ public class MenuControllerImpl implements MenuController {
     }
 
     /**
-     * Handles the action of starting an All Wild game.
+     * {@inheritDoc}
      */
     @Override
     public void onStartAllWildGame() {
         startGame(GameMode.ALL_WILD);
     }
 
+    /**
+     * Starts a new game based on the selected Game Mode, initializing the Model,
+     * View, and Controller accordingly.
+     * 
+     * @param gameMode the selected Game Mode
+     */
     private void startGame(final GameMode gameMode) {
-        // 1. Crea i giocatori
         final List<AbstractPlayer> players = createPlayers(gameMode);
 
-        // 2. Crea la Factory e il Gioco
-        // La factory gestisce Deck, GameImpl e Setup
-        final GameFactoryImpl factory = new GameFactoryImpl(currentRules);
+        final GameFactory factory = new GameFactoryImpl(currentRules);
         final Game gameModel = factory.createGame(HUMAN_NAME, gameMode, players);
+        final GameScene gameScene = new GameSceneImpl(gameModel);
+        final GameController gameController = new GameControllerImpl(gameModel, gameScene, frame);
 
-        // 3. Crea la View del Gioco (GameScene)
-        final GameSceneImpl gameScene = new GameSceneImpl(gameModel);
-
-        // 4. Crea il Controller del Gioco
-        // Use factory.getLogger() to share the logger
-        final GameControllerImpl gameController = new GameControllerImpl(gameModel, gameScene, frame);
-
-        // 5. Collega la Scena al suo Controller
         gameScene.setObserver(gameController);
 
-        // 6. Mostra la nuova scena
-        frame.showScene(gameScene);
+        frame.showScene((Container) gameScene);
 
         gameController.showStartingPlayerPopupAndStartGame();
     }
 
+    /**
+     * Creates a list of players based on the selected Game Mode. The first player is
+     * always a Human Player, followed by three AI Players of the appropriate type.
+     * 
+     * @param gameMode the selected Game Mode
+     * @return a list of players for the game
+     */
     private List<AbstractPlayer> createPlayers(final GameMode gameMode) {
         final List<AbstractPlayer> players = new ArrayList<>();
-        players.add(new HumanPlayer(HUMAN_NAME)); // Giocatore umano
+        players.add(new HumanPlayer(HUMAN_NAME));
 
         switch (gameMode) {
             case FLIP:
@@ -108,7 +120,7 @@ public class MenuControllerImpl implements MenuController {
                 players.add(new AIAllWild(AI_TWO_NAME));
                 players.add(new AIAllWild(AI_THREE_NAME));
                 break;
-            default: // Classic
+            default:
                 players.add(new AIClassic(AI_ONE_NAME));
                 players.add(new AIClassic(AI_TWO_NAME));
                 players.add(new AIClassic(AI_THREE_NAME));
@@ -118,26 +130,26 @@ public class MenuControllerImpl implements MenuController {
     }
 
     /**
-     * Handles the action of quitting the application.
+     * {@inheritDoc}
      */
     @Override
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DM_EXIT")
+    @SuppressFBWarnings("DM_EXIT")
     public void onQuit() {
         System.exit(0);
     }
 
     /**
-     * Handles the action of opening the rules scene.
+     * {@inheritDoc}
      */
     @Override
     public void onOpenRules() {
-        final RulesSceneImpl rulesScene = new RulesSceneImpl(currentRules);
+        final RulesScene rulesScene = new RulesSceneImpl(currentRules);
         rulesScene.setObserver(this);
-        frame.showScene(rulesScene);
+        frame.showScene((Container) rulesScene);
     }
 
     /**
-     * Handles saving the custom rules.
+     * {@inheritDoc}
      */
     @Override
     public void onSaveRules(final GameRules rules) {
@@ -145,13 +157,12 @@ public class MenuControllerImpl implements MenuController {
     }
 
     /**
-     * Handles returning to the main menu.
+     * {@inheritDoc}
      */
     @Override
     public void onBackToMenu() {
-        // Re-create the Menu Scene (stateless usually)
-        final MenuSceneImpl menuScene = new MenuSceneImpl();
+        final MenuScene menuScene = new MenuSceneImpl();
         menuScene.setObserver(this);
-        frame.showScene(menuScene);
+        frame.showScene((Container) menuScene);
     }
 }

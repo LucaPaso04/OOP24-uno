@@ -12,6 +12,8 @@ import uno.model.utils.api.GameLogger;
 import java.util.List;
 import java.util.Optional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Concrete implementation of DeckHandler.
  */
@@ -23,8 +25,18 @@ public class DeckHandlerImpl implements DeckHandler {
     private final GameLogger logger;
     private final String loggerPlayerName;
 
-    public DeckHandlerImpl(Deck<Card> drawDeck, DiscardPile discardPile, GameRules rules, GameLogger logger,
-            String loggerPlayerName) {
+    /**
+     * Constructor for DeckHandlerImpl.
+     * 
+     * @param drawDeck the draw deck
+     * @param discardPile discard pile
+     * @param rules selected game rules
+     * @param logger logger
+     * @param loggerPlayerName the name of the player for logging purposes
+     */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    public DeckHandlerImpl(final Deck<Card> drawDeck, final DiscardPile discardPile, final GameRules rules, 
+            final GameLogger logger, final String loggerPlayerName) {
         this.drawDeck = drawDeck;
         this.discardPile = discardPile;
         this.rules = rules;
@@ -32,6 +44,9 @@ public class DeckHandlerImpl implements DeckHandler {
         this.loggerPlayerName = loggerPlayerName;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean drawCardForPlayer(final AbstractPlayer player, final GameContext game) {
         if (drawDeck.isEmpty()) {
@@ -56,6 +71,9 @@ public class DeckHandlerImpl implements DeckHandler {
         return true;
     }
 
+    /**
+     * Reshuffles the discard pile back into the draw deck, leaving the top card of the discard pile intact.
+     */
     private void reshuffleDiscardPile() {
         final List<Card> cardsToReshuffle = discardPile.takeAllExceptTop();
 
@@ -68,12 +86,20 @@ public class DeckHandlerImpl implements DeckHandler {
         drawDeck.shuffle();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public Deck<Card> getDrawDeck() {
         return drawDeck;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public DiscardPile getDiscardPile() {
         return discardPile;
     }

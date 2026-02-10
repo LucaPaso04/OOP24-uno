@@ -24,10 +24,11 @@ import uno.model.players.impl.HumanPlayer;
 
 class GameSetupTest {
 
+    private static final int INITIAL_HAND_SIZE = 7;
+
     private GameSetupImpl setup;
     private MockGame game;
     private MockDiscardPile discardPile;
-    private Deck<Card> deck;
     private List<AbstractPlayer> players;
 
     @BeforeEach
@@ -39,21 +40,21 @@ class GameSetupTest {
         players.add(new HumanPlayer("P1"));
         players.add(new HumanPlayer("P2"));
 
-        deck = new MockDeck();
+        final Deck<Card> deck = new MockDeck();
 
         setup = new GameSetupImpl(game, deck, discardPile, players);
     }
 
     @Test
-    void testInitializeGame_DealsCards() {
+    void testInitializeGameDealsCards() {
         setup.initializeGame(false);
 
-        assertEquals(7, players.get(0).getHandSize());
-        assertEquals(7, players.get(1).getHandSize());
+        assertEquals(INITIAL_HAND_SIZE, players.get(0).getHandSize());
+        assertEquals(INITIAL_HAND_SIZE, players.get(1).getHandSize());
     }
 
     @Test
-    void testInitializeGame_Standard_FirstCard() {
+    void testInitializeGameStandardFirstCard() {
         setup.initializeGame(false);
 
         assertEquals(1, discardPile.cards.size());
@@ -61,26 +62,26 @@ class GameSetupTest {
     }
 
     @Test
-    void testInitializeGame_AllWild() {
+    void testInitializeGameAllWild() {
         setup.initializeGame(true);
         assertTrue(game.setCurrentColorCalled);
     }
 
     static class MockGame implements Game {
-        boolean setCurrentColorCalled;
+        private boolean setCurrentColorCalled;
 
         @Override
-        public void logSystemAction(String type, String action, String description) {
+        public void logSystemAction(final String type, final String action, final String description) {
         }
 
         @Override
-        public void setCurrentColor(CardColor c) {
+        public void setCurrentColor(final CardColor c) {
             setCurrentColorCalled = true;
         }
 
         // Complete interface implementation
         @Override
-        public void addObserver(GameModelObserver observer) {
+        public void addObserver(final GameModelObserver observer) {
         }
 
         @Override
@@ -88,7 +89,7 @@ class GameSetupTest {
         }
 
         @Override
-        public void playCard(Optional<Card> card) {
+        public void playCard(final Optional<Card> card) {
         }
 
         @Override
@@ -100,24 +101,24 @@ class GameSetupTest {
         }
 
         @Override
-        public void callUno(AbstractPlayer player) {
+        public void callUno(final AbstractPlayer player) {
         }
 
         @Override
-        public void setColor(CardColor color) {
+        public void setColor(final CardColor color) {
             setCurrentColorCalled = true;
         }
 
         @Override
-        public void chosenPlayer(AbstractPlayer player) {
+        public void chosenPlayer(final AbstractPlayer player) {
         }
 
         @Override
-        public void skipPlayers(int n) {
+        public void skipPlayers(final int n) {
         }
 
         @Override
-        public void makeNextPlayerDraw(int amount) {
+        public void makeNextPlayerDraw(final int amount) {
         }
 
         @Override
@@ -137,11 +138,11 @@ class GameSetupTest {
         }
 
         @Override
-        public void drawCardForPlayer(AbstractPlayer player) {
+        public void drawCardForPlayer(final AbstractPlayer player) {
         }
 
         @Override
-        public void drawUntilColorChosenCard(CardColor color) {
+        public void drawUntilColorChosenCard(final CardColor color) {
         }
 
         @Override
@@ -186,7 +187,7 @@ class GameSetupTest {
 
         @Override
         public List<AbstractPlayer> getPlayers() {
-            return null;
+            return List.of();
         }
 
         @Override
@@ -205,7 +206,7 @@ class GameSetupTest {
         }
 
         @Override
-        public boolean hasCurrentPlayerDrawn(AbstractPlayer player) {
+        public boolean hasCurrentPlayerDrawn(final AbstractPlayer player) {
             return false;
         }
 
@@ -224,10 +225,10 @@ class GameSetupTest {
     }
 
     static class MockDiscardPile implements DiscardPile {
-        List<Card> cards = new ArrayList<>();
+        private final List<Card> cards = new ArrayList<>();
 
         @Override
-        public void addCard(Card card) {
+        public void addCard(final Card card) {
             cards.add(card);
         }
 
@@ -243,7 +244,7 @@ class GameSetupTest {
 
         @Override
         public List<Card> takeAll() {
-            List<Card> allCards = new ArrayList<>(cards);
+            final List<Card> allCards = new ArrayList<>(cards);
             cards.clear();
             return allCards;
         }
@@ -268,7 +269,7 @@ class GameSetupTest {
         private final List<Card> cards = new ArrayList<>();
 
         @Override
-        public void addCard(Card c) {
+        public void addCard(final Card c) {
             cards.add(c);
         }
 
@@ -302,7 +303,7 @@ class GameSetupTest {
         }
 
         @Override
-        public void refill(List<Card> newCards) {
+        public void refill(final List<Card> newCards) {
             cards.addAll(newCards);
         }
 

@@ -13,7 +13,7 @@ import java.util.Optional;
  * Abstract implementation of the {@link Deck} interface.
  * This class handles the underlying storage (ArrayList) and standard operations
  * like shuffling and drawing, while delegating the specific deck composition
- * to the concrete subclasses (e.g., UnoDeck).
+ * to the concrete subclasses.
  * 
  * @param <T> The type of Card this deck contains.
  */
@@ -27,7 +27,7 @@ public abstract class AbstractDeckImpl<T extends Card> implements Deck<T> {
      * Concrete subclasses must call {@link #refill(List)} or {@link #addCard(Card)}
      * to populate it.
      * 
-     * @param logger logger
+     * @param logger logger for logging deck operations.
      */
     public AbstractDeckImpl(final GameLogger logger) {
         this.logger = logger;
@@ -65,7 +65,6 @@ public abstract class AbstractDeckImpl<T extends Card> implements Deck<T> {
         if (cards.isEmpty()) {
             return Optional.empty();
         }
-        // Remove from the end (top) of the list for O(1) performance
         return Optional.of(cards.remove(cards.size() - 1));
     }
 

@@ -8,34 +8,31 @@ package uno.controller.api;
 public interface MenuController extends MenuObserver {
 
     /**
-     * Starts a new game in "Classic" mode.
-     * Initializes the standard deck and standard AI opponents.
+     * {@inheritDoc}
      */
     @Override
     void onStartClassicGame();
 
     /**
-     * Starts a new game in "Flip" mode.
-     * Initializes the Flip deck (double-sided cards) and Flip AI opponents.
+     * {@inheritDoc}
      */
     @Override
     void onStartFlipGame();
 
     /**
-     * Starts a new game in "All Wild" mode.
-     * Initializes the All Wild deck and specialized AI opponents.
+     * {@inheritDoc}
      */
     @Override
     void onStartAllWildGame();
 
     /**
-     * Opens the rules screen to display game instructions.
+     * {@inheritDoc}
      */
     @Override
     void onOpenRules();
 
     /**
-     * Terminates the application.
+     * {@inheritDoc}
      */
     @Override
     void onQuit();

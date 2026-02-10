@@ -7,7 +7,7 @@ import uno.model.game.api.Game;
 
 /**
  * Represents the back side (or inactive side) of a card.
- * This class implements the Null Object/Singleton pattern.
+ * This class implements the Singleton pattern.
  * Since the back of a card has no color, value, or effect, attempting to access
  * these properties indicates a logic error in the game flow.
  */
@@ -18,7 +18,6 @@ public final class BackSideBehavior implements CardSideBehavior {
 
     // Private constructor to prevent instantiation from outside
     private BackSideBehavior() {
-
     }
 
     /**

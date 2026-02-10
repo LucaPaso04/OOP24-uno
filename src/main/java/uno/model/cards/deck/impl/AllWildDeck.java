@@ -9,7 +9,7 @@ import uno.model.cards.types.impl.DoubleSidedCard;
 import uno.model.utils.api.GameLogger;
 
 /**
- * Represents the deck for the "UNO All Wild" variant.
+ * Represents the deck for the "Uno All Wild" variant.
  * In this mode, every single card is a Wild card. Colors do not matter for matching,
  * but specific cards have powerful action effects (Skip Two, Targeted Draw, Swap).
  */
@@ -20,7 +20,7 @@ public class AllWildDeck extends AbstractDeckImpl<Card> {
     /**
      * Constructs an All Wild Deck with 112 Wild cards.
      * 
-     * @param logger logger
+     * @param logger logger for logging deck operations.
      */
     public AllWildDeck(final GameLogger logger) {
         super(logger);
@@ -30,59 +30,48 @@ public class AllWildDeck extends AbstractDeckImpl<Card> {
 
     /**
      * Populates the deck with 112 Wild cards.
-     * Note: In "All Wild", cards typically do NOT require a color choice 
-     * because they match everything. We set `requiresColorChoice` to false
-     * for most cards, unless your specific house rules require it.
+     * Note: In "All Wild", cards do NOT require a color choice 
+     * because they match everything. We set `requiresColorChoice` to false.
      */
     private void initializeDeck() {
-        // Distribution based on typical All Wild rules (approx. 14 of each type)
-        // Adjust the loop count if you want exact official distribution numbers.
         for (int i = 0; i < CARDS_OF_EACH_TYPE; i++) {
 
-            // 1. Classic Wild (Basic play)
-            // Value, Draw, ColorChoice, TargetChoice, Skip, Reverse
+            // Classic Wild
             createAndAddCard(new WildBehavior(
                 CardValue.WILD_ALLWILD, 0, false, false, 0, false
             ));
 
-            // 2. Wild Draw 4 (Penalty)
-            // Draws 4, usually skips the next player (Skip=1)
+            // Wild Draw 4
             createAndAddCard(new WildBehavior(
                 CardValue.WILD_DRAW_FOUR_ALLWILD, 4, false, false, 1, false
             ));
 
-            // 3. Wild Draw 2 (Penalty)
-            // Draws 2, usually skips the next player (Skip=1)
+            // Wild Draw 2
             createAndAddCard(new WildBehavior(
                 CardValue.WILD_DRAW_TWO_ALLWILD, 2, false, false, 1, false
             ));
 
-            // 4. Wild Reverse
+            // Wild Reverse
             createAndAddCard(new WildBehavior(
                 CardValue.WILD_REVERSE, 0, false, false, 0, true
             ));
 
-            // 5. Wild Skip (Skips 1)
+            // Wild Skip
             createAndAddCard(new WildBehavior(
                 CardValue.WILD_SKIP, 0, false, false, 1, false
             ));
 
-            // 6. Wild Skip Two (Skips 2 players)
+            // Wild Skip Two
             createAndAddCard(new WildBehavior(
                 CardValue.WILD_SKIP_TWO, 0, false, false, 2, false
             ));
 
-            // --- SPECIAL TARGETING CARDS ---
-
-            // 7. Forced Swap
-            // No draw, No skip, YES Target Player (to swap with)
+            // Forced Swap
             createAndAddCard(new WildBehavior(
                 CardValue.WILD_FORCED_SWAP, 0, false, true, 0, false
             ));
 
-            // 8. Targeted Draw 2
-            // No automatic next-player draw (0), YES Target Player.
-            // The Game logic handles the drawing for the chosen target.
+            // Targeted Draw Two
             createAndAddCard(new WildBehavior(
                 CardValue.WILD_TARGETED_DRAW_TWO, 0, false, true, 0, false
             ));
@@ -97,7 +86,6 @@ public class AllWildDeck extends AbstractDeckImpl<Card> {
      */
     private void createAndAddCard(final CardSideBehavior frontBehavior) {
         final Card card = new DoubleSidedCard(frontBehavior, BackSideBehavior.getInstance());
-        // Uses the public method from DeckImpl
         this.addCard(card);
     }
 }

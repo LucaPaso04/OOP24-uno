@@ -11,10 +11,18 @@ import uno.model.game.impl.AbstractGameState;
  */
 public class RoundOverState extends AbstractGameState {
 
-    public RoundOverState(GameContext game) {
+    /**
+     * Constructor for RoundOverState.
+     * 
+     * @param game the game context to which this state belongs
+     */
+    public RoundOverState(final GameContext game) {
         super(game);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GameState getEnum() {
         return GameState.ROUND_OVER;

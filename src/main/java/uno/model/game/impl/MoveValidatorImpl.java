@@ -7,6 +7,8 @@ import uno.model.players.api.AbstractPlayer;
 
 import java.util.Optional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Concrete implementation of MoveValidator.
  */
@@ -14,16 +16,28 @@ public class MoveValidatorImpl implements MoveValidator {
 
     private final GameContext gameContext;
 
-    public MoveValidatorImpl(GameContext gameContext) {
+    /**
+     * Constructor for MoveValidatorImpl.
+     * 
+     * @param gameContext the game context to be used for validating moves
+     */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    public MoveValidatorImpl(final GameContext gameContext) {
         this.gameContext = gameContext;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isValidMove(final Card cardToPlay) {
         final Optional<Card> topCard = gameContext.getTopDiscardCard();
         return topCard.isPresent() && cardToPlay.canBePlayedOn(topCard.get(), gameContext);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean playerHasPlayableCard(final AbstractPlayer player) {
         for (final Optional<Card> card : player.getHand()) {

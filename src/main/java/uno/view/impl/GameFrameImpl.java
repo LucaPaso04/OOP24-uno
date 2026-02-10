@@ -3,9 +3,9 @@ package uno.view.impl;
 import uno.view.api.GameFrame;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.awt.Dimension;
+import java.awt.Container;
 
 /**
  * Concrete implementation of the main application window using Java Swing.
@@ -37,7 +37,7 @@ public final class GameFrameImpl extends JFrame implements GameFrame {
      * {@inheritDoc}
      */
     @Override
-    public void showScene(final JPanel scene) {
+    public void showScene(final Container scene) {
         // Set the new panel as the content pane
         setContentPane(scene);
 

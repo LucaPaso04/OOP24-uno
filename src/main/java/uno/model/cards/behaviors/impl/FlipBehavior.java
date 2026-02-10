@@ -1,9 +1,9 @@
 package uno.model.cards.behaviors.impl;
 
+import uno.model.game.api.Game;
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.attributes.CardValue;
 import uno.model.cards.behaviors.api.CardSideBehavior;
-import uno.model.game.api.Game;
 
 /**
  * Implementation of {@link CardSideBehavior} for the "Flip" card.

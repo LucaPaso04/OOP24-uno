@@ -66,12 +66,10 @@ public class AIAllWild extends AbstractAIPlayer {
                 .filter(c -> c.getValue(game) == CardValue.WILD_FORCED_SWAP)
                 .findFirst();
 
-        if (swapCard.isPresent() && bestTargetOpt.isPresent()) {
+        if (swapCard.isPresent() && bestTargetOpt.isPresent() && this.getHandSize() > bestTargetOpt.get().getHandSize()) {
             // CONVIENE SCAMBIARE?
             // Sì, se io ho PIÙ carte del bersaglio (gli rifilo il mio mazzo grosso)
-            if (this.getHandSize() > bestTargetOpt.get().getHandSize()) {
-                return swapCard;
-            }
+            return swapCard;
         }
 
         // --- 2. LOGICA ATTACCO (Priorità alle carte cattive) ---
@@ -90,10 +88,9 @@ public class AIAllWild extends AbstractAIPlayer {
         for (final Card card : hand) {
             boolean isBadSwap = false;
             // Se è uno swap e abbiamo un target, controlliamo se ci conviene
-            if (card.getValue(game) == CardValue.WILD_FORCED_SWAP && bestTargetOpt.isPresent()) {
-                if (this.getHandSize() < bestTargetOpt.get().getHandSize()) {
-                    isBadSwap = true;
-                }
+            if (card.getValue(game) == CardValue.WILD_FORCED_SWAP && bestTargetOpt.isPresent() 
+                && this.getHandSize() < bestTargetOpt.get().getHandSize()) {
+                isBadSwap = true;
             }
             // Se non è uno swap svantaggioso, giocala
             if (!isBadSwap) {

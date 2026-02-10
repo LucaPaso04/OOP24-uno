@@ -29,7 +29,7 @@ public final class Main {
             final MenuSceneImpl menuScene = new MenuSceneImpl();
 
             menuScene.setObserver(menuController);
-            frame.showScene(menuScene);
+            frame.showScene((java.awt.Container) menuScene);
 
             frame.setVisible(true);
         });

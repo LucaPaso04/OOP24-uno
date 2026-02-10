@@ -64,6 +64,8 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     private static final int START_POPUP_DELAY = 3000;
 
+    private static final String START_POINTS = "Punti: 0";
+
     private static final Insets GBC_INSETS = new Insets(0, 5, 0, 5);
     private static final int GRID_FIVE = 5;
 
@@ -325,7 +327,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     public void showWinnerPopup(final String winnerName) {
         setHumanInputEnabled(false);
 
-        final Object[] options = { "Torna al Menu", "Chiudi Gioco" };
+        final Object[] options = {"Torna al Menu", "Chiudi Gioco" };
 
         final int choice = JOptionPane.showOptionDialog(
                 this,
@@ -387,19 +389,19 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
         if (title.contains("Ovest")) {
             this.westAILabel = cardLabel;
-            this.westScoreLabel = new JLabel("Punti: 0");
+            this.westScoreLabel = new JLabel(START_POINTS);
             this.westScoreLabel.setFont(UnoTheme.TEXT_FONT);
             this.westScoreLabel.setForeground(UnoTheme.DESC_COLOR);
             this.westScoreLabel.setAlignmentX(CENTER_ALIGNMENT);
         } else if (title.contains("Nord")) {
             this.northAILabel = cardLabel;
-            this.northScoreLabel = new JLabel("Punti: 0");
+            this.northScoreLabel = new JLabel(START_POINTS);
             this.northScoreLabel.setFont(UnoTheme.TEXT_FONT);
             this.northScoreLabel.setForeground(UnoTheme.DESC_COLOR);
             this.northScoreLabel.setAlignmentX(CENTER_ALIGNMENT);
         } else if (title.contains("Est")) {
             this.eastAILabel = cardLabel;
-            this.eastScoreLabel = new JLabel("Punti: 0");
+            this.eastScoreLabel = new JLabel(START_POINTS);
             this.eastScoreLabel.setFont(UnoTheme.TEXT_FONT);
             this.eastScoreLabel.setForeground(UnoTheme.DESC_COLOR);
             this.eastScoreLabel.setAlignmentX(CENTER_ALIGNMENT);
@@ -427,6 +429,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * @param panel The panel to update.
      * @param label The label within the panel to update.
      * @param ai    The AI player associated with the panel.
+     * @param scoreLabel The label to update with the AI's score (can be null if not used).
      */
     private void updateOpponentPanel(final JPanel panel, final JLabel label, final JLabel scoreLabel,
             final AbstractPlayer ai) {
@@ -476,8 +479,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         this.discardPileCard.setOpaque(true);
 
         // Use StyledButton for Pass and UNO
-        this.passButton = new StyledButtonImpl("Passa", PASS_BUTTON_NORMAL_COLOR, PASS_BUTTON_HOVER_COLOR); // Custom
-                                                                                                            // Red
+        this.passButton = new StyledButtonImpl("Passa", PASS_BUTTON_NORMAL_COLOR, PASS_BUTTON_HOVER_COLOR);
         this.passButton.setSize(PASS_BUTTON_WIDTH, PASS_BUTTON_HEIGHT);
         this.passButton.setFont(UnoTheme.TEXT_BOLD_FONT);
 
@@ -645,7 +647,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         this.colorInfoLabel.setForeground(UnoTheme.TEXT_COLOR);
         this.colorInfoLabel.setBorder(INFO_LABEL_BORDER);
 
-        this.humanScoreLabel = new JLabel("Punti: 0");
+        this.humanScoreLabel = new JLabel(START_POINTS);
         this.humanScoreLabel.setFont(UnoTheme.TEXT_BOLD_FONT);
         this.humanScoreLabel.setForeground(UnoTheme.BUTTON_COLOR);
         this.humanScoreLabel.setBorder(INFO_LABEL_BORDER);

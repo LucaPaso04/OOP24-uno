@@ -15,52 +15,67 @@ import java.util.Optional;
  */
 public class WaitingForColorState extends AbstractGameState {
 
-    public WaitingForColorState(GameContext game) {
+    /**
+     * Constructor for WaitingForColorState.
+     * 
+     * @param game the game context
+     */
+    public WaitingForColorState(final GameContext game) {
         super(game);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GameState getEnum() {
         return GameState.WAITING_FOR_COLOR;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void setColor(CardColor color) {
+    public void setColor(final CardColor color) {
         // Deve prendere il valore della carta giocata
-        final Card playedCard = game.getCurrentPlayedCard();
+        final Card playedCard = this.getGame().getCurrentPlayedCard();
 
-        game.getLogger().logAction(game.getCurrentPlayer().getName(), "SET_COLOR", "N/A", color.toString());
+        this.getGame().getLogger().logAction(this.getGame().getCurrentPlayer().getName(), 
+            "SET_COLOR", "N/A", color.toString());
 
-        if (playedCard.getValue(game) == CardValue.WILD_DRAW_COLOR) {
+        if (playedCard.getValue(this.getGame()) == CardValue.WILD_DRAW_COLOR) {
             drawUntilColorChosenCard(color);
             return;
         }
 
-        game.setCurrentColorOptional(Optional.of(color));
-        game.setGameState(new RunningState(game)); // Transition back to Running
+        this.getGame().setCurrentColorOptional(Optional.of(color));
+        this.getGame().setGameState(new RunningState(this.getGame())); // Transition back to Running
 
-        game.notifyObservers();
+        this.getGame().notifyObservers();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void drawUntilColorChosenCard(CardColor color) {
-        final AbstractPlayer nextPlayer = game.getTurnManager().peekNextPlayer();
+    public void drawUntilColorChosenCard(final CardColor color) {
+        final AbstractPlayer nextPlayer = this.getGame().getTurnManager().peekNextPlayer();
 
         while (true) {
-            final Optional<Card> drawnCard = game.getDrawDeck().draw();
+            final Optional<Card> drawnCard = this.getGame().getDrawDeck().draw();
             if (drawnCard.isPresent()) {
                 nextPlayer.addCardToHand(drawnCard.get());
 
-                if (drawnCard.get().getColor(game) == color) {
+                if (drawnCard.get().getColor(this.getGame()) == color) {
                     break;
                 }
             }
         }
 
-        game.setCurrentColorOptional(Optional.of(color));
+        this.getGame().setCurrentColorOptional(Optional.of(color));
 
-        game.setGameState(new RunningState(game)); // Transition back to Running
-        game.getTurnManager().advanceTurn(game);
-        game.notifyObservers();
+        this.getGame().setGameState(new RunningState(this.getGame())); // Transition back to Running
+        this.getGame().getTurnManager().advanceTurn(this.getGame());
+        this.getGame().notifyObservers();
     }
 }

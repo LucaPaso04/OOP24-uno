@@ -28,50 +28,48 @@ class DoubleSidedCardTest {
 
     private DoubleSidedCard card;
     private MockGame game;
-    private CardSideBehavior lightSide;
-    private CardSideBehavior darkSide;
 
     @BeforeEach
     void setUp() {
-        lightSide = new NumericBehavior(CardColor.RED, CardValue.ONE);
-        darkSide = new NumericBehavior(CardColor.BLUE, CardValue.TWO);
+        final CardSideBehavior lightSide = new NumericBehavior(CardColor.RED, CardValue.ONE);
+        final CardSideBehavior darkSide = new NumericBehavior(CardColor.BLUE, CardValue.TWO);
         card = new DoubleSidedCard(lightSide, darkSide);
         game = new MockGame();
     }
 
     @Test
-    void testGetColor_LightSide() {
+    void testGetColorLightSide() {
         game.isDarkSide = false;
         assertEquals(CardColor.RED, card.getColor(game));
     }
 
     @Test
-    void testGetColor_DarkSide() {
+    void testGetColorDarkSide() {
         game.isDarkSide = true;
         assertEquals(CardColor.BLUE, card.getColor(game));
     }
 
     @Test
-    void testGetValue_LightSide() {
+    void testGetValueLightSide() {
         game.isDarkSide = false;
         assertEquals(CardValue.ONE, card.getValue(game));
     }
 
     @Test
-    void testGetValue_DarkSide() {
+    void testGetValueDarkSide() {
         game.isDarkSide = true;
         assertEquals(CardValue.TWO, card.getValue(game));
     }
 
     @Test
-    void testPerformEffect_Delegation() {
+    void testPerformEffectDelegation() {
         card.performEffect(game);
     }
 
     @Test
     void testCanBePlayedOn() {
         game.isDarkSide = false;
-        CardSideBehavior back = uno.model.cards.behaviors.impl.BackSideBehavior.getInstance();
+        final CardSideBehavior back = uno.model.cards.behaviors.impl.BackSideBehavior.getInstance();
         assertTrue(card.canBePlayedOn(new DoubleSidedCard(new NumericBehavior(CardColor.RED, CardValue.NINE), back),
                 game));
         assertTrue(card.canBePlayedOn(new DoubleSidedCard(new NumericBehavior(CardColor.GREEN, CardValue.ONE), back),
@@ -81,7 +79,7 @@ class DoubleSidedCardTest {
     }
 
     static class MockGame implements Game {
-        boolean isDarkSide;
+        private boolean isDarkSide;
 
         @Override
         public boolean isDarkSide() {
@@ -94,7 +92,7 @@ class DoubleSidedCardTest {
         }
 
         @Override
-        public void addObserver(GameModelObserver observer) {
+        public void addObserver(final GameModelObserver observer) {
         }
 
         @Override
@@ -102,7 +100,7 @@ class DoubleSidedCardTest {
         }
 
         @Override
-        public void playCard(Optional<Card> card) {
+        public void playCard(final Optional<Card> card) {
         }
 
         @Override
@@ -114,23 +112,23 @@ class DoubleSidedCardTest {
         }
 
         @Override
-        public void callUno(AbstractPlayer player) {
+        public void callUno(final AbstractPlayer player) {
         }
 
         @Override
-        public void setColor(CardColor color) {
+        public void setColor(final CardColor color) {
         }
 
         @Override
-        public void chosenPlayer(AbstractPlayer player) {
+        public void chosenPlayer(final AbstractPlayer player) {
         }
 
         @Override
-        public void skipPlayers(int n) {
+        public void skipPlayers(final int n) {
         }
 
         @Override
-        public void makeNextPlayerDraw(int amount) {
+        public void makeNextPlayerDraw(final int amount) {
         }
 
         @Override
@@ -150,11 +148,11 @@ class DoubleSidedCardTest {
         }
 
         @Override
-        public void drawCardForPlayer(AbstractPlayer player) {
+        public void drawCardForPlayer(final AbstractPlayer player) {
         }
 
         @Override
-        public void drawUntilColorChosenCard(CardColor color) {
+        public void drawUntilColorChosenCard(final CardColor color) {
         }
 
         @Override
@@ -194,7 +192,7 @@ class DoubleSidedCardTest {
 
         @Override
         public List<AbstractPlayer> getPlayers() {
-            return null;
+            return List.of();
         }
 
         @Override
@@ -208,12 +206,12 @@ class DoubleSidedCardTest {
         }
 
         @Override
-        public boolean hasCurrentPlayerDrawn(AbstractPlayer player) {
+        public boolean hasCurrentPlayerDrawn(final AbstractPlayer player) {
             return false;
         }
 
         @Override
-        public void setCurrentColor(CardColor color) {
+        public void setCurrentColor(final CardColor color) {
         }
 
         @Override
@@ -226,7 +224,7 @@ class DoubleSidedCardTest {
         }
 
         @Override
-        public void logSystemAction(String actionType, String cardDetails, String extraInfo) {
+        public void logSystemAction(final String actionType, final String cardDetails, final String extraInfo) {
         }
 
         @Override

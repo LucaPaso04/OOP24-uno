@@ -19,8 +19,6 @@ public interface Deck<T extends Card> {
 
     /**
      * Randomizes the order of the cards currently in the deck.
-     * This should be called immediately after creation and whenever the 
-     * discard pile is reshuffled into the draw deck.
      */
     void shuffle();
 
@@ -33,8 +31,6 @@ public interface Deck<T extends Card> {
 
     /**
      * Retrieves the card at the top of the deck without removing it.
-     * This is essential for the Discard Pile to see the active card 
-     * (matching color/value) or for AI to peek at the draw pile (if cheating/debugging).
      * 
      * @return An {@link Optional} containing the top card, or {@code empty} if the deck is empty.
      */
@@ -42,17 +38,13 @@ public interface Deck<T extends Card> {
 
     /**
      * Adds a single card to the deck.
-     * For a Discard Pile, this places a played card on top.
-     * For a Draw Pile, this is rarely used during play but useful during initialization.
      * 
-     * @param card The card to be added. Must not be null.
+     * @param card The card to be added.
      */
     void addCard(T card);
 
     /**
      * Replenishes the deck with a collection of new cards.
-     * This is typically used when the Draw Pile is empty: the Discard Pile 
-     * is shuffled and passed to this method to reform the Draw Pile.
      * 
      * @param newCards The list of cards to add to the deck.
      */
@@ -75,7 +67,7 @@ public interface Deck<T extends Card> {
     /**
      * Getter of the logger.
      * 
-     * @return logger
+     * @return the logger instance for logging deck-related events and actions.
      */
     GameLogger getLogger();
 }

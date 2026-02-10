@@ -127,6 +127,11 @@ public enum CardValue {
 
     private final int pointValue;
 
+    /**
+     * Constructor for CardValue enum.
+     * 
+     * @param pointValue the point value associated with the card value.
+     */
     CardValue(final int pointValue) {
         this.pointValue = pointValue;
     }

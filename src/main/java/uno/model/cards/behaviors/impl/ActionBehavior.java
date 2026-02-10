@@ -1,17 +1,18 @@
 package uno.model.cards.behaviors.impl;
 
+import uno.model.game.impl.GameImpl;
+import uno.model.game.api.Game;
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.attributes.CardValue;
 import uno.model.cards.behaviors.api.CardSideBehavior;
-import uno.model.game.api.Game;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Implementation of {@link CardSideBehavior} for action cards.
- * This class uses a functional approach to execute specific game logic
- * defined at construction time (e.g., Skip, Reverse).
+ * Concrete implementation of {@link CardSideBehavior} for action cards (e.g., SKIP, REVERSE).
+ * It encapsulates the logic for executing the card's effect on the game state.
+ * The behavior is defined by a Consumer<Game> that is executed when the card is played.
  */
 public class ActionBehavior implements CardSideBehavior {
 
@@ -37,7 +38,6 @@ public class ActionBehavior implements CardSideBehavior {
      */
     @Override
     public void executeEffect(final Game game) {
-        // Using Optional to avoid null checks and execute logic only if present
         action.ifPresent(gameConsumer -> gameConsumer.accept(game));
     }
 

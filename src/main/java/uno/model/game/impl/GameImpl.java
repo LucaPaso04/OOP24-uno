@@ -37,6 +37,7 @@ public class GameImpl implements GameContext {
     private static final String SUPPRESS_EI_EXPOSE_REP = "EI_EXPOSE_REP";
     private static final String LOGGER_PLAYER_NAME = "SYSTEM";
     private static final Random RANDOM = new Random();
+    private static final int START_HAND_SIZE = 7;
 
     private final List<GameModelObserver> observers = new ArrayList<>();
     private final List<AbstractPlayer> players;
@@ -159,7 +160,7 @@ public class GameImpl implements GameContext {
      */
     @Override
     public void drawCardForPlayer(final AbstractPlayer player) {
-        boolean success = deckHandler.drawCardForPlayer(player, this);
+        final boolean success = deckHandler.drawCardForPlayer(player, this);
         if (!success) {
             // Deck empty and no reshuffle -> Game Over
             this.currentState = new GameOverState(this);
@@ -254,7 +255,6 @@ public class GameImpl implements GameContext {
      * {@inheritDoc}
      */
     @Override
-    @SuppressFBWarnings(SUPPRESS_EI_EXPOSE_REP)
     public Deck<Card> getDrawDeck() {
         return deckHandler.getDrawDeck();
     }
@@ -263,7 +263,6 @@ public class GameImpl implements GameContext {
      * {@inheritDoc}
      */
     @Override
-    @SuppressFBWarnings(SUPPRESS_EI_EXPOSE_REP)
     public DiscardPile getDiscardPile() {
         return deckHandler.getDiscardPile();
     }
@@ -357,7 +356,7 @@ public class GameImpl implements GameContext {
         this.currentColor = Optional.of(this.currentPlayedCard.getColor(this));
 
         if (this.currentColor.get() == CardColor.WILD) {
-            final CardColor[] coloredValues = { CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW };
+            final CardColor[] coloredValues = {CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW };
             final CardColor chosenColor = coloredValues[RANDOM.nextInt(coloredValues.length)];
 
             this.currentColor = Optional.of(chosenColor);
@@ -435,16 +434,27 @@ public class GameImpl implements GameContext {
 
     // --- Public getters and setters for GameContext ---
 
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     @Override
     public void setGameState(final GameStateBehavior newState) {
         this.currentState = newState;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GameLogger getLogger() {
         return this.logger;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     @Override
     public void setWinner(final AbstractPlayer winner) {
         this.winner = winner;
@@ -480,7 +490,7 @@ public class GameImpl implements GameContext {
 
         // 4. Deal 7 cards to each player
         for (final AbstractPlayer player : players) {
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < START_HAND_SIZE; i++) {
                 drawCardForPlayer(player);
             }
         }
@@ -494,7 +504,7 @@ public class GameImpl implements GameContext {
 
             // Handle Wild card color initialization
             if (firstCard.getColor(this) == CardColor.WILD) {
-                final CardColor[] coloredValues = { CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW };
+                final CardColor[] coloredValues = {CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW };
                 final CardColor chosenColor = coloredValues[RANDOM.nextInt(coloredValues.length)];
                 this.currentColor = Optional.of(chosenColor);
             } else {
@@ -512,16 +522,25 @@ public class GameImpl implements GameContext {
         notifyObservers(); // Notify view to update
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setCurrentPlayedCard(final Card card) {
         this.currentPlayedCard = card;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Card getCurrentPlayedCard() {
         return this.currentPlayedCard;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setCurrentColorOptional(final Optional<CardColor> color) {
         this.currentColor = color;

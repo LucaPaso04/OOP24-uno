@@ -1,35 +1,35 @@
 package uno.model.cards.behaviors.impl;
 
+import uno.model.game.api.Game;
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.attributes.CardValue;
 import uno.model.cards.behaviors.api.CardSideBehavior;
-import uno.model.game.api.Game;
 
 /**
  * Implementation of {@link CardSideBehavior} for Wild cards.
- * This class handles all "Jolly" type cards, including Standard Wilds,
- * Uno Flip Wilds, and "Uno All Wild" variants.
+ * This class handles all "Jolly" type cards, including Uno Standard Wilds,
+ * Uno Flip Wilds, and Uno All Wild variants.
  * It uses boolean flags to determine specific interactions (drawing, targeting, skipping).
  */
 public class WildBehavior implements CardSideBehavior {
 
     private final CardValue value;
     private final int drawAmount;
+    private final int skipAmount;
     private final boolean requiresColorChoice;
     private final boolean requiresTargetPlayer;
-    private final int skipAmount;
     private final boolean reversesGame;
 
     /**
      * Master Constructor.
      * Allows full configuration of a Wild Card's behavior.
      * 
-     * @param value                The card value (name).
-     * @param drawAmount           How many cards the next player draws (0 if none).
-     * @param requiresColorChoice  True if the player must choose a color (Standard Wilds).
-     * @param requiresTargetPlayer True if the player must choose an opponent (Swap, Target Draw).
-     * @param skipAmount           How many players to skip (usually 0 or 1, sometimes 2).
-     * @param reversesGame         True if the card changes turn direction (Reverse).
+     * @param value                The card value.
+     * @param drawAmount           How many cards the next player draws.
+     * @param requiresColorChoice  True if the player must choose a color.
+     * @param requiresTargetPlayer True if the player must choose an opponent.
+     * @param skipAmount           How many players to skip.
+     * @param reversesGame         True if the card changes turn direction.
      */
     public WildBehavior(final CardValue value, 
                         final int drawAmount, 
@@ -45,25 +45,25 @@ public class WildBehavior implements CardSideBehavior {
         this.reversesGame = reversesGame;
     }
 
-    // --- CONSTRUCTOR OVERLOADS (Per facilitare la creazione nella Factory) ---
+    // --- CONSTRUCTOR OVERLOADS ---
 
     /**
-     * Constructor for Standard Wilds (Wild, Wild Draw 4).
+     * Constructor for Standard Wilds.
      * Automatically assumes color choice is needed and no specific target player.
      * 
-     * @param value      The card value (name).
-     * @param drawAmount How many cards the next player draws (0 if none).
+     * @param value      The card value.
+     * @param drawAmount How many cards the next player draws.
      */
     public WildBehavior(final CardValue value, final int drawAmount) {
         this(value, drawAmount, true, false, drawAmount >= 4 ? 1 : 0, false);
     }
 
     /**
-     * Constructor for "All Wild" variants or special cards.
+     * Constructor for variants or special cards.
      * Allows defining if color choice is needed explicitly.
      * 
-     * @param value                The card value (name).
-     * @param drawAmount           How many cards the next player draws (0 if none).
+     * @param value                The card value.
+     * @param drawAmount           How many cards the next player draws.
      * @param requiresColorChoice  True if the player must choose a color.
      */
     public WildBehavior(final CardValue value, final int drawAmount, final boolean requiresColorChoice) {
@@ -75,27 +75,22 @@ public class WildBehavior implements CardSideBehavior {
      */
     @Override
     public void executeEffect(final Game game) {
-        // 1. Draw Logic
         if (drawAmount > 0) {
             game.makeNextPlayerDraw(drawAmount);
         }
 
-        // 2. Color Selection (Standard Wilds)
         if (requiresColorChoice) {
             game.requestColorChoice();
         }
 
-        // 3. Target Selection (Swap Hands, Targeted Draw)
         if (requiresTargetPlayer) {
             game.requestPlayerChoice();
         }
 
-        // 4. Flow Control (Skip)
         if (skipAmount > 0) {
             game.skipPlayers(skipAmount);
         }
 
-        // 5. Flow Control (Reverse)
         if (reversesGame) {
             game.reversePlayOrder();
         }

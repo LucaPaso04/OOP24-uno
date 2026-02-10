@@ -17,24 +17,36 @@ import java.util.Optional;
  */
 public class WaitingForPlayerState extends AbstractGameState {
 
-    public WaitingForPlayerState(GameContext game) {
+    /**
+     * Constructor for WaitingForPlayerState.
+     * 
+     * @param game the game context
+     */
+    public WaitingForPlayerState(final GameContext game) {
         super(game);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GameState getEnum() {
         return GameState.WAITING_FOR_PLAYER;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void chosenPlayer(AbstractPlayer player) {
-        final Card playedCard = game.getCurrentPlayedCard();
+    public void chosenPlayer(final AbstractPlayer player) {
+        final Card playedCard = this.getGame().getCurrentPlayedCard();
 
-        game.getLogger().logAction(game.getCurrentPlayer().getName(), "CHOOSEN_PLAYER", "N/A", player.getName());
+        this.getGame().getLogger().logAction(this.getGame().getCurrentPlayer().getName(), 
+            "CHOOSEN_PLAYER", "N/A", player.getName());
 
-        if (playedCard.getValue(game) == CardValue.WILD_FORCED_SWAP) {
+        if (playedCard.getValue(this.getGame()) == CardValue.WILD_FORCED_SWAP) {
 
-            final AbstractPlayer currentPlayer = game.getCurrentPlayer();
+            final AbstractPlayer currentPlayer = this.getGame().getCurrentPlayer();
 
             // Scambia le mani
             final List<Optional<Card>> tempHand = new ArrayList<>(currentPlayer.getHand());
@@ -42,13 +54,13 @@ public class WaitingForPlayerState extends AbstractGameState {
             player.setHand(tempHand);
         }
 
-        if (playedCard.getValue(game) == CardValue.WILD_TARGETED_DRAW_TWO) {
-            game.drawCardForPlayer(player);
-            game.drawCardForPlayer(player);
+        if (playedCard.getValue(this.getGame()) == CardValue.WILD_TARGETED_DRAW_TWO) {
+            this.getGame().drawCardForPlayer(player);
+            this.getGame().drawCardForPlayer(player);
         }
 
-        game.setGameState(new RunningState(game)); // Transition back to Running
+        this.getGame().setGameState(new RunningState(this.getGame())); // Transition back to Running
 
-        game.notifyObservers();
+        this.getGame().notifyObservers();
     }
 }

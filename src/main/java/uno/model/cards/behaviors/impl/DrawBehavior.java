@@ -1,12 +1,12 @@
 package uno.model.cards.behaviors.impl;
 
+import uno.model.game.api.Game;
 import uno.model.cards.attributes.CardColor;
 import uno.model.cards.attributes.CardValue;
 import uno.model.cards.behaviors.api.CardSideBehavior;
-import uno.model.game.api.Game;
 
 /**
- * Implementation of {@link CardSideBehavior} for penalty cards (Draw Two, Wild Draw Four, etc.).
+ * Implementation of {@link CardSideBehavior} for penalty cards (e.g., Draw Two, Wild Draw Four).
  * This behavior encapsulates the logic of forcing the next player to draw a specific
  * amount of cards and subsequently forfeiting their turn (standard UNO rules).
  */

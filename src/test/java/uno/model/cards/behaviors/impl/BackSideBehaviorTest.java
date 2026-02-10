@@ -10,28 +10,28 @@ class BackSideBehaviorTest {
 
     @Test
     void testSingleton() {
-        BackSideBehavior i1 = BackSideBehavior.getInstance();
-        BackSideBehavior i2 = BackSideBehavior.getInstance();
+        final BackSideBehavior i1 = BackSideBehavior.getInstance();
+        final BackSideBehavior i2 = BackSideBehavior.getInstance();
         assertNotNull(i1);
         assertEquals(i1, i2);
     }
 
     @Test
-    void testGetColor_ThrowsException() {
+    void testGetColorThrowsException() {
         assertThrows(UnsupportedOperationException.class, () -> {
             BackSideBehavior.getInstance().getColor();
         });
     }
 
     @Test
-    void testGetValue_ThrowsException() {
+    void testGetValueThrowsException() {
         assertThrows(UnsupportedOperationException.class, () -> {
             BackSideBehavior.getInstance().getValue();
         });
     }
 
     @Test
-    void testPerformEffect_ThrowsException() {
+    void testPerformEffectThrowsException() {
         assertThrows(IllegalStateException.class, () -> {
             BackSideBehavior.getInstance().executeEffect(null);
         });

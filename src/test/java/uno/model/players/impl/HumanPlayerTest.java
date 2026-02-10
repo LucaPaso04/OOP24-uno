@@ -6,15 +6,17 @@ import org.junit.jupiter.api.Test;
 
 class HumanPlayerTest {
 
+    private static final String PLAYER_NAME = "TestPlayer";
+
     @Test
     void testConstructor() {
-        HumanPlayer p = new HumanPlayer("Test");
-        assertEquals("Test", p.getName());
+        final HumanPlayer p = new HumanPlayer(PLAYER_NAME);
+        assertEquals(PLAYER_NAME, p.getName());
     }
 
     @Test
     void testTakeTurn() {
-        HumanPlayer p = new HumanPlayer("Test");
+        final HumanPlayer p = new HumanPlayer(PLAYER_NAME);
         // Verify it doesn't throw and does nothing interactive (passive)
         p.takeTurn(null);
     }

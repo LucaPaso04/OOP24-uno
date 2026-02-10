@@ -17,26 +17,39 @@ import java.util.Optional;
  */
 public class RunningState extends AbstractGameState {
 
-    public RunningState(GameContext game) {
+    private static final int FINAL_SCORE = 500;
+
+    /**
+     * Constructor for RunningState.
+     * 
+     * @param game The game context to which this state belongs.
+     */
+    public RunningState(final GameContext game) {
         super(game);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GameState getEnum() {
         return GameState.RUNNING;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void playCard(Optional<Card> card) {
+    public void playCard(final Optional<Card> card) {
         // Validation logic logic moved here from GameImpl
 
         // 1. Check if it's a valid action in this state (Implicitly yes, since we are
         // in RunningState)
 
-        final AbstractPlayer player = game.getCurrentPlayer();
+        final AbstractPlayer player = this.getGame().getCurrentPlayer();
 
         // New Rule: Skip After Draw
-        if (game.getRules().isSkipAfterDrawEnabled() && game.hasCurrentPlayerDrawn(player)) {
+        if (this.getGame().getRules().isSkipAfterDrawEnabled() && this.getGame().hasCurrentPlayerDrawn(player)) {
             throw new IllegalStateException("Regola: Skip After Draw. Hai pescato, quindi devi passare il turno.");
         }
 
@@ -49,114 +62,120 @@ public class RunningState extends AbstractGameState {
         // Note: isValidMove is private in GameImpl. We will need to make it accessible
         // or move logic here.
         // For now, assume GameImpl will expose it or we call a package-private method.
-        if (!game.isValidMove(card.get())) {
+        if (!this.getGame().isValidMove(card.get())) {
             throw new IllegalStateException("Mossa non valida! La carta " + card + " non può essere giocata.");
         }
 
-        game.setCurrentPlayedCard(card.get());
-        game.getLogger().logAction(player.getName(), "PLAY",
+        this.getGame().setCurrentPlayedCard(card.get());
+        this.getGame().getLogger().logAction(player.getName(), "PLAY",
                 card.getClass().getSimpleName(),
-                card.get().getValue(game).toString());
+                card.get().getValue(this.getGame()).toString());
 
         // --- FINE LOGICA DI VALIDAZIONE ---
 
         // Se la mossa è valida, aggiorna il currentColor.
-        if (card.get().getColor(game) == CardColor.WILD) {
-            game.setCurrentColorOptional(Optional.empty()); // Sarà impostato da onColorChosen()
+        if (card.get().getColor(this.getGame()) == CardColor.WILD) {
+            this.getGame().setCurrentColorOptional(Optional.empty()); // Sarà impostato da onColorChosen()
         } else {
             // Se è una carta colorata, quello è il nuovo colore attivo.
-            game.setCurrentColorOptional(Optional.of(card.get().getColor(game)));
+            this.getGame().setCurrentColorOptional(Optional.of(card.get().getColor(this.getGame())));
         }
 
         // Esegui effetto carta (polimorfismo)
-        if (card.get().getValue(game) == CardValue.WILD_FORCED_SWAP) {
+        if (card.get().getValue(this.getGame()) == CardValue.WILD_FORCED_SWAP) {
             // Sposta la carta
             player.playCard(card);
-            game.getDiscardPile().addCard(card.get());
+            this.getGame().getDiscardPile().addCard(card.get());
 
-            card.get().performEffect(game);
+            card.get().performEffect(this.getGame());
         } else {
-            card.get().performEffect(game);
+            card.get().performEffect(this.getGame());
 
             // Sposta la carta
             player.playCard(card);
-            game.getDiscardPile().addCard(card.get());
+            this.getGame().getDiscardPile().addCard(card.get());
         }
 
         // --- CONTROLLO VITTORIA ---
         if (player.hasWon()) {
             final ScoreManager scoreManager = new ScoreManagerImpl();
-            final int points = scoreManager.calculateRoundPoints(player, game.getPlayers(), game);
+            final int points = scoreManager.calculateRoundPoints(player, this.getGame().getPlayers(), this.getGame());
             player.addScore(points);
 
             String winType = "ROUND_WINNER";
-            boolean scoringMode = game.getRules().isScoringModeEnabled();
+            final boolean scoringMode = this.getGame().getRules().isScoringModeEnabled();
 
-            if (!scoringMode || player.getScore() >= 500) {
+            if (!scoringMode || player.getScore() >= FINAL_SCORE) {
                 winType = "MATCH_WINNER";
-                game.setGameState(new GameOverState(game));
+                this.getGame().setGameState(new GameOverState(this.getGame()));
             } else {
-                game.setGameState(new RoundOverState(game));
+                this.getGame().setGameState(new RoundOverState(this.getGame()));
             }
 
-            game.setWinner(player);
-            game.getLogger().logAction("SYSTEM", "GAME_OVER", "N/A",
+            this.getGame().setWinner(player);
+            this.getGame().getLogger().logAction("SYSTEM", "GAME_OVER", "N/A",
                     "Winner: " + player.getName() + " (" + winType + ") Points: " + points + " Total Score: "
                             + player.getScore());
-            game.notifyObservers();
+            this.getGame().notifyObservers();
             return;
         }
 
         // --- LOGICA DI AVANZAMENTO TURNO ---
         // Se lo stato è cambiato (es. waiting for color), non avanzare qui.
-        if (game.getGameState() == GameState.RUNNING) {
-            game.getTurnManager().advanceTurn(game);
+        if (this.getGame().getGameState() == GameState.RUNNING) {
+            this.getGame().getTurnManager().advanceTurn(this.getGame());
         }
 
-        game.notifyObservers();
+        this.getGame().notifyObservers();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void playerInitiatesDraw() {
-        final AbstractPlayer player = game.getCurrentPlayer();
+        final AbstractPlayer player = this.getGame().getCurrentPlayer();
 
         // 1. Regola: "Massimo una carta"
-        if (game.hasCurrentPlayerDrawn(player)) {
+        if (this.getGame().hasCurrentPlayerDrawn(player)) {
             throw new IllegalStateException("Hai già pescato in questo turno. Devi giocare la carta o passare.");
         }
 
         // 2. Regola: "Non se hai carte da giocare"
-        if (game.playerHasPlayableCard(player)) {
+        if (this.getGame().playerHasPlayableCard(player)) {
             throw new IllegalStateException("Mossa non valida! Hai una carta giocabile, non puoi pescare.");
         }
 
         // Ok, il giocatore deve pescare
-        game.getTurnManager().setHasDrawnThisTurn(true);
+        this.getGame().getTurnManager().setHasDrawnThisTurn(true);
 
-        game.drawCardForPlayer(player);
+        this.getGame().drawCardForPlayer(player);
 
-        game.notifyObservers();
+        this.getGame().notifyObservers();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void playerPassTurn() {
         // Puoi passare solo se hai pescato (perché non avevi mosse)
         // Oppure se hai pescato e la regola "Skip After Draw" è attiva.
-        if (!game.hasCurrentPlayerDrawn(game.getCurrentPlayer())) {
+        if (!this.getGame().hasCurrentPlayerDrawn(this.getGame().getCurrentPlayer())) {
             // Potresti avere una mossa, quindi non puoi passare
-            if (game.playerHasPlayableCard(game.getCurrentPlayer())) {
+            if (this.getGame().playerHasPlayableCard(this.getGame().getCurrentPlayer())) {
                 throw new IllegalStateException("Non puoi passare, hai una mossa valida.");
             } else {
                 throw new IllegalStateException("Non puoi passare, devi prima pescare una carta.");
             }
         }
 
-        final AbstractPlayer currentPlayer = game.getCurrentPlayer();
+        final AbstractPlayer currentPlayer = this.getGame().getCurrentPlayer();
         final String handSize = String.valueOf(currentPlayer.getHand().size());
 
-        game.getLogger().logAction(currentPlayer.getName(), "PASS_TURN", "N/A", "HandSize: " + handSize);
+        this.getGame().getLogger().logAction(currentPlayer.getName(), "PASS_TURN", "N/A", "HandSize: " + handSize);
 
-        game.getTurnManager().advanceTurn(game);
-        game.notifyObservers();
+        this.getGame().getTurnManager().advanceTurn(this.getGame());
+        this.getGame().notifyObservers();
     }
 }

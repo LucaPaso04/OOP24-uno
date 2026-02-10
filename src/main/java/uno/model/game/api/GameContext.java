@@ -73,7 +73,8 @@ public interface GameContext extends Game {
     void setWinner(AbstractPlayer winner);
 
     /**
-     * Resets the game state for a new round (keeping scores).
+     * {@inheritDoc}
      */
+    @Override
     void startNewRound();
 }

@@ -27,9 +27,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class RoundTransitionTest {
+
+    private static final int HAND_SIZE = 7;
+    private static final int INITIAL_SCORE = 499;
+    private static final int WINNING_SCORE_EXPE = 501;
+    private static final int CARDS_NUMB = 20;
 
     private GameImpl game;
     private AbstractPlayer p1;
@@ -38,35 +46,23 @@ class RoundTransitionTest {
     private DiscardPile discardPile;
     private TurnManager turnManager;
 
-    // Helper class to create a clean deck for testing
-    static class TestDeck extends AbstractDeckImpl<Card> {
-        public TestDeck() {
-            super(new TestLogger());
-        }
-    }
-
-    private Card createSimpleCard(CardColor color, CardValue value) {
-        CardSideBehavior behavior = new NumericBehavior(color, value);
-        return new DoubleSidedCard(behavior, behavior);
-    }
-
     @BeforeEach
     void setUp() {
         p1 = new HumanPlayer("P1");
         p2 = new HumanPlayer("P2");
-        List<AbstractPlayer> players = Arrays.asList(p1, p2);
+        final List<AbstractPlayer> players = Arrays.asList(p1, p2);
 
         deck = new TestDeck();
         // Add some dummy cards to deck
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < CARDS_NUMB; i++) {
             deck.addCard(createSimpleCard(CardColor.RED, CardValue.FIVE));
         }
 
         discardPile = new DiscardPileImpl();
         discardPile.addCard(createSimpleCard(CardColor.RED, CardValue.FOUR)); // Add a starting card
-        GameRules rules = new GameRulesImpl(false, false, false, true); // Scoring enabled
+        final GameRules rules = new GameRulesImpl(false, false, false, true); // Scoring enabled
         turnManager = new TurnManagerImpl(players, rules);
-        GameLogger logger = new TestLogger();
+        final GameLogger logger = new TestLogger();
 
         game = new GameImpl(deck, players, turnManager, discardPile, "Classic", logger, rules);
     }
@@ -76,7 +72,7 @@ class RoundTransitionTest {
         // Setup: P1 has 1 card, P2 has cards. P1 plays last card and wins round.
         // Scores are 0.
 
-        Card winningCard = createSimpleCard(CardColor.RED, CardValue.FIVE);
+        final Card winningCard = createSimpleCard(CardColor.RED, CardValue.FIVE);
         p1.addCardToHand(winningCard);
 
         // P2 has some cards (points)
@@ -102,9 +98,9 @@ class RoundTransitionTest {
     @Test
     void testMatchOverTransition() {
         // Setup: P1 score is 499. P1 wins meaningful points.
-        p1.setScore(499);
+        p1.setScore(INITIAL_SCORE);
 
-        Card winningCard = createSimpleCard(CardColor.RED, CardValue.FIVE);
+        final Card winningCard = createSimpleCard(CardColor.RED, CardValue.FIVE);
         p1.addCardToHand(winningCard);
         p2.addCardToHand(createSimpleCard(CardColor.BLUE, CardValue.TWO)); // 2 points
 
@@ -116,7 +112,7 @@ class RoundTransitionTest {
         game.playCard(Optional.of(winningCard));
 
         // Assert: P1 score > 500
-        assertEquals(501, p1.getScore());
+        assertEquals(WINNING_SCORE_EXPE, p1.getScore());
 
         // Assert: State should be GAME_OVER
         assertEquals(GameState.GAME_OVER, game.getGameState(), "State should be GAME_OVER");
@@ -125,7 +121,7 @@ class RoundTransitionTest {
     @Test
     void testStartNewRound() {
         // Setup: Game in ROUND_OVER state
-        Card winningCard = createSimpleCard(CardColor.RED, CardValue.FIVE);
+        final Card winningCard = createSimpleCard(CardColor.RED, CardValue.FIVE);
         p1.addCardToHand(winningCard);
         p2.addCardToHand(createSimpleCard(CardColor.BLUE, CardValue.TWO));
 
@@ -145,8 +141,8 @@ class RoundTransitionTest {
         assertEquals(GameState.RUNNING, game.getGameState());
 
         // 2. Players have 7 cards
-        assertEquals(7, p1.getHandSize());
-        assertEquals(7, p2.getHandSize());
+        assertEquals(HAND_SIZE, p1.getHandSize());
+        assertEquals(HAND_SIZE, p2.getHandSize());
 
         // 3. Deck is refilled (approx check)
         assertFalse(deck.isEmpty());
@@ -156,5 +152,17 @@ class RoundTransitionTest {
 
         // 5. Turn manager reset (checking if currentPlayer is valid)
         assertNotNull(game.getCurrentPlayer());
+    }
+
+    private Card createSimpleCard(final CardColor color, final CardValue value) {
+        final CardSideBehavior behavior = new NumericBehavior(color, value);
+        return new DoubleSidedCard(behavior, behavior);
+    }
+
+    // Helper class to create a clean deck for testing
+    static class TestDeck extends AbstractDeckImpl<Card> {
+        TestDeck() {
+            super(new TestLogger());
+        }
     }
 }

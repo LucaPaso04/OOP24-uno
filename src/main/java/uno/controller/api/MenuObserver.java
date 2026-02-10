@@ -1,48 +1,48 @@
 package uno.controller.api;
 
+import uno.model.game.api.GameRules;
+
 /**
- * Interfaccia (Observer) che definisce le azioni che l'utente
- * può compiere dalla schermata del menu.
- * La View (MenuScene) chiamerà questi metodi, e il Controller
- * (MenuController) li implementerà.
+ * Interface defining the operations for controlling the main menu of the Uno! game.
+ * It serves as a contract for handling user interactions in the menu, such as
+ * starting different game modes, opening the rules, and quitting the application.
  */
 public interface MenuObserver {
 
     /**
-     * Chiamato quando l'utente clicca "Avvia Partita Classica".
+     * Called when the user clicks "Start Classic Mode".
      */
     void onStartClassicGame();
 
     /**
-     * Chiamato quando l'utente clicca "Avvia Modalità Flip" (Esempio).
+     * Called when the user clicks "Start Flip Mode".
      */
     void onStartFlipGame();
 
     /**
-     * Chiamato quando l'utente clicca "Esci".
-     */
-    void onQuit();
-
-    /**
-     * Chiamato quando l'utente clicca "Avvia Modalità Tutti Jolly".
+     * Called when the user clicks "Start All Wild Mode".
      */
     void onStartAllWildGame();
 
     /**
-     * Chiamato quando l'utente clicca "Regole".
+     * Called when the user clicks "Rules".
      */
     void onOpenRules();
 
     /**
-     * Chiamato quando l'utente salva le regole personalizzate.
+     * Called when the user saves custom rules.
      * 
-     * @param rules Le nuove regole impostate.
+     * @param rules The new rules set by the user.
      */
-    void onSaveRules(uno.model.game.api.GameRules rules);
+    void onSaveRules(GameRules rules);
 
     /**
-     * Chiamato quando l'utente vuole tornare al menu principale dalla schermata
-     * regole.
+     * Called when the user wants to return to the main menu from the rules screen.
      */
     void onBackToMenu();
+
+    /**
+     * Called when the user clicks "Quit".
+     */
+    void onQuit();
 }

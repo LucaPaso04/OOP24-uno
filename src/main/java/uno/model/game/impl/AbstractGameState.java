@@ -8,6 +8,8 @@ import uno.model.players.api.AbstractPlayer;
 
 import java.util.Optional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Abstract base class for Game States.
  * Throws IllegalStateException by default for all actions.
@@ -15,39 +17,73 @@ import java.util.Optional;
  */
 public abstract class AbstractGameState implements GameStateBehavior {
 
-    protected final GameContext game;
+    private final GameContext game;
 
-    public AbstractGameState(GameContext game) {
+    /**
+     * Constructor to initialize the game context.
+     * 
+     * @param game the game context to be used by the state
+     */
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    public AbstractGameState(final GameContext game) {
         this.game = game;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void playCard(Optional<Card> card) {
+    public void playCard(final Optional<Card> card) {
         throw new IllegalStateException("Non è possibile giocare una carta in questo stato: " + getEnum());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void playerInitiatesDraw() {
         throw new IllegalStateException("Non è possibile pescare in questo stato: " + getEnum());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void playerPassTurn() {
         throw new IllegalStateException("Non è possibile passare il turno in questo stato: " + getEnum());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void setColor(CardColor color) {
+    public void setColor(final CardColor color) {
         throw new IllegalStateException("Non è possibile impostare il colore in questo stato: " + getEnum());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void chosenPlayer(AbstractPlayer player) {
+    public void chosenPlayer(final AbstractPlayer player) {
         throw new IllegalStateException("Non è possibile scegliere un giocatore in questo stato: " + getEnum());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void drawUntilColorChosenCard(CardColor color) {
+    public void drawUntilColorChosenCard(final CardColor color) {
         throw new IllegalStateException("Non è possibile pescare fino al colore in questo stato: " + getEnum());
+    }
+
+    /**
+     * Getter for the game context.
+     * 
+     * @return the game context associated with this state
+     */
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    public GameContext getGame() {
+        return this.game;
     }
 }

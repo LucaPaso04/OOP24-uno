@@ -9,10 +9,18 @@ import uno.model.game.impl.AbstractGameState;
  */
 public class GameOverState extends AbstractGameState {
 
-    public GameOverState(GameContext game) {
+    /**
+     * Constructor for GameOverState.
+     * 
+     * @param game the game context to which this state belongs
+     */
+    public GameOverState(final GameContext game) {
         super(game);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GameState getEnum() {
         return GameState.GAME_OVER;
