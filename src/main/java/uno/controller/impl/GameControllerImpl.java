@@ -13,6 +13,7 @@ import uno.view.api.GameFrame;
 import uno.view.scenes.api.GameScene;
 import uno.view.scenes.api.MenuScene;
 import uno.view.scenes.impl.MenuSceneImpl;
+import uno.view.api.GameViewData;
 
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
@@ -40,9 +41,11 @@ public class GameControllerImpl implements GameController {
     /**
      * Constructs the GameControllerImpl with the given Model, View, and Main Frame.
      * 
-     * @param gameModel the game logic and state. 
-     * @param gameScene the view representing the game board and player interactions.
-     * @param mainFrame the main application window to control scene transitions and popups.
+     * @param gameModel the game logic and state.
+     * @param gameScene the view representing the game board and player
+     *                  interactions.
+     * @param mainFrame the main application window to control scene transitions and
+     *                  popups.
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public GameControllerImpl(final Game gameModel, final GameScene gameScene,
@@ -66,6 +69,9 @@ public class GameControllerImpl implements GameController {
         onGameUpdate();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     /**
      * {@inheritDoc}
      */
@@ -96,6 +102,10 @@ public class GameControllerImpl implements GameController {
             return;
         }
 
+        // Create DTOs
+        final GameViewData viewData = createGameViewData();
+        gameScene.updateView(viewData);
+
         final boolean isHumanTurn = gameModel.getCurrentPlayer().getClass() == HumanPlayer.class;
 
         if (isHumanTurn) {
@@ -111,8 +121,61 @@ public class GameControllerImpl implements GameController {
         checkAndRunAITurn();
     }
 
+    private GameViewData createGameViewData() {
+        final GameState state = gameModel.getGameState();
+
+        final java.util.List<uno.view.api.PlayerViewData> playerViewDataList = gameModel.getPlayers().stream()
+                .map(this::createPlayerViewData)
+                .collect(java.util.stream.Collectors.toList());
+
+        final uno.view.api.PlayerViewData currentPlayer = createPlayerViewData(gameModel.getCurrentPlayer());
+
+        uno.view.api.PlayerViewData winner = null;
+
+        final java.util.Optional<uno.view.api.CardViewData> topCard = gameModel.getTopDiscardCard()
+                .map(this::createCardViewData);
+
+        return new uno.view.api.GameViewData(
+                state,
+                playerViewDataList,
+                currentPlayer,
+                topCard,
+                gameModel.isDiscardPileEmpty(),
+                gameModel.getDrawDeck().size(),
+                gameModel.getCurrentColor(),
+                gameModel.isDarkSide(),
+                gameModel.hasCurrentPlayerDrawn(gameModel.getCurrentPlayer()),
+                winner,
+                gameModel.isClockwise());
+    }
+
+    private uno.view.api.PlayerViewData createPlayerViewData(final AbstractPlayer player) {
+        final java.util.List<uno.view.api.CardViewData> hand = player.getHand().stream()
+                .filter(java.util.Optional::isPresent)
+                .map(cardOpt -> createCardViewData(cardOpt.get()))
+                .collect(java.util.stream.Collectors.toList());
+
+        return new uno.view.api.PlayerViewData(
+                player.getName(),
+                player.getHandSize(),
+                player.getScore(),
+                gameModel.getCurrentPlayer().equals(player),
+                hand,
+                player);
+    }
+
+    private uno.view.api.CardViewData createCardViewData(final Card card) {
+        final String imageKey = card.getColor(gameModel).name() + "_" + card.getValue(gameModel).name();
+        return new uno.view.api.CardViewData(
+                card.getColor(gameModel),
+                card.getValue(gameModel),
+                imageKey,
+                java.util.Optional.of(card));
+    }
+
     /**
-     * Check if the current player is an AI and, if so, schedule its turn after a short delay.
+     * Check if the current player is an AI and, if so, schedule its turn after a
+     * short delay.
      */
     private void checkAndRunAITurn() {
         if (gameModel.getGameState() != GameState.RUNNING) {
@@ -127,7 +190,8 @@ public class GameControllerImpl implements GameController {
             final ActionListener aiTask = new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
-                    currentPlayer.takeTurn(gameModel);
+                    ((AbstractAIPlayer) currentPlayer).takeTurn(gameModel); // Cast to AbstractAIPlayer to access
+                                                                            // takeTurn
                 }
             };
 

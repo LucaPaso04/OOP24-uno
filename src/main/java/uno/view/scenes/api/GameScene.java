@@ -2,7 +2,7 @@ package uno.view.scenes.api;
 
 import uno.model.players.api.AbstractPlayer;
 import uno.view.api.GameViewObserver;
-import uno.model.api.GameModelObserver; // Assumendo che questa sia l'interfaccia Observer generica
+import uno.view.api.GameViewData;
 
 import java.util.List;
 
@@ -12,7 +12,14 @@ import java.util.List;
  * requests
  * coming from the Controller.
  */
-public interface GameScene extends GameModelObserver {
+public interface GameScene {
+
+    /**
+     * Updates the view with the latest game data.
+     * 
+     * @param data The snapshot of the game state.
+     */
+    void updateView(GameViewData data);
 
     /**
      * Registers the controller to handle user inputs (clicks on cards, buttons).

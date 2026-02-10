@@ -88,7 +88,7 @@ public class MenuControllerImpl implements MenuController {
 
         final GameFactory factory = new GameFactoryImpl(currentRules);
         final Game gameModel = factory.createGame(HUMAN_NAME, gameMode, players);
-        final GameScene gameScene = new GameSceneImpl(gameModel);
+        final GameScene gameScene = new GameSceneImpl();
         final GameController gameController = new GameControllerImpl(gameModel, gameScene, frame);
 
         gameScene.setObserver(gameController);
@@ -99,7 +99,8 @@ public class MenuControllerImpl implements MenuController {
     }
 
     /**
-     * Creates a list of players based on the selected Game Mode. The first player is
+     * Creates a list of players based on the selected Game Mode. The first player
+     * is
      * always a Human Player, followed by three AI Players of the appropriate type.
      * 
      * @param gameMode the selected Game Mode

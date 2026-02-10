@@ -2,9 +2,8 @@ package uno.view.scenes.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uno.model.cards.attributes.CardColor;
-import uno.model.cards.types.api.Card;
-import uno.model.game.api.GameState;
 import uno.model.players.api.AbstractPlayer;
+import uno.model.game.api.GameState;
 import uno.view.components.impl.ColorChooserPanelImpl;
 import uno.view.components.impl.PlayerChooserPanelImpl;
 import uno.view.components.api.StyledButton;
@@ -12,10 +11,12 @@ import uno.view.components.impl.StyledButtonImpl;
 import uno.view.scenes.api.GameScene;
 import uno.view.utils.impl.CardImageLoaderImpl;
 import uno.view.api.GameViewObserver;
+import uno.view.api.GameViewData;
+import uno.view.api.PlayerViewData;
+import uno.view.api.CardViewData;
 import uno.view.components.api.ColorChooserPanel;
 import uno.view.components.api.PlayerChooserPanel;
 import uno.view.style.UnoTheme;
-import uno.model.game.api.Game;
 import java.util.Optional;
 
 import javax.swing.ImageIcon;
@@ -89,7 +90,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     private final CardImageLoaderImpl cardImageLoader;
 
-    private final Game gameModel;
+    private GameViewData currentData;
     private Optional<GameViewObserver> controllerObserver = Optional.empty();
 
     private final JPanel playerHandPanel;
@@ -116,14 +117,10 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     /**
      * Constructor for GameSceneImpl.
-     * 
-     * @param gameModel The game model instance to observe and represent.
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
-    public GameSceneImpl(final Game gameModel) {
+    public GameSceneImpl() {
         super(new BorderLayout(10, 10));
-        this.gameModel = gameModel;
-        this.gameModel.addObserver(this);
         this.cardImageLoader = new CardImageLoaderImpl(CARD_WIDTH, CARD_HEIGHT);
         setBackground(UnoTheme.BACKGROUND_COLOR);
         setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -168,7 +165,34 @@ public final class GameSceneImpl extends JPanel implements GameScene {
             controllerObserver.ifPresent(GameViewObserver::onCallUno);
         });
 
-        onGameUpdate();
+    }
+
+    /**
+     * Updates the view with the latest game data.
+     */
+    @Override
+    public void updateView(final GameViewData data) {
+        this.currentData = data;
+        updateStatusLabel();
+        updateDiscardPile();
+        updateHumanHand();
+        updateAIPanels();
+        updateGameInfo();
+
+        final boolean isHumanTurn = currentData.getCurrentPlayer().getModelPlayer().getClass().getSimpleName()
+                .equals("HumanPlayer");
+        // Note: Using simple name check or passing explicit "isHuman" boolean in
+        // PlayerViewData would be cleaner,
+        // but current logic uses class check. PlayerViewData has AbstractPlayer token,
+        // so we can check that.
+        // Actually, PlayerViewData doesn't expose class type easily unless we check the
+        // token.
+        // Let's rely on token for now.
+
+        setHumanInputEnabled(isHumanTurn && currentData.getGameState() == GameState.RUNNING);
+
+        revalidate();
+        repaint();
     }
 
     /**
@@ -184,13 +208,16 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      */
     @Override
     public void setHumanInputEnabled(final boolean enabled) {
-        final GameState currentState = gameModel.getGameState();
+        if (currentData == null) {
+            return;
+        }
+        final GameState currentState = currentData.getGameState();
         final boolean shouldDisableUno = currentState == GameState.WAITING_FOR_COLOR
                 || currentState == GameState.WAITING_FOR_PLAYER;
 
         this.unoButton.setEnabled(!shouldDisableUno);
 
-        final boolean hasDrawn = gameModel.hasCurrentPlayerDrawn(gameModel.getCurrentPlayer());
+        final boolean hasDrawn = currentData.hasCurrentPlayerDrawn();
 
         this.drawDeckButton.setEnabled(enabled && !hasDrawn);
         this.passButton.setEnabled(enabled && hasDrawn);
@@ -222,7 +249,17 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * {@inheritDoc}
      */
     @Override
-    public void showPlayerChooser(final List<AbstractPlayer> opponents) {
+    public void showPlayerChooser(final List<AbstractPlayer> opponents) { // Interface still uses AbstractPlayer list?
+        // GameScene interface: void showPlayerChooser(List<AbstractPlayer> opponents);
+        // We haven't changed that interface method signature yet.
+        // Implementation plan said "Update GameScene interface". I checked GameScene
+        // and only updated updateView?
+        // Let's check GameScene content again. I view_file'd it.
+        // I implicitly kept `showPlayerChooser(List<AbstractPlayer> opponents)`.
+        // Ideally this should use keys or PlayerViewData.
+        // But for now let's keep it compatible if Controller passes AbstractPlayer list
+        // (Controller has access to Model).
+        // View just displays names.
 
         final PlayerChooserPanel panel = new PlayerChooserPanelImpl(this.controllerObserver, opponents);
 
@@ -236,35 +273,18 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     }
 
     /**
-     * Metodo chiamato dal Modello (Game) quando lo stato cambia.
-     */
-    @Override
-    public void onGameUpdate() {
-        updateStatusLabel();
-        updateDiscardPile();
-        updateHumanHand();
-        updateAIPanels();
-        updateGameInfo(); // Update new info labels
-
-        final boolean isHumanTurn = gameModel.getCurrentPlayer().getClass() == AbstractPlayer.class;
-        setHumanInputEnabled(isHumanTurn && gameModel.getGameState() == GameState.RUNNING);
-
-        revalidate();
-        repaint();
-    }
-
-    /**
      * New method to update game info.
      */
     private void updateGameInfo() {
-        // Update Deck Count
-        if (gameModel.getDrawDeck() != null) {
-            final int deckSize = gameModel.getDrawDeck().size();
-            deckInfoLabel.setText("Deck: " + deckSize + " cards");
+        if (currentData == null) {
+            return;
         }
+        // Update Deck Count
+        final int deckSize = currentData.getDeckSize();
+        deckInfoLabel.setText("Deck: " + deckSize + " cards");
 
         // Update Current Color
-        final Optional<CardColor> currentColor = gameModel.getCurrentColor();
+        final Optional<CardColor> currentColor = currentData.getCurrentColor();
         if (currentColor.isPresent()) {
             colorInfoLabel.setText("Color: " + currentColor.get().name());
             colorInfoLabel.setForeground(convertCardColor(currentColor));
@@ -274,8 +294,9 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         }
 
         // Update Human Score
-        if (!gameModel.getPlayers().isEmpty()) {
-            humanScoreLabel.setText("Punti: " + gameModel.getPlayers().get(0).getScore());
+        if (!currentData.getPlayers().isEmpty()) {
+            // Assuming first player is human/self
+            humanScoreLabel.setText("Punti: " + currentData.getPlayers().get(0).getScore());
         }
     }
 
@@ -327,7 +348,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     public void showWinnerPopup(final String winnerName) {
         setHumanInputEnabled(false);
 
-        final Object[] options = {"Torna al Menu", "Chiudi Gioco" };
+        final Object[] options = { "Torna al Menu", "Chiudi Gioco" };
 
         final int choice = JOptionPane.showOptionDialog(
                 this,
@@ -426,19 +447,20 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * Updates an AI opponent panel with the current card count and highlights if
      * it's their turn.
      * 
-     * @param panel The panel to update.
-     * @param label The label within the panel to update.
-     * @param ai    The AI player associated with the panel.
-     * @param scoreLabel The label to update with the AI's score (can be null if not used).
+     * @param panel      The panel to update.
+     * @param label      The label within the panel to update.
+     * @param ai         The AI player associated with the panel.
+     * @param scoreLabel The label to update with the AI's score (can be null if not
+     *                   used).
      */
     private void updateOpponentPanel(final JPanel panel, final JLabel label, final JLabel scoreLabel,
-            final AbstractPlayer ai) {
+            final PlayerViewData ai) {
         label.setText(ai.getHandSize() + " carte");
         if (scoreLabel != null) {
             scoreLabel.setText("Punti: " + ai.getScore());
         }
 
-        if (gameModel.getCurrentPlayer().equals(ai)) {
+        if (ai.isCurrentPlayer()) {
             // Active Turn: Thicker Gold (or Red) Border
             final Color activeColor = ai.getHandSize() <= 1 ? UnoTheme.BUTTON_COLOR : UnoTheme.ACTIVE_BORDER_COLOR;
             final int thickness = ai.getHandSize() <= 1 ? 5 : 4;
@@ -446,7 +468,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
             panel.setBorder(new CompoundBorder(
                     BorderFactory.createLineBorder(activeColor, thickness),
                     UnoTheme.PANEL_INSETS));
-            panel.setBackground(UnoTheme.PANEL_COLOR); // Simpler background for now
+            panel.setBackground(UnoTheme.PANEL_COLOR);
         } else {
             // Inactive
             panel.setBorder(new CompoundBorder(
@@ -689,11 +711,11 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     /**
      * Creates a JButton representing a card in the player's hand.
      * 
-     * @param card The card to create a button for.
+     * @param cardData The card data to create a button for.
      * @return The created JButton.
      */
-    private JButton createCardButton(final Optional<Card> card) {
-        final String cardName = card.get().getColor(gameModel).name() + "_" + card.get().getValue(gameModel).name();
+    private JButton createCardButton(final CardViewData cardData) {
+        final String cardName = cardData.getImageKey();
         final JButton button = new JButton();
         styleAsCardButton(button, cardName);
         return button;
@@ -737,27 +759,32 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * including the top card image and the active color border.
      */
     private void updateDiscardPile() {
-        if (gameModel.isDiscardPileEmpty()) {
+        if (currentData == null) {
+            return;
+        }
+        if (currentData.isDiscardPileEmpty()) {
             discardPileCard.setText("Empty");
             discardPileCard.setIcon(null);
             discardPileCard.setBackground(Color.LIGHT_GRAY);
         } else {
-            final Optional<Card> topCard = gameModel.getTopDiscardCard();
-            final String cardName = topCard.get().getColor(gameModel).name() + "_"
-                    + topCard.get().getValue(gameModel).name();
-            final Optional<ImageIcon> icon = Optional.of(cardImageLoader.getImage(cardName));
+            final Optional<CardViewData> topCardData = currentData.getTopDiscardCard();
+            if (topCardData.isPresent()) {
+                final CardViewData card = topCardData.get();
+                final String cardName = card.getImageKey();
+                final Optional<ImageIcon> icon = Optional.of(cardImageLoader.getImage(cardName));
 
-            if (icon.isPresent()) {
-                discardPileCard.setIcon(icon.get());
-                discardPileCard.setText(null);
-            } else {
-                discardPileCard.setIcon(null);
-                discardPileCard.setText("<html><div style='text-align: center;'>"
-                        + topCard.get().getValue(gameModel) + "<br>" + topCard.get().getColor(gameModel)
-                        + "</div></html>");
+                if (icon.isPresent()) {
+                    discardPileCard.setIcon(icon.get());
+                    discardPileCard.setText(null);
+                } else {
+                    discardPileCard.setIcon(null);
+                    discardPileCard.setText("<html><div style='text-align: center;'>"
+                            + card.getValue() + "<br>" + card.getColor()
+                            + "</div></html>");
+                }
             }
 
-            applyActiveColorBorder(gameModel.getCurrentColor());
+            applyActiveColorBorder(currentData.getCurrentColor());
         }
     }
 
@@ -780,9 +807,23 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * Refreshes the human player's hand panel by recreating card buttons.
      */
     private void updateHumanHand() {
+        if (currentData == null) {
+            return;
+        }
         playerHandPanel.removeAll();
 
-        final AbstractPlayer humanPlayer = gameModel.getPlayers().get(0);
+        // Assuming first player is human. In a real network game, we'd need to identify
+        // "me".
+        // But here it's local turn-based or similar?
+        // GameModel.getPlayers() list order...
+        // Existing code assumed gameModel.getPlayers().get(0) is human.
+        if (currentData.getPlayers().isEmpty()) {
+            playerHandPanel.revalidate();
+            playerHandPanel.repaint();
+            return;
+        }
+
+        final PlayerViewData humanPlayer = currentData.getPlayers().get(0);
 
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -790,16 +831,18 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         gbc.insets = GBC_INSETS;
         gbc.anchor = GridBagConstraints.CENTER;
 
-        for (final Optional<Card> card : humanPlayer.getHand()) {
-            final JButton cardButton = createCardButton(card);
+        for (final CardViewData cardData : humanPlayer.getHand()) {
+            final JButton cardButton = createCardButton(cardData);
 
             cardButton.addActionListener(e -> {
-                controllerObserver.ifPresent(observer -> observer.onPlayCard(card));
+                controllerObserver.ifPresent(observer -> observer.onPlayCard(cardData.getModelCard()));
             });
 
             playerHandPanel.add(cardButton, gbc);
             gbc.gridx++;
         }
+        playerHandPanel.revalidate();
+        playerHandPanel.repaint();
     }
 
     /**
@@ -808,7 +851,10 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * requests.
      */
     private void updateStatusLabel() {
-        final GameState currentState = gameModel.getGameState();
+        if (currentData == null) {
+            return;
+        }
+        final GameState currentState = currentData.getGameState();
 
         switch (currentState) {
             case WAITING_FOR_COLOR:
@@ -818,9 +864,9 @@ public final class GameSceneImpl extends JPanel implements GameScene {
                 statusLabel.setText("Pick a target player!");
                 break;
             case RUNNING:
-                final String direction = gameModel.isClockwise() ? "Clockwise" : "Counter-clockwise";
+                final String direction = currentData.isClockwise() ? "Clockwise" : "Counter-clockwise";
                 statusLabel.setText("<html><div style='text-align: center;'>Turn: "
-                        + gameModel.getCurrentPlayer().getName()
+                        + currentData.getCurrentPlayer().getName()
                         + "<br>Direction: " + direction + "</div></html>");
                 break;
             default:
@@ -834,15 +880,16 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * Highlights the active player and updates card counts.
      */
     private void updateAIPanels() {
-
-        final List<AbstractPlayer> players = gameModel.getPlayers();
+        if (currentData == null) {
+            return;
+        }
+        final List<PlayerViewData> players = currentData.getPlayers();
 
         if (players.size() >= 4) {
             updateOpponentPanel(westAIPanel, westAILabel, westScoreLabel, players.get(1));
             updateOpponentPanel(northAIPanel, northAILabel, northScoreLabel, players.get(2));
             updateOpponentPanel(eastAIPanel, eastAILabel, eastScoreLabel, players.get(3));
         }
-
     }
 
     @SuppressFBWarnings("DM_EXIT")
