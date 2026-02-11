@@ -20,7 +20,7 @@ public class WaitingForPlayerState extends AbstractGameState {
     /**
      * Constructor for WaitingForPlayerState.
      * 
-     * @param game the game context
+     * @param game The game context to which this state belongs.
      */
     public WaitingForPlayerState(final GameContext game) {
         super(game);
@@ -47,8 +47,6 @@ public class WaitingForPlayerState extends AbstractGameState {
         if (playedCard.getValue(this.getGame()) == CardValue.WILD_FORCED_SWAP) {
 
             final AbstractPlayer currentPlayer = this.getGame().getCurrentPlayer();
-
-            // Scambia le mani
             final List<Optional<Card>> tempHand = new ArrayList<>(currentPlayer.getHand());
             currentPlayer.setHand(player.getHand());
             player.setHand(tempHand);
@@ -59,8 +57,7 @@ public class WaitingForPlayerState extends AbstractGameState {
             this.getGame().drawCardForPlayer(player);
         }
 
-        this.getGame().setGameState(new RunningState(this.getGame())); // Transition back to Running
-
+        this.getGame().setGameState(new RunningState(this.getGame()));
         this.getGame().notifyObservers();
     }
 }

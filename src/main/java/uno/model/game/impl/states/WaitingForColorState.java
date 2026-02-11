@@ -18,7 +18,7 @@ public class WaitingForColorState extends AbstractGameState {
     /**
      * Constructor for WaitingForColorState.
      * 
-     * @param game the game context
+     * @param game The game context to which this state belongs.
      */
     public WaitingForColorState(final GameContext game) {
         super(game);
@@ -37,7 +37,6 @@ public class WaitingForColorState extends AbstractGameState {
      */
     @Override
     public void setColor(final CardColor color) {
-        // Deve prendere il valore della carta giocata
         final Card playedCard = this.getGame().getCurrentPlayedCard();
 
         this.getGame().getLogger().logAction(this.getGame().getCurrentPlayer().getName(), 
@@ -49,8 +48,7 @@ public class WaitingForColorState extends AbstractGameState {
         }
 
         this.getGame().setCurrentColorOptional(Optional.of(color));
-        this.getGame().setGameState(new RunningState(this.getGame())); // Transition back to Running
-
+        this.getGame().setGameState(new RunningState(this.getGame()));
         this.getGame().notifyObservers();
     }
 
@@ -73,8 +71,7 @@ public class WaitingForColorState extends AbstractGameState {
         }
 
         this.getGame().setCurrentColorOptional(Optional.of(color));
-
-        this.getGame().setGameState(new RunningState(this.getGame())); // Transition back to Running
+        this.getGame().setGameState(new RunningState(this.getGame()));
         this.getGame().getTurnManager().advanceTurn(this.getGame());
         this.getGame().notifyObservers();
     }

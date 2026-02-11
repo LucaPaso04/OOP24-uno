@@ -45,8 +45,6 @@ public class WildBehavior implements CardSideBehavior {
         this.reversesGame = reversesGame;
     }
 
-    // --- CONSTRUCTOR OVERLOADS ---
-
     /**
      * Constructor for Standard Wilds.
      * Automatically assumes color choice is needed and no specific target player.

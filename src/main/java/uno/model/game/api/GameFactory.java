@@ -15,7 +15,7 @@ public interface GameFactory {
      * Creates a new Game instance.
      * 
      * @param playerName The name of the human player.
-     * @param gameMode   The selected game mode (e.g., "Classica", "Chaos", "Uno
+     * @param gameMode   The selected game mode (e.g., "Classica", "Uno
      *                   Flip").
      * @param players    The list of players participating in the game.
      * @return A fully initialized Game instance.
@@ -25,7 +25,7 @@ public interface GameFactory {
     /**
      * Return the logger.
      * 
-     * @return logger
+     * @return The GameLogger instance used for logging game events.
      */
     GameLogger getLogger();
 }

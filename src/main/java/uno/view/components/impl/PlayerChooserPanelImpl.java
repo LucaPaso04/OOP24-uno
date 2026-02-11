@@ -20,11 +20,13 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Optional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * A panel that prompts the current player to choose a target opponent.
  * Used for specific cards (e.g., "Swap Hands" or targeted draws).
  */
-@edu.umd.cs.findbugs.annotations.SuppressFBWarnings({ "SE_BAD_FIELD", "EI_EXPOSE_REP2" })
+@SuppressFBWarnings({ "SE_BAD_FIELD", "EI_EXPOSE_REP2" })
 public final class PlayerChooserPanelImpl extends JPanel implements ActionListener, PlayerChooserPanel {
 
     private static final long serialVersionUID = 1L;
@@ -47,7 +49,6 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
         this.observer = observer;
         this.availableOpponents = opponents;
 
-        // Vertical layout for the list of buttons
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(UnoTheme.PANEL_COLOR);
 
@@ -55,28 +56,24 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
                 BorderFactory.createEtchedBorder(), "Choose Opponent",
                 TitledBorder.LEFT, TitledBorder.TOP, UnoTheme.TEXT_FONT, UnoTheme.TEXT_COLOR));
 
-        // Create a button for each valid opponent
         add(Box.createVerticalGlue());
 
         for (final AbstractPlayer opponent : opponents) {
 
-            // Filter out HumanPlayer instances
             if (opponent instanceof HumanPlayer) {
                 continue;
             }
 
-            // Create and add the button
             final JButton button = createStyledButton(opponent.getName());
-            button.setActionCommand(opponent.getName()); // Use name as ID
+            button.setActionCommand(opponent.getName());
             button.addActionListener(this);
 
             add(button);
-            add(Box.createRigidArea(SPACER_SIZE)); // Spacer between buttons
+            add(Box.createRigidArea(SPACER_SIZE));
         }
 
         add(Box.createVerticalGlue());
 
-        // Set a preferred size suitable for a list
         setPreferredSize(PANEL_SIZE);
     }
 
@@ -93,7 +90,7 @@ public final class PlayerChooserPanelImpl extends JPanel implements ActionListen
     }
 
     /**
-     * Handles button clicks to notify the observer of the chosen player.
+     * {@inheritDoc}
      */
     @Override
     public void actionPerformed(final ActionEvent e) {

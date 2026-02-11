@@ -15,7 +15,6 @@ import java.util.Optional;
  * Main interface for the UNO Game Model.
  * It maintains the game state, orchestrates turn flow, and manages rules
  * execution.
- * Following the Observer Pattern, it notifies the View of any state changes.
  */
 public interface Game {
 

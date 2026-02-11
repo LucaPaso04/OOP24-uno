@@ -100,8 +100,7 @@ public class MenuControllerImpl implements MenuController {
 
     /**
      * Creates a list of players based on the selected Game Mode. The first player
-     * is
-     * always a Human Player, followed by three AI Players of the appropriate type.
+     * is always a Human Player, followed by three AI Players of the appropriate type.
      * 
      * @param gameMode the selected Game Mode
      * @return a list of players for the game

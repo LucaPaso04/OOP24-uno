@@ -7,54 +7,51 @@ import uno.model.players.api.AbstractPlayer;
 import java.util.Optional;
 
 /**
- * Interfaccia (Observer) che definisce le azioni che l'utente
- * può compiere dalla schermata di gioco.
- * La GameScene chiamerà questi metodi, e il GameController
- * li implementerà.
+ * Interface for observing user interactions in the game view. This interface defines
+ * methods that are called when the user performs certain actions in the game view, such as
+ * playing a card, drawing a card, calling "UNO", etc.
  */
 public interface GameViewObserver {
 
     /**
-     * Chiamato quando l'utente clicca su una carta nella sua mano.
+     * Called when the user attempts to play a card.
      * 
-     * @param card La carta che l'utente ha tentato di giocare.
+     * @param card The card that the user attempted to play.
      */
     void onPlayCard(Optional<Card> card);
 
     /**
-     * Chiamato quando l'utente clicca sul mazzo di pesca.
+     * Called when the user clicks on the draw pile.
      */
     void onDrawCard();
 
     /**
-     * Chiamato quando l'utente clicca il bottone "UNO".
+     * Called when the user clicks the "UNO" button.
      */
     void onCallUno();
 
     /**
-     * Chiamato quando l'utente vuole tornare al menu.
+     * Called when the user wants to go back to the main menu.
      */
     void onBackToMenu();
 
     /**
-     * Chiamato quando l'utente clicca il bottone "Passa".
+     * Called when the user clicks the "Pass" button.
      */
     void onPassTurn();
 
     /**
-     * Chiamato quando l'utente clicca su uno dei bottoni giocatore
-     * dopo aver giocato una carta che richiede di scegliere un giocatore
-     * (es. Asso).
+     * Called when the user clicks on one of the player buttons to choose a player for a card effect.
      * 
-     * @param player Il giocatore scelto.
+     * @param player The chosen player.
      */
     void onPlayerChosen(AbstractPlayer player);
 
     /**
-     * Chiamato quando l'utente clicca su uno dei bottoni colore
-     * dopo aver giocato una carta Jolly.
+     * Called when the user clicks on one of the color buttons
+     * after playing a Jolly card.
      * 
-     * @param color Il colore scelto.
+     * @param color The chosen color.
      */
     void onColorChosen(CardColor color);
 }

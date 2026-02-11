@@ -16,11 +16,13 @@ import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import javax.swing.border.EmptyBorder;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * The panel (JPanel) representing the main menu screen.
  * This implementation uses a modern and accessible graphical style.
  */
-@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_BAD_FIELD")
+@SuppressFBWarnings("SE_BAD_FIELD")
 public final class MenuSceneImpl extends JPanel implements MenuScene {
 
     private static final long serialVersionUID = 1L;
@@ -34,13 +36,12 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
      * Constructs the MenuSceneImpl, setting up the layout and components.
      */
     public MenuSceneImpl() {
-        super(new GridBagLayout()); // Use GridBagLayout to center everything
+        super(new GridBagLayout());
         setBackground(UnoTheme.BACKGROUND_COLOR);
 
-        // Inner panel to hold components vertically
         final JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setOpaque(false); // Make transparent to show background
+        contentPanel.setOpaque(false);
 
         // 1. Title
         final JLabel title = new JLabel("UNO");
@@ -50,7 +51,6 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
 
         title.setBorder(TITLE_EMPTY_BORDER);
 
-        // 2. Create Styled Buttons - Ensuring Uniform Size
         final int btnWidth = 350;
         final int btnHeight = 60;
 
@@ -66,7 +66,6 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
         allWildButton.setSize(btnWidth, btnHeight);
         allWildButton.setMnemonic(KeyEvent.VK_W);
 
-        // --- Rules Button ---
         final StyledButton rulesButton = new StyledButtonImpl("Game Rules");
         rulesButton.setSize(btnWidth, btnHeight);
         rulesButton.setMnemonic(KeyEvent.VK_R);
@@ -75,7 +74,6 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
         quitButton.setSize(btnWidth, btnHeight);
         quitButton.setMnemonic(KeyEvent.VK_E);
 
-        // 3. Add components to the inner panel
         contentPanel.add(title);
         contentPanel.add(classicButton.getComponent());
         contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION));
@@ -83,16 +81,11 @@ public final class MenuSceneImpl extends JPanel implements MenuScene {
         contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION));
         contentPanel.add(allWildButton.getComponent());
         contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION));
-        // Add rules button with spacing
         contentPanel.add(rulesButton.getComponent());
         contentPanel.add(Box.createRigidArea(RIGID_AREA_DIMENSION));
-
         contentPanel.add(quitButton.getComponent());
-
-        // 4. Add the inner panel to the main scene (centered by GridBag)
         add(contentPanel, new GridBagConstraints());
 
-        // 5. Link ActionListeners to the Observer
         classicButton.addActionListener(e -> {
             if (observer != null) {
                 observer.onStartClassicGame();

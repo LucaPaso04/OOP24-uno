@@ -29,7 +29,7 @@ public class AIFlip extends AbstractAIPlayer {
     /**
      * Constructor for AIFlip player.
      * 
-     * @param name the name of the player
+     * @param name the name of the player.
      */
     public AIFlip(final String name) {
         super(name);
@@ -46,6 +46,7 @@ public class AIFlip extends AbstractAIPlayer {
             return Optional.empty();
         }
 
+        // Prioritize Flip cards to switch sides if beneficial
         final Optional<Card> flipCard = playableCards.stream()
                 .filter(c -> c.getValue(game) == CardValue.FLIP)
                 .findFirst();
@@ -54,6 +55,7 @@ public class AIFlip extends AbstractAIPlayer {
             return flipCard;
         }
 
+        // On Dark Side, prioritize powerful cards to maintain control
         if (game.isDarkSide()) {
             final Optional<Card> powerCard = playableCards.stream()
                     .filter(c -> c.getValue(game) == CardValue.DRAW_FIVE 
@@ -122,9 +124,9 @@ public class AIFlip extends AbstractAIPlayer {
      * Calculate a score for a card to determine its priority.
      * Higher score means higher priority to play.
      * 
-     * @param c the card to score
-     * @param game the current game state
-     * @return the score of the card
+     * @param c the card to score.
+     * @param game the current game state.
+     * @return the score of the card.
      */
     private int getCardScore(final Card c, final Game game) {
         final CardValue v = c.getValue(game);

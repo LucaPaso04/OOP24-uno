@@ -14,6 +14,7 @@ import uno.model.cards.deck.impl.AllWildDeck;
 import uno.model.cards.types.api.Card;
 import uno.model.utils.api.GameLogger;
 import uno.model.utils.impl.GameLoggerImpl;
+import uno.model.game.api.GameSetup;
 
 import java.util.List;
 
@@ -26,9 +27,9 @@ public class GameFactoryImpl implements GameFactory {
     private final GameLogger logger;
 
     /**
-     * Constructor.
+     * Constructor for GameFactoryImpl.
      * 
-     * @param rules rules of the game
+     * @param rules rules of the game.
      */
     public GameFactoryImpl(final GameRules rules) {
         this.rules = rules;
@@ -58,10 +59,8 @@ public class GameFactoryImpl implements GameFactory {
 
         final DiscardPile discardPile = new DiscardPileImpl();
         final TurnManager turnManager = new TurnManagerImpl(players, rules);
-
-        final GameImpl game = new GameImpl(deck, players, turnManager, discardPile, gameMode.name(), logger, rules);
-
-        final GameSetupImpl setup = new GameSetupImpl(game, deck, game.getDiscardPile(), players);
+        final Game game = new GameImpl(deck, players, turnManager, discardPile, gameMode.name(), logger, rules);
+        final GameSetup setup = new GameSetupImpl(game, deck, game.getDiscardPile(), players);
         setup.initializeGame(isAllWild);
 
         return game;

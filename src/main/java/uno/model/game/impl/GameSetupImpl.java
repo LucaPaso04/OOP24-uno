@@ -13,12 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Implementation of the {@link GameSetup} interface.
  */
 public class GameSetupImpl implements GameSetup {
 
-    /** The size of the initial hand dealt to each player. */
     private static final int INITIAL_HAND_SIZE = 7;
     private static final String LOGGER_ACTION_TYPE = "SETUP";
 
@@ -30,12 +31,12 @@ public class GameSetupImpl implements GameSetup {
     /**
      * Constructor for GameSetupImpl.
      * 
-     * @param game        game instance
-     * @param deck        deck of cards
-     * @param discardPile discard pile
-     * @param players     list of players
+     * @param game        game instance.
+     * @param deck        deck of cards.
+     * @param discardPile discard pile.
+     * @param players     list of players.
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("EI_EXPOSE_REP2")
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public GameSetupImpl(final Game game, final Deck<Card> deck, final DiscardPile discardPile,
             final List<AbstractPlayer> players) {
         this.game = game;
@@ -49,11 +50,7 @@ public class GameSetupImpl implements GameSetup {
      */
     @Override
     public void initializeGame(final boolean isAllWild) {
-
-        // 1. Deal cards
         dealInitialCards();
-
-        // 2. Setup Discard Pile
         setupFirstCard(isAllWild);
     }
 
@@ -63,8 +60,6 @@ public class GameSetupImpl implements GameSetup {
     private void dealInitialCards() {
         for (int i = 0; i < INITIAL_HAND_SIZE; i++) {
             for (final AbstractPlayer player : this.players) {
-                // We assume Game has a method to orchestrate the draw,
-                // or we can do it directly here:
                 deck.draw().ifPresent(player::addCardToHand);
             }
         }
@@ -74,11 +69,9 @@ public class GameSetupImpl implements GameSetup {
     /**
      * Sets up the first card on the discard pile.
      * 
-     * @param isAllWild indicates if the game is in All Wild mode
+     * @param isAllWild indicates if the game is in All Wild mode.
      */
     private void setupFirstCard(final boolean isAllWild) {
-        // CASE A: ALL WILD MODE
-        // In All Wild, colors don't matter, and usually, any card can start.
         if (isAllWild) {
             drawAndPlaceAnyCard();
             game.setCurrentColor(CardColor.WILD);
@@ -86,10 +79,7 @@ public class GameSetupImpl implements GameSetup {
             return;
         }
 
-        // CASE B: STANDARD / FLIP MODE
-        // We must ensure the first card is a valid starter (usually a Number card).
         boolean validCardFound = false;
-
         while (!validCardFound) {
             final Optional<Card> drawnOpt = deck.draw();
 
@@ -100,18 +90,13 @@ public class GameSetupImpl implements GameSetup {
             final Optional<Card> drawnCard = drawnOpt;
 
             if (isValidStartingCard(drawnCard)) {
-                // Success: Valid card found
                 discardPile.addCard(drawnCard.get());
                 game.setCurrentColor(drawnCard.get().getColor(game));
 
                 game.logSystemAction(LOGGER_ACTION_TYPE, "FIRST_CARD", "Card: " + drawnCard);
                 validCardFound = true;
             } else {
-                // Fail: Invalid card (Wild, Action, Flip), put in discard and draw again
                 discardPile.addCard(drawnCard.get());
-                // Note: Standard rules say "put back in deck", but putting in discard is a
-                // common variant
-                // to avoid infinite reshuffling loops.
             }
         }
     }
@@ -126,8 +111,8 @@ public class GameSetupImpl implements GameSetup {
     /**
      * Checks if the drawn card is a valid starting card.
      * 
-     * @param cardOpt the drawn card
-     * @return true if valid, false otherwise
+     * @param cardOpt the drawn card.
+     * @return true if valid, false otherwise.
      */
     private boolean isValidStartingCard(final Optional<Card> cardOpt) {
         if (cardOpt.isEmpty()) {
@@ -136,7 +121,6 @@ public class GameSetupImpl implements GameSetup {
         final Card card = cardOpt.get();
         final CardValue v = card.getValue(game);
 
-        // List of prohibited starting cards
         return v != CardValue.WILD
                 && v != CardValue.WILD_DRAW_FOUR
                 && v != CardValue.WILD_DRAW_TWO

@@ -72,7 +72,7 @@ public interface TurnManager {
 
     /**
      * Resets the turn manager state for a new round.
-     * This typically involves resetting the direction, clearing flags,
+     * This involves resetting the direction, clearing flags,
      * and potentially randomizing the starting player again.
      */
     void reset();

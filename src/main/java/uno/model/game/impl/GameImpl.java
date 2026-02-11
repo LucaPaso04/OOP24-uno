@@ -47,7 +47,7 @@ public class GameImpl implements GameContext {
     private final DeckHandler deckHandler;
     private final MoveValidator moveValidator;
 
-    private GameStateBehavior currentState; // Changed from enum GameState
+    private GameStateBehavior currentState;
     private Optional<CardColor> currentColor;
     private Card currentPlayedCard;
 
@@ -59,13 +59,13 @@ public class GameImpl implements GameContext {
     /**
      * Constructor for GameImpl with custom rules.
      * 
-     * @param deck        deck of cards
-     * @param players     list of players
-     * @param turnManager turn manager
-     * @param discardPile discard pile
-     * @param gameMode    game mode
-     * @param logger      logger
-     * @param rules       game rules
+     * @param deck        deck of cards.
+     * @param players     list of players.
+     * @param turnManager turn manager.
+     * @param discardPile discard pile.
+     * @param gameMode    game mode.
+     * @param logger      logger.
+     * @param rules       game rules.
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public GameImpl(final Deck<Card> deck, final List<AbstractPlayer> players, final TurnManager turnManager,
@@ -76,12 +76,9 @@ public class GameImpl implements GameContext {
         this.rules = rules;
         this.winner = null;
         this.turnManager = turnManager;
-
-        // Initialize helper delegates
         this.deckHandler = new DeckHandlerImpl(deck, discardPile, rules, logger, LOGGER_PLAYER_NAME);
         this.moveValidator = new MoveValidatorImpl(this);
-
-        this.currentState = new RunningState(this); // Initialize with RunningStateBehavior
+        this.currentState = new RunningState(this);
         this.currentColor = Optional.empty();
         this.currentPlayedCard = null;
 
@@ -162,7 +159,6 @@ public class GameImpl implements GameContext {
     public void drawCardForPlayer(final AbstractPlayer player) {
         final boolean success = deckHandler.drawCardForPlayer(player, this);
         if (!success) {
-            // Deck empty and no reshuffle -> Game Over
             this.currentState = new GameOverState(this);
             notifyObservers();
         }
@@ -173,16 +169,7 @@ public class GameImpl implements GameContext {
      */
     @Override
     public void callUno(final AbstractPlayer player) {
-
-        // Rule: UNO Penalty
-        // If disabled, players don't need to call UNO.
         if (!rules.isUnoPenaltyEnabled()) {
-            // Se la penalità è disabilitata, non facciamo nulla se il giocatore tenta di
-            // chiamare UNO.
-            // Ma se lo chiama quando ha 1 carta, va bene e lo logghiamo come successo.
-            // Se sbaglia, tecnicamente non dovrebbe succedere nulla se la regola è "No
-            // Penalty".
-            // Tuttavia, permettiamo comunque di chiamarlo correttamente.
             if (player.getHandSize() == 1) {
                 player.hasCalledUno();
                 logger.logAction(player.getName(), "CALL_UNO_SUCCESS", CARD_DETAIL, "HandSize: 1");
@@ -199,11 +186,10 @@ public class GameImpl implements GameContext {
 
             drawCardForPlayer(player);
             drawCardForPlayer(player);
-
             notifyObservers();
 
-            throw new IllegalStateException("Non puoi chiamare UNO ora! Hai "
-                    + player.getHandSize() + " carte. Penalità applicata: hai pescato 2 carte.");
+            throw new IllegalStateException("You can't call UNO now! You have "
+                    + player.getHandSize() + " cards. Penalty applied: you drew 2 cards.");
         }
     }
 
@@ -223,7 +209,7 @@ public class GameImpl implements GameContext {
         try {
             return deckHandler.getDiscardPile().getTopCard();
         } catch (final NoSuchElementException e) {
-            return Optional.empty(); // Pila scarti vuota
+            return Optional.empty();
         }
     }
 
@@ -352,13 +338,16 @@ public class GameImpl implements GameContext {
     @Override
     public void flipTheWorld() {
         this.isDarkSide = !this.isDarkSide;
-
         this.currentColor = Optional.of(this.currentPlayedCard.getColor(this));
 
         if (this.currentColor.get() == CardColor.WILD) {
-            final CardColor[] coloredValues = {CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW };
+            final CardColor[] coloredValues;
+            if (this.isDarkSide) {
+                coloredValues = new CardColor[]{CardColor.PINK, CardColor.TEAL, CardColor.PURPLE, CardColor.ORANGE};
+            } else {
+                coloredValues = new CardColor[]{CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW};
+            }
             final CardColor chosenColor = coloredValues[RANDOM.nextInt(coloredValues.length)];
-
             this.currentColor = Optional.of(chosenColor);
         }
 
@@ -432,8 +421,6 @@ public class GameImpl implements GameContext {
         return this.rules;
     }
 
-    // --- Public getters and setters for GameContext ---
-
     /**
      * {@inheritDoc}
      */
@@ -467,42 +454,34 @@ public class GameImpl implements GameContext {
     public void startNewRound() {
         logger.logAction(LOGGER_PLAYER_NAME, "ROUND_START", "N/A", "Starting new round...");
 
-        // 1. Collect all cards to recycle
         final List<Card> cardsToRecycle = new ArrayList<>();
 
-        // From players
         for (final AbstractPlayer player : players) {
             for (final Optional<Card> cardOpt : player.getHand()) {
                 cardOpt.ifPresent(cardsToRecycle::add);
             }
-            player.setHand(new ArrayList<>()); // Clear hand
+            player.setHand(new ArrayList<>());
         }
 
-        // From discard pile
         cardsToRecycle.addAll(deckHandler.getDiscardPile().takeAll());
 
-        // 2. Refill and shuffle deck
         deckHandler.getDrawDeck().refill(cardsToRecycle);
         deckHandler.getDrawDeck().shuffle();
 
-        // 3. Reset TurnManager (new random starting player)
         turnManager.reset();
 
-        // 4. Deal 7 cards to each player
         for (final AbstractPlayer player : players) {
             for (int i = 0; i < START_HAND_SIZE; i++) {
                 drawCardForPlayer(player);
             }
         }
 
-        // 5. Draw first card for discard pile
         final Optional<Card> firstCardOpt = deckHandler.getDrawDeck().draw();
         if (firstCardOpt.isPresent()) {
             final Card firstCard = firstCardOpt.get();
             deckHandler.getDiscardPile().addCard(firstCard);
             this.currentPlayedCard = firstCard;
 
-            // Handle Wild card color initialization
             if (firstCard.getColor(this) == CardColor.WILD) {
                 final CardColor[] coloredValues = {CardColor.RED, CardColor.BLUE, CardColor.GREEN, CardColor.YELLOW };
                 final CardColor chosenColor = coloredValues[RANDOM.nextInt(coloredValues.length)];
@@ -517,9 +496,8 @@ public class GameImpl implements GameContext {
             throw new IllegalStateException("Deck empty after refill!");
         }
 
-        // 6. Reset State
         this.currentState = new RunningState(this);
-        notifyObservers(); // Notify view to update
+        notifyObservers();
     }
 
     /**

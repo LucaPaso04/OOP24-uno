@@ -12,7 +12,6 @@ import java.util.Optional;
  */
 public class DiscardPileImpl implements DiscardPile {
 
-    // Using ArrayList acts as a Stack (Last-In-First-Out logic for the top card)
     private final List<Card> cards;
 
     /**
@@ -41,7 +40,6 @@ public class DiscardPileImpl implements DiscardPile {
         if (cards.isEmpty()) {
             return Optional.empty();
         }
-        // The last element in the list represents the physical top of the pile
         return Optional.of(cards.get(cards.size() - 1));
     }
 
@@ -64,14 +62,9 @@ public class DiscardPileImpl implements DiscardPile {
             return new ArrayList<>();
         }
 
-        // 1. Identify the top card (to keep)
         final Card topCard = cards.get(cards.size() - 1);
-
-        // 2. Extract all other cards (0 to size-1) for reshuffling
-        // We create a new list copy to return
         final List<Card> cardsToRecycle = new ArrayList<>(cards.subList(0, cards.size() - 1));
 
-        // 3. Clear internal state and restore top card
         cards.clear();
         cards.add(topCard);
 
@@ -83,7 +76,6 @@ public class DiscardPileImpl implements DiscardPile {
      */
     @Override
     public List<Card> getSnapshot() {
-        // Defensive copy to prevent external modification of the internal list
         return new ArrayList<>(this.cards);
     }
 

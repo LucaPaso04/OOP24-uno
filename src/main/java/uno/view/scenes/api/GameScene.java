@@ -9,8 +9,7 @@ import java.util.List;
 /**
  * Interface representing the main Game Board view.
  * It defines how the game displays the state and handles user interaction
- * requests
- * coming from the Controller.
+ * requests coming from the Controller.
  */
 public interface GameScene {
 

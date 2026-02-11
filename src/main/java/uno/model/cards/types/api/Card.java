@@ -13,11 +13,7 @@ import uno.model.game.api.Game;
 public interface Card {
 
     /**
-     * Retrieves the current color of the card.
-     * The `Game` parameter is required because the card's effective color might
-     * depend
-     * on the game state (e.g., checking which side is active in Uno Flip,
-     * or retrieving the declared color for a Wild card).
+     * Gets the current color of the card based on the game state.
      * 
      * @param game The current game context.
      * @return The {@link CardColor} of the card (e.g., RED, BLUE, or WILD).
@@ -25,9 +21,7 @@ public interface Card {
     CardColor getColor(Game game);
 
     /**
-     * Retrieves the current face value or type of the card.
-     * Similar to color, the value might change based on the active side of the deck
-     * (Light vs. Dark side).
+     * Gets the current value/type of the card based on the game state.
      * 
      * @param game The current game context.
      * @return The {@link CardValue} representing the card's type (e.g., NINE, SKIP,
@@ -39,8 +33,7 @@ public interface Card {
      * Determines if this card can be legally played on top of the discard pile's
      * current card.
      * This method implements the core matching logic (Match by Color, Match by
-     * Value,
-     * or Wild card rules).
+     * Value, or Wild card rules).
      * 
      * @param topCard The card currently visible on top of the discard pile.
      * @param game    The current game instance (needed to check the active color if
@@ -63,7 +56,7 @@ public interface Card {
     void performEffect(Game game);
 
     /**
-     * Retrieves the point value of this card based on the current game state.
+     * Gets the point value of the card for scoring purposes at the end of a round.
      * 
      * @param game The current game context.
      * @return The point value.
@@ -78,9 +71,6 @@ public interface Card {
      * @return true if the card allows changing color, false otherwise.
      */
     default boolean isWild(final Game game) {
-        // Assumiamo che il tuo enum CardColor abbia un metodo o un valore per
-        // identificare i jolly
-        // Esempio generico (adatta al tuo enum):
         return getColor(game).name().contains("WILD");
     }
 }

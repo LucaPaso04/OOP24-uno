@@ -19,7 +19,7 @@ public class MoveValidatorImpl implements MoveValidator {
     /**
      * Constructor for MoveValidatorImpl.
      * 
-     * @param gameContext the game context to be used for validating moves
+     * @param gameContext the game context to be used for validating moves.
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public MoveValidatorImpl(final GameContext gameContext) {

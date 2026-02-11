@@ -28,11 +28,11 @@ public class DeckHandlerImpl implements DeckHandler {
     /**
      * Constructor for DeckHandlerImpl.
      * 
-     * @param drawDeck the draw deck
-     * @param discardPile discard pile
-     * @param rules selected game rules
-     * @param logger logger
-     * @param loggerPlayerName the name of the player for logging purposes
+     * @param drawDeck the draw deck.
+     * @param discardPile discard pile.
+     * @param rules selected game rules.
+     * @param logger game logger for logging actions.
+     * @param loggerPlayerName the name of the player for logging purposes.
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public DeckHandlerImpl(final Deck<Card> drawDeck, final DiscardPile discardPile, final GameRules rules, 
@@ -50,7 +50,6 @@ public class DeckHandlerImpl implements DeckHandler {
     @Override
     public boolean drawCardForPlayer(final AbstractPlayer player, final GameContext game) {
         if (drawDeck.isEmpty()) {
-            // Regola: Mandatory Pass / No Reshuffle
             if (rules.isMandatoryPassEnabled()) {
                 logger.logAction(loggerPlayerName, "DECK_EMPTY", "N/A", "No Reshuffle Rule Active. Game Ends.");
                 return false;

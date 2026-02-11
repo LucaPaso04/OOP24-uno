@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface GameStateBehavior {
 
     /**
+     * Gets the enum representation of this game state.
+     * 
      * @return The enum representation of this state.
      */
     GameState getEnum();

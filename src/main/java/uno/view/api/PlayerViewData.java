@@ -3,50 +3,51 @@ package uno.view.api;
 import uno.model.players.api.AbstractPlayer;
 
 import java.util.List;
-import java.util.Collections;
 
 /**
  * DTO representing a Player for the View.
  */
-public class PlayerViewData {
-    private final String name;
-    private final int handSize;
-    private final int score;
-    private final boolean isCurrentPlayer;
-    private final List<CardViewData> hand;
-    private final AbstractPlayer modelPlayer; // Opaque token
+public interface PlayerViewData {
+    /**
+     * Get the player's name.
+     * 
+     * @return the player's name.
+     */
+    String getName();
 
-    public PlayerViewData(String name, int handSize, int score, boolean isCurrentPlayer,
-            List<CardViewData> hand, AbstractPlayer modelPlayer) {
-        this.name = name;
-        this.handSize = handSize;
-        this.score = score;
-        this.isCurrentPlayer = isCurrentPlayer;
-        this.hand = hand != null ? hand : Collections.emptyList();
-        this.modelPlayer = modelPlayer;
-    }
+    /**
+     * Get the number of cards in the player's hand.
+     * 
+     * @return the number of cards in the player's hand.
+     */
+    int getHandSize();
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * Get the player's current score.
+     * 
+     * @return the player's current score.
+     */
+    int getScore();
 
-    public int getHandSize() {
-        return handSize;
-    }
+    /**
+     * Check if this player is the current player.
+     * 
+     * @return true if this player is the current player, false otherwise.
+     */
+    boolean isCurrentPlayer();
 
-    public int getScore() {
-        return score;
-    }
+    /**
+     * Get the player's hand as a list of CardViewData.
+     * 
+     * @return the player's hand as a list of CardViewData.
+     */
+    List<CardViewData> getHand();
 
-    public boolean isCurrentPlayer() {
-        return isCurrentPlayer;
-    }
-
-    public List<CardViewData> getHand() {
-        return hand;
-    }
-
-    public AbstractPlayer getModelPlayer() {
-        return modelPlayer;
-    }
+    /**
+     * Get the underlying model player object. This is an opaque token that can be used
+     * for advanced features or debugging, but should not be used for game logic in the view.
+     * 
+     * @return the underlying model player object.
+     */
+    AbstractPlayer getModelPlayer();
 }

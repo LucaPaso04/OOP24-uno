@@ -3,17 +3,18 @@ package uno.view.scenes.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import uno.model.cards.attributes.CardColor;
 import uno.model.players.api.AbstractPlayer;
+import uno.model.players.impl.HumanPlayer;
 import uno.model.game.api.GameState;
 import uno.view.components.impl.ColorChooserPanelImpl;
 import uno.view.components.impl.PlayerChooserPanelImpl;
 import uno.view.components.api.StyledButton;
 import uno.view.components.impl.StyledButtonImpl;
+import uno.view.api.CardViewData;
+import uno.view.api.GameViewData;
+import uno.view.api.PlayerViewData;
 import uno.view.scenes.api.GameScene;
 import uno.view.utils.impl.CardImageLoaderImpl;
 import uno.view.api.GameViewObserver;
-import uno.view.api.GameViewData;
-import uno.view.api.PlayerViewData;
-import uno.view.api.CardViewData;
 import uno.view.components.api.ColorChooserPanel;
 import uno.view.components.api.PlayerChooserPanel;
 import uno.view.style.UnoTheme;
@@ -50,8 +51,7 @@ import java.util.logging.Level;
  * Implementation of the GameScene interface representing the main Game Board
  * view.
  * It defines how the game displays the state and handles user interaction
- * requests
- * coming from the Controller.
+ * requests coming from the Controller.
  */
 @SuppressFBWarnings("SE_BAD_FIELD")
 public final class GameSceneImpl extends JPanel implements GameScene {
@@ -71,7 +71,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     private static final int GRID_FIVE = 5;
 
     private static final Dimension SCROLL_PANE_DIMENSION = new Dimension(800, 180);
-    private static final Dimension PANEL_DIMENSION = new Dimension(120, 110); // Slightly taller for better spacing
+    private static final Dimension PANEL_DIMENSION = new Dimension(120, 110);
     private static final Dimension DISCARD_PILE_DIMENSION = new Dimension(100, 150);
 
     private static final int PASS_BUTTON_WIDTH = 100;
@@ -87,6 +87,9 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     private static final Dimension MENU_BUTTON_DIMENSION = new Dimension(100, 40);
     private static final EmptyBorder STATUS_LABEL_BORDER = new EmptyBorder(5, 5, 5, 5);
     private static final EmptyBorder INFO_LABEL_BORDER = new EmptyBorder(0, 5, 5, 5);
+    private static final String POSITION_WEST = "West";
+    private static final String POSITION_NORTH = "North";
+    private static final String POSITION_EAST = "East";
 
     private final CardImageLoaderImpl cardImageLoader;
 
@@ -107,31 +110,29 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
     private final JPanel centerPanel;
     private JLabel discardPileCard;
-    private JButton drawDeckButton; // Keep as JButton for Card Image
+    private JButton drawDeckButton;
     private StyledButton passButton;
     private JLabel statusLabel;
-    private JLabel deckInfoLabel; // New Label for Deck Count
-    private JLabel colorInfoLabel; // New Label for Current Color
-    private JLabel humanScoreLabel; // New Label for Human Score
+    private JLabel deckInfoLabel;
+    private JLabel colorInfoLabel;
+    private JLabel humanScoreLabel;
     private StyledButton unoButton;
 
     /**
      * Constructor for GameSceneImpl.
      */
-    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public GameSceneImpl() {
         super(new BorderLayout(10, 10));
         this.cardImageLoader = new CardImageLoaderImpl(CARD_WIDTH, CARD_HEIGHT);
         setBackground(UnoTheme.BACKGROUND_COLOR);
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // --- Creation of Panels ---
         playerHandPanel = createPlayerHandPanel();
         centerPanel = createCenterPanel();
 
-        westAIPanel = createOpponentPanel("IA-Ovest (1)");
-        northAIPanel = createOpponentPanel("IA-Nord (2)");
-        eastAIPanel = createOpponentPanel("IA-Est (3)");
+        westAIPanel = createOpponentPanel("AI-1", POSITION_WEST);
+        northAIPanel = createOpponentPanel("AI-2", POSITION_NORTH);
+        eastAIPanel = createOpponentPanel("AI-3", POSITION_EAST);
 
         add(northAIPanel, BorderLayout.NORTH);
         add(westAIPanel, BorderLayout.WEST);
@@ -152,7 +153,6 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         southPanel.add(scrollPane, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
 
-        // --- Event Listeners ---
         drawDeckButton.addActionListener(e -> {
             controllerObserver.ifPresent(GameViewObserver::onDrawCard);
         });
@@ -168,7 +168,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     }
 
     /**
-     * Updates the view with the latest game data.
+     * {@inheritDoc}
      */
     @Override
     public void updateView(final GameViewData data) {
@@ -179,15 +179,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         updateAIPanels();
         updateGameInfo();
 
-        final boolean isHumanTurn = currentData.getCurrentPlayer().getModelPlayer().getClass().getSimpleName()
-                .equals("HumanPlayer");
-        // Note: Using simple name check or passing explicit "isHuman" boolean in
-        // PlayerViewData would be cleaner,
-        // but current logic uses class check. PlayerViewData has AbstractPlayer token,
-        // so we can check that.
-        // Actually, PlayerViewData doesn't expose class type easily unless we check the
-        // token.
-        // Let's rely on token for now.
+        final boolean isHumanTurn = currentData.getCurrentPlayer().getModelPlayer() instanceof HumanPlayer;
 
         setHumanInputEnabled(isHumanTurn && currentData.getGameState() == GameState.RUNNING);
 
@@ -240,7 +232,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
                 panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION,
                 null, new Object[] {}, null);
 
-        final JDialog dialog = pane.createDialog(this, "Scegli un Colore");
+        final JDialog dialog = pane.createDialog(this, "Choose a Color");
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         dialog.setVisible(true);
     }
@@ -249,41 +241,30 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      * {@inheritDoc}
      */
     @Override
-    public void showPlayerChooser(final List<AbstractPlayer> opponents) { // Interface still uses AbstractPlayer list?
-        // GameScene interface: void showPlayerChooser(List<AbstractPlayer> opponents);
-        // We haven't changed that interface method signature yet.
-        // Implementation plan said "Update GameScene interface". I checked GameScene
-        // and only updated updateView?
-        // Let's check GameScene content again. I view_file'd it.
-        // I implicitly kept `showPlayerChooser(List<AbstractPlayer> opponents)`.
-        // Ideally this should use keys or PlayerViewData.
-        // But for now let's keep it compatible if Controller passes AbstractPlayer list
-        // (Controller has access to Model).
-        // View just displays names.
-
+    public void showPlayerChooser(final List<AbstractPlayer> opponents) {
         final PlayerChooserPanel panel = new PlayerChooserPanelImpl(this.controllerObserver, opponents);
 
         final JOptionPane pane = new JOptionPane(
                 panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION,
                 null, new Object[] {}, null);
 
-        final JDialog dialog = pane.createDialog(this, "Scegli un Giocatore");
+        final JDialog dialog = pane.createDialog(this, "Choose a Player");
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         dialog.setVisible(true);
     }
 
     /**
-     * New method to update game info.
+     * Updates the game info labels such as deck count, current color, and human
+     * score.
      */
     private void updateGameInfo() {
         if (currentData == null) {
             return;
         }
-        // Update Deck Count
+
         final int deckSize = currentData.getDeckSize();
         deckInfoLabel.setText("Deck: " + deckSize + " cards");
 
-        // Update Current Color
         final Optional<CardColor> currentColor = currentData.getCurrentColor();
         if (currentColor.isPresent()) {
             colorInfoLabel.setText("Color: " + currentColor.get().name());
@@ -293,10 +274,8 @@ public final class GameSceneImpl extends JPanel implements GameScene {
             colorInfoLabel.setForeground(UnoTheme.TEXT_COLOR);
         }
 
-        // Update Human Score
         if (!currentData.getPlayers().isEmpty()) {
-            // Assuming first player is human/self
-            humanScoreLabel.setText("Punti: " + currentData.getPlayers().get(0).getScore());
+            humanScoreLabel.setText("Points: " + currentData.getPlayers().get(0).getScore());
         }
     }
 
@@ -308,25 +287,30 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void showInfo(final String message, final String title) {
         JOptionPane.showMessageDialog(this, message, title, JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void showStartingPlayer(final String playerName) {
-        final String msg = "Inizia: " + playerName;
+        final String msg = "Starts: " + playerName;
         final JOptionPane pane = new JOptionPane(msg, JOptionPane.INFORMATION_MESSAGE);
         final JDialog dialog = pane.createDialog(this, "Inizio Partita");
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        // Force center on screen as requested
         dialog.setLocationRelativeTo(null);
 
         new Thread(() -> {
             try {
                 Thread.sleep(START_POPUP_DELAY);
             } catch (final InterruptedException e) {
-                LOGGER.log(Level.SEVERE, "Si è verificato un errore imprevisto", e);
+                LOGGER.log(Level.SEVERE, "Error while showing starting player popup", e);
             }
             dialog.dispose();
         }).start();
@@ -338,8 +322,8 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     public boolean confirmExit() {
         final int choice = JOptionPane.showConfirmDialog(
                 this,
-                "Sei sicuro di voler tornare al menu? La partita sarà persa.",
-                "Torna al Menu",
+                "Are you sure you want to go back to the menu? The game will be lost.",
+                "Back to Menu",
                 JOptionPane.YES_NO_OPTION);
         return choice == JOptionPane.YES_OPTION;
     }
@@ -348,17 +332,17 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     public void showWinnerPopup(final String winnerName) {
         setHumanInputEnabled(false);
 
-        final Object[] options = { "Torna al Menu", "Chiudi Gioco" };
+        final Object[] popupOptions = {"Back to Menu", "Close Game" };
 
         final int choice = JOptionPane.showOptionDialog(
                 this,
-                winnerName + " ha vinto la partita!\nCosa vuoi fare?",
-                "Partita Terminata",
+                winnerName + " has won the game!\nWhat would you like to do?",
+                "Game Over",
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
                 null,
-                options,
-                options[0]);
+                popupOptions,
+                popupOptions[0]);
 
         if (controllerObserver.isPresent()) {
             switch (choice) {
@@ -382,45 +366,44 @@ public final class GameSceneImpl extends JPanel implements GameScene {
     /**
      * Creates a panel for an AI opponent with a title and card count label.
      * 
-     * @param title The title of the opponent panel.
+     * @param title    The title of the opponent panel.
+     * @param position The position of the panel (West, North, East).
      * @return The created JPanel.
      */
-    private JPanel createOpponentPanel(final String title) {
+    private JPanel createOpponentPanel(final String title, final String position) {
         final JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(UnoTheme.PANEL_COLOR);
 
-        // Modern styling: LineBorder + Padding
         panel.setBorder(new CompoundBorder(
                 BorderFactory.createLineBorder(UnoTheme.BORDER_COLOR, 2),
                 UnoTheme.PANEL_INSETS));
 
         panel.setPreferredSize(PANEL_DIMENSION);
 
-        // Name Label
         final JLabel nameLabel = new JLabel(title);
         nameLabel.setFont(UnoTheme.TEXT_BOLD_FONT);
         nameLabel.setForeground(UnoTheme.DESC_COLOR);
         nameLabel.setAlignmentX(CENTER_ALIGNMENT);
 
-        final JLabel cardLabel = new JLabel("X carte");
-        cardLabel.setFont(UnoTheme.BUTTON_FONT); // Larger font for count
+        final JLabel cardLabel = new JLabel("X cards");
+        cardLabel.setFont(UnoTheme.BUTTON_FONT);
         cardLabel.setForeground(UnoTheme.TEXT_COLOR);
         cardLabel.setAlignmentX(CENTER_ALIGNMENT);
 
-        if (title.contains("Ovest")) {
+        if (POSITION_WEST.equals(position)) {
             this.westAILabel = cardLabel;
             this.westScoreLabel = new JLabel(START_POINTS);
             this.westScoreLabel.setFont(UnoTheme.TEXT_FONT);
             this.westScoreLabel.setForeground(UnoTheme.DESC_COLOR);
             this.westScoreLabel.setAlignmentX(CENTER_ALIGNMENT);
-        } else if (title.contains("Nord")) {
+        } else if (POSITION_NORTH.equals(position)) {
             this.northAILabel = cardLabel;
             this.northScoreLabel = new JLabel(START_POINTS);
             this.northScoreLabel.setFont(UnoTheme.TEXT_FONT);
             this.northScoreLabel.setForeground(UnoTheme.DESC_COLOR);
             this.northScoreLabel.setAlignmentX(CENTER_ALIGNMENT);
-        } else if (title.contains("Est")) {
+        } else if (POSITION_EAST.equals(position)) {
             this.eastAILabel = cardLabel;
             this.eastScoreLabel = new JLabel(START_POINTS);
             this.eastScoreLabel.setFont(UnoTheme.TEXT_FONT);
@@ -432,11 +415,11 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         panel.add(nameLabel);
         panel.add(Box.createVerticalStrut(BOX_VERTICAL_HEIGHT));
         panel.add(cardLabel);
-        if (title.contains("Ovest")) {
+        if (POSITION_WEST.equals(position)) {
             panel.add(this.westScoreLabel);
-        } else if (title.contains("Nord")) {
+        } else if (POSITION_NORTH.equals(position)) {
             panel.add(this.northScoreLabel);
-        } else if (title.contains("Est")) {
+        } else if (POSITION_EAST.equals(position)) {
             panel.add(this.eastScoreLabel);
         }
         panel.add(Box.createVerticalGlue());
@@ -455,13 +438,12 @@ public final class GameSceneImpl extends JPanel implements GameScene {
      */
     private void updateOpponentPanel(final JPanel panel, final JLabel label, final JLabel scoreLabel,
             final PlayerViewData ai) {
-        label.setText(ai.getHandSize() + " carte");
+        label.setText(ai.getHandSize() + " cards");
         if (scoreLabel != null) {
-            scoreLabel.setText("Punti: " + ai.getScore());
+            scoreLabel.setText("Points: " + ai.getScore());
         }
 
         if (ai.isCurrentPlayer()) {
-            // Active Turn: Thicker Gold (or Red) Border
             final Color activeColor = ai.getHandSize() <= 1 ? UnoTheme.BUTTON_COLOR : UnoTheme.ACTIVE_BORDER_COLOR;
             final int thickness = ai.getHandSize() <= 1 ? 5 : 4;
 
@@ -470,7 +452,6 @@ public final class GameSceneImpl extends JPanel implements GameScene {
                     UnoTheme.PANEL_INSETS));
             panel.setBackground(UnoTheme.PANEL_COLOR);
         } else {
-            // Inactive
             panel.setBorder(new CompoundBorder(
                     BorderFactory.createLineBorder(UnoTheme.BORDER_COLOR, 2),
                     UnoTheme.PANEL_INSETS));
@@ -493,24 +474,22 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         this.drawDeckButton = new JButton();
         styleAsCardButton(this.drawDeckButton, "CARD_BACK");
 
-        this.discardPileCard = new JLabel("SCARTI");
+        this.discardPileCard = new JLabel("DISCARDS");
         this.discardPileCard.setPreferredSize(DISCARD_PILE_DIMENSION);
         this.discardPileCard.setFont(UnoTheme.TEXT_BOLD_FONT);
         this.discardPileCard.setHorizontalAlignment(JLabel.CENTER);
         this.discardPileCard.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         this.discardPileCard.setOpaque(true);
 
-        // Use StyledButton for Pass and UNO
-        this.passButton = new StyledButtonImpl("Passa", PASS_BUTTON_NORMAL_COLOR, PASS_BUTTON_HOVER_COLOR);
+        this.passButton = new StyledButtonImpl("Pass", PASS_BUTTON_NORMAL_COLOR, PASS_BUTTON_HOVER_COLOR);
         this.passButton.setSize(PASS_BUTTON_WIDTH, PASS_BUTTON_HEIGHT);
         this.passButton.setFont(UnoTheme.TEXT_BOLD_FONT);
 
         this.unoButton = new StyledButtonImpl("UNO!", UnoTheme.YELLOW_COLOR, Color.ORANGE);
-        this.unoButton.setForeground(Color.BLACK); // Text black for yellow button
+        this.unoButton.setForeground(Color.BLACK);
         this.unoButton.setSize(UNO_BUTTON_WIDTH, UNO_BUTTON_HEIGHT);
         this.unoButton.setFont(UnoTheme.TEXT_BOLD_FONT);
 
-        // Initialize MENU BUTTON here
         final StyledButton menuButton;
         menuButton = new StyledButtonImpl("Menu", MENU_BUTTON_NORMAL_COLOR, MENU_BUTTON_HOVER_COLOR);
         menuButton.setPreferredSize(MENU_BUTTON_DIMENSION);
@@ -529,16 +508,14 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         final JPanel verticalSpacerTop = new JPanel();
         verticalSpacerTop.setOpaque(false);
 
-        // Layout using GridBagLayout
-
         // --- Row 0 (Top Row) ---
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.weightx = 0.5; // Give it weight so it expands
+        gbc.weightx = 0.5;
         gbc.weighty = 0.0;
-        gbc.fill = GridBagConstraints.NONE; // Do NOT fill, keep distinct size
+        gbc.fill = GridBagConstraints.NONE;
         panel.add(menuButton.getComponent(), gbc);
 
         // --- Row 1 (Middle Row) ---
@@ -630,7 +607,6 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         final JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(UnoTheme.PANEL_COLOR);
 
-        // Modern simple border
         panel.setBorder(new CompoundBorder(
                 BorderFactory.createMatteBorder(2, 0, 0, 0, UnoTheme.BORDER_COLOR), // Top border only
                 UnoTheme.PANEL_INSETS));
@@ -656,7 +632,6 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         this.statusLabel = new JLabel("Turno di: ... \n Direzione: ...");
         this.statusLabel.setFont(UnoTheme.TEXT_BOLD_FONT);
         this.statusLabel.setForeground(UnoTheme.TEXT_COLOR);
-        // this.statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.statusLabel.setBorder(STATUS_LABEL_BORDER);
 
         this.deckInfoLabel = new JLabel("Deck: ?");
@@ -734,7 +709,7 @@ public final class GameSceneImpl extends JPanel implements GameScene {
 
         switch (cardColor.get()) {
             case RED:
-                return UnoTheme.BUTTON_COLOR; // Use theme red
+                return UnoTheme.BUTTON_COLOR;
             case BLUE:
                 return UnoTheme.BLUE_COLOR;
             case GREEN:
@@ -812,11 +787,6 @@ public final class GameSceneImpl extends JPanel implements GameScene {
         }
         playerHandPanel.removeAll();
 
-        // Assuming first player is human. In a real network game, we'd need to identify
-        // "me".
-        // But here it's local turn-based or similar?
-        // GameModel.getPlayers() list order...
-        // Existing code assumed gameModel.getPlayers().get(0) is human.
         if (currentData.getPlayers().isEmpty()) {
             playerHandPanel.revalidate();
             playerHandPanel.repaint();

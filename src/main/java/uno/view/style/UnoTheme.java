@@ -40,7 +40,7 @@ public final class UnoTheme {
     // Borders & Dimensions
     public static final int ARC = 20;
     public static final Color BORDER_COLOR = new Color(80, 80, 80);
-    public static final Color ACTIVE_BORDER_COLOR = YELLOW_COLOR; // Gold for active turn
+    public static final Color ACTIVE_BORDER_COLOR = YELLOW_COLOR;
 
     public static final EmptyBorder PADDING_BORDER = new EmptyBorder(20, 40, 20, 40);
     public static final EmptyBorder PANEL_INSETS = new EmptyBorder(10, 10, 10, 10);

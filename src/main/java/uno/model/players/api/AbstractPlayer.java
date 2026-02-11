@@ -59,8 +59,6 @@ public abstract class AbstractPlayer {
 
     /**
      * Executes the player's turn logic.
-     * For Human players, this might notify the UI to enable controls.
-     * For AI players, this triggers the algorithmic decision making.
      * 
      * @param game The current game instance (interface).
      */
@@ -110,8 +108,6 @@ public abstract class AbstractPlayer {
      */
     public void addCardToHand(final Card card) {
         this.hand.add(Optional.of(card));
-        // Reset UNO status if they draw cards (they are safe now or need to call it
-        // again later)
         if (hand.size() > 1) {
             this.hasCalledUno = false;
         }

@@ -17,21 +17,27 @@ public class DoubleSidedEntryDTO {
     private int count;
 
     /**
-     * @return the DTO for the light side
+     * Gets the DTO for the light side of the card pair.
+     * 
+     * @return the DTO for the light side.
      */
     public CardDTO getLight() {
         return light;
     }
 
     /**
-     * @return the DTO for the dark side
+     * Gets the DTO for the dark side of the card pair.
+     * 
+     * @return the DTO for the dark side.
      */
     public CardDTO getDark() {
         return dark;
     }
 
     /**
-     * @return the number of copies of this card pair to add to the deck
+     * Gets the number of copies of this card pair to add to the deck.
+     * 
+     * @return the number of copies of this card pair to add to the deck.
      */
     public int getCount() {
         return count;

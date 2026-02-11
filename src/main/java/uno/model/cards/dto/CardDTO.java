@@ -14,14 +14,18 @@ public class CardDTO {
     private String value;
 
     /**
-     * @return the raw color string from JSON
+     * Gets the raw color string from JSON.
+     * 
+     * @return the raw color string from JSON.
      */
     public String getColor() {
         return color;
     }
 
     /**
-     * @return the raw value string from JSON
+     * Gets the raw value string from JSON.
+     * 
+     * @return the raw value string from JSON.
      */
     public String getValue() {
         return value;

@@ -26,10 +26,8 @@ public final class GameFrameImpl extends JFrame implements GameFrame {
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Set the minimum size to ensure UI elements fit correctly
         setMinimumSize(MIN_SIZE);
 
-        // Center the window on the screen
         setLocationRelativeTo(null);
     }
 
@@ -38,11 +36,8 @@ public final class GameFrameImpl extends JFrame implements GameFrame {
      */
     @Override
     public void showScene(final Container scene) {
-        // Set the new panel as the content pane
         setContentPane(scene);
 
-        // Revalidate and repaint to ensure the UI updates immediately
-        // (SwingUtilities.invokeLater is good practice for UI updates)
         SwingUtilities.invokeLater(() -> {
             validate();
             repaint();

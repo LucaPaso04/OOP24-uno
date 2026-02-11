@@ -5,17 +5,15 @@ import uno.model.cards.attributes.CardValue;
 import uno.model.cards.behaviors.api.CardSideBehavior;
 import uno.model.cards.types.api.Card;
 import uno.model.game.api.Game;
-import uno.model.game.impl.GameImpl;
 
 import java.util.Objects;
 
 /**
  * Implementation of a generic UNO card that possesses two sides (Light and
  * Dark).
- * This class acts as a <b>Proxy</b>: it holds two {@link CardSideBehavior}
- * strategies
- * and delegates all calls (getColor, getValue, performEffect) to the currently
- * active side based on the {@link GameImpl#isDarkSide()} state.
+ * This class uses the Strategy design pattern to delegate behavior based on the
+ * current game state (Light Mode or Dark Mode).
+ * Each side can have its own color, value, point value, and special effects.
  */
 public class DoubleSidedCard implements Card {
 
@@ -29,7 +27,6 @@ public class DoubleSidedCard implements Card {
      * @param darkSide  The behavior when the game is in Dark Mode.
      */
     public DoubleSidedCard(final CardSideBehavior lightSide, final CardSideBehavior darkSide) {
-        // Ensure behaviors are never null to avoid runtime NPEs
         this.lightSide = Objects.requireNonNull(lightSide, "Light side behavior cannot be null");
         this.darkSide = Objects.requireNonNull(darkSide, "Dark side behavior cannot be null");
     }
@@ -83,11 +80,6 @@ public class DoubleSidedCard implements Card {
     public boolean canBePlayedOn(final Card topCard, final Game game) {
         final CardSideBehavior myFace = getActiveSide(game);
 
-        // FIX: Gestione sicura del Colore.
-        // 1. Prova a prendere il colore attivo dal gioco (es. impostato da un Jolly).
-        // 2. Se è vuoto (Optional.empty), usa il colore fisico della carta in cima agli
-        // scarti.
-        // Questo evita NoSuchElementException e gestisce lo stato transitorio.
         final CardColor targetColor = game.getCurrentColor()
                 .orElse(topCard.getColor(game));
 
@@ -100,7 +92,6 @@ public class DoubleSidedCard implements Card {
      */
     @Override
     public void performEffect(final Game game) {
-        // Delegates execution to the active strategy (e.g., Draw, Skip, Flip)
         getActiveSide(game).executeEffect(game);
     }
 

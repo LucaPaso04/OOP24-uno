@@ -17,7 +17,7 @@ import uno.model.utils.api.GameLogger;
 import uno.model.game.api.Game;
 
 /**
- * Concrete implementation of a Standard UNO Deck (108 cards).
+ * Represents the deck for the "Uno Standard".
  * It extends {@link AbstractDeckImpl} and initializes the cards in the constructor
  * by creating {@link DoubleSidedCard} instances where the back side is always
  * the standard {@link BackSideBehavior}.
@@ -25,21 +25,18 @@ import uno.model.game.api.Game;
 public class StandardDeck extends AbstractDeckImpl<Card> {
 
     /**
-     * Constructs a new StandardDeck by populating it with the standard UNO cards.
+     * Constructs a new StandardDeck by populating it with the standard UNO cards (108 cards).
      * 
-     * @param logger logger
+     * @param logger logger for logging deck operations.
      */
     public StandardDeck(final GameLogger logger) {
-        super(logger); // 1. Inizializza la lista vuota nel genitore
-        initializeDeck(); // 2. Popola il mazzo
-        shuffle(); // 3. Mischia alla fine
+        super(logger);
+        initializeDeck();
+        shuffle();
     }
 
     /**
      * Fills the deck according to standard UNO rules.
-     * - 19 cards per color (0-9, with two of 1-9)
-     * - 2 Skip, 2 Reverse, 2 Draw Two per color
-     * - 4 Wild, 4 Wild Draw Four
      */
     private void initializeDeck() {
         final List<CardColor> colors = Arrays.asList(
@@ -52,16 +49,16 @@ public class StandardDeck extends AbstractDeckImpl<Card> {
         );
 
         for (final CardColor color : colors) {
-            // --- 1. ZERO (Only 1 per color) ---
+            // ZERO (Only 1 per color)
             createAndAddCard(new NumericBehavior(color, CardValue.ZERO));
 
-            // --- 2. NUMBERS 1-9 (2 per color) ---
+            // NUMBERS 1-9 (2 per color)
             for (final CardValue value : numberValues) {
                 createAndAddCard(new NumericBehavior(color, value));
                 createAndAddCard(new NumericBehavior(color, value));
             }
 
-            // --- 3. ACTIONS (2 per color) ---
+            // ACTIONS (2 per color)
             // Skip
             createAndAddCard(new ActionBehavior(color, CardValue.SKIP, g -> g.skipPlayers(1)));
             createAndAddCard(new ActionBehavior(color, CardValue.SKIP, g -> g.skipPlayers(1)));
@@ -75,12 +72,9 @@ public class StandardDeck extends AbstractDeckImpl<Card> {
             createAndAddCard(new DrawBehavior(color, CardValue.DRAW_TWO, 2));
         }
 
-        // --- 4. WILD CARDS (4 each) ---
+        // WILD CARDS (4 each)
         for (int i = 0; i < 4; i++) {
-            // Standard Wild: No draw, Needs Color Choice
             createAndAddCard(new WildBehavior(CardValue.WILD, 0));
-
-            // Wild Draw Four: Draw 4, Needs Color Choice (Skip logic is handled inside WildBehavior)
             createAndAddCard(new WildBehavior(CardValue.WILD_DRAW_FOUR, 4));
         }
     }
@@ -92,10 +86,7 @@ public class StandardDeck extends AbstractDeckImpl<Card> {
      * @param frontBehavior The behavior for the front side of the card.
      */
     private void createAndAddCard(final CardSideBehavior frontBehavior) {
-        // Create the card: Front is the behavior passed, Back is the standard Card Back
         final Card card = new DoubleSidedCard(frontBehavior, BackSideBehavior.getInstance());
-
-        // Use the public method from DeckImpl, NOT direct list access
         this.addCard(card);
     }
 }

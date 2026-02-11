@@ -52,7 +52,6 @@ public final class StyledButtonImpl extends JButton implements StyledButton {
         setForeground(UnoTheme.BUTTON_TEXT_COLOR);
         setBackground(normalColor);
 
-        // Defaults
         setPreferredSize(DEFAULT_DIMENSION);
         setBorder(DEFAULT_BORDER);
 
@@ -64,8 +63,7 @@ public final class StyledButtonImpl extends JButton implements StyledButton {
     }
 
     /**
-     * Implementation of paintComponent to draw rounded corners and handle hover
-     * state.
+     * {@inheritDoc}
      */
     @Override
     protected void paintComponent(final Graphics g) {

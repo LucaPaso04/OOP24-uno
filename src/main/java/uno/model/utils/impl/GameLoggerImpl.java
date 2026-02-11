@@ -10,6 +10,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.logging.Logger;
+
+import static java.util.logging.Level.SEVERE;
 
 /**
  * Concrete implementation of GameLogger that writes events to a text file.
@@ -30,12 +35,8 @@ public class GameLoggerImpl implements GameLogger {
      *                filename).
      */
     public GameLoggerImpl(final String matchId) {
-        // Retrieve current working directory
         final String userDir = System.getProperty("user.dir");
-
-        // Construct the file path using safe separators
         this.filePath = userDir + File.separator + "logs" + File.separator + "log_match_" + matchId + ".txt";
-
         initializeLogDirectory();
     }
 
@@ -46,24 +47,23 @@ public class GameLoggerImpl implements GameLogger {
     private void initializeLogDirectory() {
         final File logFile = new File(this.filePath);
 
-        // Uso corretto di Optional:
-        // 1. Prendi il padre
-        // 2. Filtra se non esiste
-        // 3. ifPresent esegue l'azione solo se serve
         Optional.ofNullable(logFile.getParentFile())
                 .filter(parent -> !parent.exists())
                 .ifPresent(parent -> {
                     if (!parent.mkdirs()) {
-                        // Se mkdirs fallisce (es. permessi negati), logghiamo l'errore
-                        // Qui puoi usare il logger di sistema o il tuo
-                        java.util.logging.Logger.getLogger(UNO)
-                                .warning("Impossibile creare la directory per i log: " + parent.getPath());
+                        Logger.getLogger(UNO)
+                                .warning("Impossible to create log directory: " + parent.getPath());
                     }
                 });
 
         cleanOldLogs(logFile.getParentFile());
     }
 
+    /**
+     * Deletes old log files if the number of log files exceeds the defined limit.
+     * 
+     * @param logDir The directory where log files are stored.
+     */
     private void cleanOldLogs(final File logDir) {
         if (logDir == null || !logDir.exists() || !logDir.isDirectory()) {
             return;
@@ -72,12 +72,12 @@ public class GameLoggerImpl implements GameLogger {
         final File[] logFiles = logDir.listFiles((dir, name) -> name.startsWith("log_match_") && name.endsWith(".txt"));
 
         if (logFiles != null && logFiles.length >= MAX_LOG_FILES) {
-            java.util.Arrays.sort(logFiles, java.util.Comparator.comparingLong(File::lastModified));
+            Arrays.sort(logFiles, Comparator.comparingLong(File::lastModified));
 
             for (int i = 0; i < logFiles.length - MAX_LOG_FILES + 1; i++) {
                 if (!logFiles[i].delete()) {
-                    java.util.logging.Logger.getLogger(UNO)
-                            .warning("Impossibile eliminare il vecchio file di log: " + logFiles[i].getPath());
+                    Logger.getLogger(UNO)
+                            .warning("Impossible to delete old log file: " + logFiles[i].getPath());
                 }
             }
         }
@@ -98,8 +98,8 @@ public class GameLoggerImpl implements GameLogger {
             writer.write(logEntry);
             writer.newLine();
         } catch (final IOException e) {
-            java.util.logging.Logger.getGlobal().log(java.util.logging.Level.SEVERE,
-                    "Impossibile scrivere nel file di log: " + filePath, e);
+            Logger.getGlobal().log(SEVERE,
+                    "Impossible to write to log file: " + filePath, e);
         }
     }
 
@@ -110,7 +110,7 @@ public class GameLoggerImpl implements GameLogger {
     public void logError(final String context, final Exception e) {
         this.logAction("SYSTEM_ERROR", context, e.getClass().getSimpleName(), e.getMessage());
 
-        java.util.logging.Logger.getLogger(UNO)
-                .log(java.util.logging.Level.SEVERE, context, e);
+        Logger.getLogger(UNO)
+                .log(SEVERE, context, e);
     }
 }

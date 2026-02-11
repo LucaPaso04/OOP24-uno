@@ -41,29 +41,18 @@ public class RunningState extends AbstractGameState {
      */
     @Override
     public void playCard(final Optional<Card> card) {
-        // Validation logic logic moved here from GameImpl
-
-        // 1. Check if it's a valid action in this state (Implicitly yes, since we are
-        // in RunningState)
-
         final AbstractPlayer player = this.getGame().getCurrentPlayer();
 
-        // New Rule: Skip After Draw
         if (this.getGame().getRules().isSkipAfterDrawEnabled() && this.getGame().hasCurrentPlayerDrawn(player)) {
-            throw new IllegalStateException("Regola: Skip After Draw. Hai pescato, quindi devi passare il turno.");
+            throw new IllegalStateException("RULE: Skip After Draw. You drawn a card, so you must pass your turn.");
         }
 
-        // 2. Controllo se il giocatore ha la carta
         if (!player.getHand().contains(card)) {
-            throw new IllegalStateException("Il giocatore non ha questa carta!");
+            throw new IllegalStateException("Player " + player.getName() + " does not have the card");
         }
 
-        // 3. Controllo se la mossa è valida secondo le regole
-        // Note: isValidMove is private in GameImpl. We will need to make it accessible
-        // or move logic here.
-        // For now, assume GameImpl will expose it or we call a package-private method.
         if (!this.getGame().isValidMove(card.get())) {
-            throw new IllegalStateException("Mossa non valida! La carta " + card + " non può essere giocata.");
+            throw new IllegalStateException("Move not valid! The card " + card + " cannot be played.");
         }
 
         this.getGame().setCurrentPlayedCard(card.get());
@@ -71,32 +60,22 @@ public class RunningState extends AbstractGameState {
                 card.getClass().getSimpleName(),
                 card.get().getValue(this.getGame()).toString());
 
-        // --- FINE LOGICA DI VALIDAZIONE ---
-
-        // Se la mossa è valida, aggiorna il currentColor.
         if (card.get().getColor(this.getGame()) == CardColor.WILD) {
-            this.getGame().setCurrentColorOptional(Optional.empty()); // Sarà impostato da onColorChosen()
+            this.getGame().setCurrentColorOptional(Optional.empty());
         } else {
-            // Se è una carta colorata, quello è il nuovo colore attivo.
             this.getGame().setCurrentColorOptional(Optional.of(card.get().getColor(this.getGame())));
         }
 
-        // Esegui effetto carta (polimorfismo)
         if (card.get().getValue(this.getGame()) == CardValue.WILD_FORCED_SWAP) {
-            // Sposta la carta
             player.playCard(card);
             this.getGame().getDiscardPile().addCard(card.get());
-
             card.get().performEffect(this.getGame());
         } else {
             card.get().performEffect(this.getGame());
-
-            // Sposta la carta
             player.playCard(card);
             this.getGame().getDiscardPile().addCard(card.get());
         }
 
-        // --- CONTROLLO VITTORIA ---
         if (player.hasWon()) {
             final ScoreManager scoreManager = new ScoreManagerImpl();
             final int points = scoreManager.calculateRoundPoints(player, this.getGame().getPlayers(), this.getGame());
@@ -120,8 +99,6 @@ public class RunningState extends AbstractGameState {
             return;
         }
 
-        // --- LOGICA DI AVANZAMENTO TURNO ---
-        // Se lo stato è cambiato (es. waiting for color), non avanzare qui.
         if (this.getGame().getGameState() == GameState.RUNNING) {
             this.getGame().getTurnManager().advanceTurn(this.getGame());
         }
@@ -136,17 +113,14 @@ public class RunningState extends AbstractGameState {
     public void playerInitiatesDraw() {
         final AbstractPlayer player = this.getGame().getCurrentPlayer();
 
-        // 1. Regola: "Massimo una carta"
         if (this.getGame().hasCurrentPlayerDrawn(player)) {
-            throw new IllegalStateException("Hai già pescato in questo turno. Devi giocare la carta o passare.");
+            throw new IllegalStateException("You have already drawn in this turn. You must play the card or pass.");
         }
 
-        // 2. Regola: "Non se hai carte da giocare"
         if (this.getGame().playerHasPlayableCard(player)) {
-            throw new IllegalStateException("Mossa non valida! Hai una carta giocabile, non puoi pescare.");
+            throw new IllegalStateException("Move not valid! You have a playable card, you cannot draw.");
         }
 
-        // Ok, il giocatore deve pescare
         this.getGame().getTurnManager().setHasDrawnThisTurn(true);
 
         this.getGame().drawCardForPlayer(player);
@@ -159,14 +133,11 @@ public class RunningState extends AbstractGameState {
      */
     @Override
     public void playerPassTurn() {
-        // Puoi passare solo se hai pescato (perché non avevi mosse)
-        // Oppure se hai pescato e la regola "Skip After Draw" è attiva.
         if (!this.getGame().hasCurrentPlayerDrawn(this.getGame().getCurrentPlayer())) {
-            // Potresti avere una mossa, quindi non puoi passare
             if (this.getGame().playerHasPlayableCard(this.getGame().getCurrentPlayer())) {
-                throw new IllegalStateException("Non puoi passare, hai una mossa valida.");
+                throw new IllegalStateException("You cannot pass, you have a playable card.");
             } else {
-                throw new IllegalStateException("Non puoi passare, devi prima pescare una carta.");
+                throw new IllegalStateException("You cannot pass, you must draw a card first.");
             }
         }
 
@@ -174,7 +145,6 @@ public class RunningState extends AbstractGameState {
         final String handSize = String.valueOf(currentPlayer.getHand().size());
 
         this.getGame().getLogger().logAction(currentPlayer.getName(), "PASS_TURN", "N/A", "HandSize: " + handSize);
-
         this.getGame().getTurnManager().advanceTurn(this.getGame());
         this.getGame().notifyObservers();
     }

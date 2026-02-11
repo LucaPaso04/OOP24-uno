@@ -8,35 +8,35 @@ import java.util.Optional;
 
 /**
  * DTO representing a Card for the View.
- * Contains resolved color and value (no dependency on Game state for
- * retrieval).
  */
-public class CardViewData {
-    private final CardColor color;
-    private final CardValue value;
-    private final String imageKey;
-    private final Optional<Card> modelCard; // Opaque token for 'play' actions
+public interface CardViewData {
+    /**
+     * Get the color of the card.
+     * 
+     * @return the color of the card.
+     */
+    CardColor getColor();
 
-    public CardViewData(CardColor color, CardValue value, String imageKey, Optional<Card> modelCard) {
-        this.color = color;
-        this.value = value;
-        this.imageKey = imageKey;
-        this.modelCard = modelCard;
-    }
+    /**
+     * Get the value of the card.
+     * 
+     * @return the value of the card.
+     */
+    CardValue getValue();
 
-    public CardColor getColor() {
-        return color;
-    }
+    /**
+     * Get the image key for this card, used to retrieve the correct image from the
+     * View's image repository.
+     * 
+     * @return the image key for this card.
+     */
+    String getImageKey();
 
-    public CardValue getValue() {
-        return value;
-    }
-
-    public String getImageKey() {
-        return imageKey;
-    }
-
-    public Optional<Card> getModelCard() {
-        return modelCard;
-    }
+    /**
+     * Get an optional reference to the underlying model Card, if available. This can be
+     * used as an opaque token for actions like 'play' without exposing the full model to the View.
+     * 
+     * @return an Optional containing the model Card if available, or empty if not.
+     */
+    Optional<Card> getModelCard();
 }

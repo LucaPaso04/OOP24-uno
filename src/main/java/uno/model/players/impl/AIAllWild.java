@@ -32,12 +32,10 @@ public class AIAllWild extends AbstractAIPlayer {
      */
     @Override
     public void takeTurn(final Game game) {
-        // 1. Esegui il flusso standard (Scegli carta -> Gioca -> Scegli Colore -> Pesca
-        // se serve)
+        // Standard turn logic handled by AbstractAIPlayer
         super.takeTurn(game);
 
-        // 2. Controllo Extra: Se il gioco aspetta un giocatore (es. per Swap o Targeted
-        // Draw)
+        // if we are waiting for a player choice, we need to choose the target
         if (game.getGameState() == GameState.WAITING_FOR_PLAYER) {
             findBestTarget(game).ifPresent(target -> {
                 game.chosenPlayer(target);
@@ -57,23 +55,19 @@ public class AIAllWild extends AbstractAIPlayer {
             return Optional.empty();
         }
 
-        // Analisi bersaglio migliore (chi ha meno carte)
+        // Choose the best target (the player with the fewest cards)
         final Optional<AbstractPlayer> bestTargetOpt = findBestTarget(game);
 
-        // --- 1. LOGICA SWAP (Scambio Forzato) ---
-        // Cerchiamo se abbiamo la carta scambio
+        // Swap Logic
         final Optional<Card> swapCard = hand.stream()
                 .filter(c -> c.getValue(game) == CardValue.WILD_FORCED_SWAP)
                 .findFirst();
 
         if (swapCard.isPresent() && bestTargetOpt.isPresent() && this.getHandSize() > bestTargetOpt.get().getHandSize()) {
-            // CONVIENE SCAMBIARE?
-            // Sì, se io ho PIÙ carte del bersaglio (gli rifilo il mio mazzo grosso)
             return swapCard;
         }
 
-        // --- 2. LOGICA ATTACCO (Priorità alle carte cattive) ---
-        // Cerchiamo Targeted Draw 2, Draw 4, Skip Two, Draw Two
+        // Attack Logic (aggressive cards)
         final Optional<Card> attackCard = hand.stream()
                 .filter(c -> isAggressiveCard(c.getValue(game)))
                 .findFirst();
@@ -82,24 +76,18 @@ public class AIAllWild extends AbstractAIPlayer {
             return attackCard;
         }
 
-        // --- 3. LOGICA DI SCARTO SICURO ---
-        // Se non attacco e non scambio vantaggiosamente, gioca una carta qualsiasi.
-        // MA: Evita di giocare lo Swap se mi danneggerebbe (ho meno carte del target).
+        // Otherwise, play any non-swap card. If I have only swap cards, I'll be forced to play one of them.
         for (final Card card : hand) {
             boolean isBadSwap = false;
-            // Se è uno swap e abbiamo un target, controlliamo se ci conviene
             if (card.getValue(game) == CardValue.WILD_FORCED_SWAP && bestTargetOpt.isPresent() 
                 && this.getHandSize() < bestTargetOpt.get().getHandSize()) {
                 isBadSwap = true;
             }
-            // Se non è uno swap svantaggioso, giocala
             if (!isBadSwap) {
                 return Optional.of(card);
             }
         }
 
-        // Se sono arrivato qui, ho solo carte Swap svantaggiose. Devo giocarne una per
-        // forza.
         return Optional.of(hand.get(0));
     }
 
@@ -110,8 +98,6 @@ public class AIAllWild extends AbstractAIPlayer {
     protected CardColor chooseBestColor(final Game game) {
         return CardColor.WILD;
     }
-
-    // --- HELPER PRIVATI ---
 
     /**
      * Find the best target player (the one with the fewest cards).

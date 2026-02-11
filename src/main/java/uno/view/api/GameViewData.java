@@ -1,110 +1,91 @@
 package uno.view.api;
 
+import java.util.List;
+
 import uno.model.cards.attributes.CardColor;
 import uno.model.game.api.GameState;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
  * Data Transfer Object containing the snapshot of the game state
  * required for the View to render itself.
- * This decouples the View from the Model.
  */
-public class GameViewData {
-
-    private final GameState gameState;
-    private final List<PlayerViewData> players;
-    private final PlayerViewData currentPlayer;
-    private final Optional<CardViewData> topDiscardCard;
-    private final boolean isDiscardPileEmpty;
-    private final int deckSize;
-    private final Optional<CardColor> currentColor;
-    private final boolean isDarkSide;
-    private final boolean hasCurrentPlayerDrawn;
-    private final PlayerViewData winner;
-    private final boolean isClockwise;
+public interface GameViewData {
+    /**
+     * Indicates whether the turn order is currently clockwise.
+     * 
+     * @return True if turn order is clockwise, false if counterclockwise.
+     */
+    boolean isClockwise();
 
     /**
-     * Constructs a new GameViewData snapshot.
-     *
-     * @param gameState             The current state of the game.
-     * @param players               The list of all players.
-     * @param currentPlayer         The player whose turn it currently is.
-     * @param topDiscardCard        The card on top of the discard pile.
-     * @param isDiscardPileEmpty    True if discard pile is empty.
-     * @param deckSize              The number of cards in the draw deck.
-     * @param currentColor          The active color (including Wild choices).
-     * @param isDarkSide            True if playing on Dark Side.
-     * @param hasCurrentPlayerDrawn True if the current player has already drawn.
-     * @param winner                The winner if the game/round is over.
-     * @param isClockwise           True if turn order is clockwise.
+     * Gets the current state of the game.
+     * 
+     * @return The current GameState.
      */
-    public GameViewData(final GameState gameState,
-            final List<PlayerViewData> players,
-            final PlayerViewData currentPlayer,
-            final Optional<CardViewData> topDiscardCard,
-            final boolean isDiscardPileEmpty,
-            final int deckSize,
-            final Optional<CardColor> currentColor,
-            final boolean isDarkSide,
-            final boolean hasCurrentPlayerDrawn,
-            final PlayerViewData winner,
-            final boolean isClockwise) {
-        this.gameState = gameState;
-        this.players = players;
-        this.currentPlayer = currentPlayer;
-        this.topDiscardCard = topDiscardCard;
-        this.isDiscardPileEmpty = isDiscardPileEmpty;
-        this.deckSize = deckSize;
-        this.currentColor = currentColor;
-        this.isDarkSide = isDarkSide;
-        this.hasCurrentPlayerDrawn = hasCurrentPlayerDrawn;
-        this.winner = winner;
-        this.isClockwise = isClockwise;
-    }
+    GameState getGameState();
 
-    public boolean isClockwise() {
-        return isClockwise;
-    }
+    /**
+     * Gets the list of all players in the game.
+     * 
+     * @return The list of PlayerViewData objects.
+     */
+    List<PlayerViewData> getPlayers();
 
-    public GameState getGameState() {
-        return gameState;
-    }
+    /**
+     * Gets the player whose turn it currently is.
+     * 
+     * @return The current PlayerViewData object.
+     */
+    PlayerViewData getCurrentPlayer();
 
-    public List<PlayerViewData> getPlayers() {
-        return players;
-    }
+    /**
+     * Gets the card on top of the discard pile, if any.
+     * 
+     * @return The top discard card, or Optional.empty() if the pile is empty.
+     */
+    Optional<CardViewData> getTopDiscardCard();
 
-    public PlayerViewData getCurrentPlayer() {
-        return currentPlayer;
-    }
+    /**
+     * Indicates whether the discard pile is currently empty.
+     * 
+     * @return True if the discard pile is empty, false otherwise.
+     */
+    boolean isDiscardPileEmpty();
 
-    public Optional<CardViewData> getTopDiscardCard() {
-        return topDiscardCard;
-    }
+    /**
+     * Gets the number of cards currently in the draw deck.
+     * 
+     * @return The number of cards in the draw deck.
+     */
+    int getDeckSize();
 
-    public boolean isDiscardPileEmpty() {
-        return isDiscardPileEmpty;
-    }
+    /**
+     * Gets the active color, which may be set by a Wild card.
+     * 
+     * @return The active color, or Optional.empty() if no color is active.
+     */
+    Optional<CardColor> getCurrentColor();
 
-    public int getDeckSize() {
-        return deckSize;
-    }
+    /**
+     * Indicates whether the game is being played on the Dark Side.
+     * 
+     * @return True if the game is being played on the Dark Side, false otherwise.
+     */
+    boolean isDarkSide();
 
-    public Optional<CardColor> getCurrentColor() {
-        return currentColor;
-    }
+    /**
+     * Indicates whether the current player has already drawn a card this turn.
+     * 
+     * @return True if the current player has already drawn a card this turn, false otherwise.
+     */
+    boolean hasCurrentPlayerDrawn();
 
-    public boolean isDarkSide() {
-        return isDarkSide;
-    }
-
-    public boolean hasCurrentPlayerDrawn() {
-        return hasCurrentPlayerDrawn;
-    }
-
-    public PlayerViewData getWinner() {
-        return winner;
-    }
+    /**
+     * Gets the winner of the game if the game or round is over.
+     * 
+     * @return The winner PlayerViewData object, or null if no winner exists.
+     */
+    PlayerViewData getWinner();
 }

@@ -47,11 +47,11 @@ public class AIClassic extends AbstractAIPlayer {
         }
 
         final boolean opponentHasUno = hasOpponentWithUno(game);
-
         final List<Card> actionCards = new ArrayList<>();
         final List<Card> numberCards = new ArrayList<>();
         final List<Card> wildCards = new ArrayList<>();
 
+        // Categorize playable cards into action, number, and wild cards
         for (final Card card : playableCards) {
             final CardValue value = card.getValue(game);
             if (value == CardValue.WILD || value == CardValue.WILD_DRAW_FOUR
@@ -65,6 +65,7 @@ public class AIClassic extends AbstractAIPlayer {
             }
         }
 
+        // If an opponent has UNO, prioritize offensive cards to disrupt them
         if (opponentHasUno) {
             final Optional<Card> offensiveCard = findBestOffensiveCard(actionCards, wildCards, game);
             if (offensiveCard.isPresent()) {
@@ -72,6 +73,7 @@ public class AIClassic extends AbstractAIPlayer {
             }
         }
 
+        // If the AI is close to winning, prioritize action cards to maintain control
         final boolean iAmClose = this.getHandSize() <= 3;
         if (iAmClose) {
             if (!actionCards.isEmpty()) {
@@ -85,17 +87,20 @@ public class AIClassic extends AbstractAIPlayer {
             }
         }
 
+        // Otherwise, play the highest value card available to reduce hand size quickly
         if (!actionCards.isEmpty()) {
             actionCards.sort((c1, c2) -> getActionCardPriority(c2.getValue(game))
                     - getActionCardPriority(c1.getValue(game)));
             return Optional.of(actionCards.get(0));
         }
 
+        // If no action cards, play the highest number card
         if (!numberCards.isEmpty()) {
             numberCards.sort((c1, c2) -> getNumericValue(c2, game) - getNumericValue(c1, game));
             return Optional.of(numberCards.get(0));
         }
 
+        // If only wild cards are available, play the most disruptive one
         if (!wildCards.isEmpty()) {
             wildCards.sort((c1, c2) -> {
                 final boolean is1DrawFour = c1.getValue(game) == CardValue.WILD_DRAW_FOUR;

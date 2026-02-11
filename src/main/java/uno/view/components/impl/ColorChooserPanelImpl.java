@@ -20,16 +20,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * A panel that allows the player to choose a new color during the game.
  * It adapts its color palette based on whether the game is currently on the
  * "Light" or "Dark" side.
  */
-@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_BAD_FIELD")
+@SuppressFBWarnings("SE_BAD_FIELD")
 public final class ColorChooserPanelImpl extends JPanel implements ActionListener, ColorChooserPanel {
 
     private static final long serialVersionUID = 1L;
-
     private static final Dimension PANEL_SIZE = new Dimension(400, 300);
 
     private final Optional<GameViewObserver> observer;
@@ -44,7 +45,6 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
     public ColorChooserPanelImpl(final Optional<GameViewObserver> observer, final boolean isDarkSide) {
         this.observer = observer;
 
-        // 2 rows, 2 columns with 10px gap
         setLayout(new GridLayout(2, 2, 10, 10));
         setBackground(UnoTheme.PANEL_COLOR);
 
@@ -52,12 +52,10 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
                 BorderFactory.createEtchedBorder(), "Pick a Color",
                 TitledBorder.LEFT, TitledBorder.TOP, UnoTheme.TEXT_FONT, UnoTheme.TEXT_COLOR));
 
-        // 1. Determine which colors to display
         final List<CardColor> colorsToOffer = isDarkSide
                 ? List.of(CardColor.PINK, CardColor.TEAL, CardColor.ORANGE, CardColor.PURPLE)
                 : List.of(CardColor.RED, CardColor.GREEN, CardColor.BLUE, CardColor.YELLOW);
 
-        // 2. Add buttons dynamically based on the side
         for (final CardColor colorEnum : colorsToOffer) {
             setupButtonForColor(colorEnum, isDarkSide);
         }
@@ -99,7 +97,7 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
         } else {
             switch (colorEnum) {
                 case RED:
-                    bgColor = UnoTheme.BUTTON_COLOR; // Using standard red
+                    bgColor = UnoTheme.BUTTON_COLOR;
                     label = "RED";
                     break;
                 case GREEN:
@@ -119,17 +117,21 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
             }
         }
 
-        // Create Styled Button with specific color and hover effect
-        // For hover, we just make it slightly brighter or same for now to keep simple
         add(createButton(label, bgColor, colorEnum));
     }
 
+    /**
+     * Creates a styled button for the given color and sets up its action listener.
+     * 
+     * @param text the label to display on the button.
+     * @param bg  the background color of the button.
+     * @param colorEnum the CardColor associated with this button, used for the action command.
+     * @return a configured JButton instance ready to be added to the panel.
+     */
     private JButton createButton(final String text, final Color bg, final CardColor colorEnum) {
-        // Create StyledButton with custom background and a derived hover color
-        // (brighter)
+
         final StyledButtonImpl btn = new StyledButtonImpl(text, bg, bg.brighter());
 
-        // Ensure text is readable (Black for Yellow/Pink/Orange, White for others)
         if (bg.equals(UnoTheme.YELLOW_COLOR) || bg.equals(UnoTheme.PINK_COLOR) || bg.equals(UnoTheme.ORANGE_COLOR)) {
             btn.setForeground(Color.BLACK);
         } else {
@@ -142,14 +144,12 @@ public final class ColorChooserPanelImpl extends JPanel implements ActionListene
     }
 
     /**
-     * Handles button clicks to notify the observer of the chosen color.
+     * {@inheritDoc}
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
         final CardColor chosen = CardColor.valueOf(e.getActionCommand());
-
         observer.ifPresent(obs -> obs.onColorChosen(chosen));
-
         closeChooser();
     }
 

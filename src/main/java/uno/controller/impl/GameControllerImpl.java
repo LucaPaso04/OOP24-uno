@@ -10,11 +10,18 @@ import uno.model.players.api.AbstractPlayer;
 import uno.model.players.impl.AbstractAIPlayer;
 import uno.model.players.impl.HumanPlayer;
 import uno.view.api.GameFrame;
+import uno.view.api.CardViewData;
+import uno.view.api.GameViewData;
+import uno.view.api.PlayerViewData;
+import uno.view.impl.CardViewDataImpl;
+import uno.view.impl.GameViewDataImpl;
+import uno.view.impl.PlayerViewDataImpl;
 import uno.view.scenes.api.GameScene;
 import uno.view.scenes.api.MenuScene;
 import uno.view.scenes.impl.MenuSceneImpl;
-import uno.view.api.GameViewData;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,7 +60,6 @@ public class GameControllerImpl implements GameController {
         this.gameModel = gameModel;
         this.gameScene = gameScene;
         this.mainFrame = mainFrame;
-
         this.gameModel.addObserver(this);
     }
 
@@ -63,15 +69,10 @@ public class GameControllerImpl implements GameController {
     @Override
     public void showStartingPlayerPopupAndStartGame() {
         final AbstractPlayer startingPlayer = gameModel.getCurrentPlayer();
-
         gameScene.showStartingPlayer(startingPlayer.getName());
-
         onGameUpdate();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     /**
      * {@inheritDoc}
      */
@@ -81,8 +82,8 @@ public class GameControllerImpl implements GameController {
             if (aiTimer.isPresent()) {
                 aiTimer.get().stop();
             }
-            gameScene.setHumanInputEnabled(false);
 
+            gameScene.setHumanInputEnabled(false);
             final AbstractPlayer winner = gameModel.getWinner();
             gameScene.showWinnerPopup(winner.getName());
             return;
@@ -92,20 +93,17 @@ public class GameControllerImpl implements GameController {
             if (aiTimer.isPresent()) {
                 aiTimer.get().stop();
             }
-            gameScene.setHumanInputEnabled(false);
 
+            gameScene.setHumanInputEnabled(false);
             final AbstractPlayer roundWinner = gameModel.getWinner();
             gameScene.showInfo("Round Winner: " + roundWinner.getName() + "!\nScore: " + roundWinner.getScore(),
                     "Round Over");
-
             gameModel.startNewRound();
             return;
         }
 
-        // Create DTOs
         final GameViewData viewData = createGameViewData();
         gameScene.updateView(viewData);
-
         final boolean isHumanTurn = gameModel.getCurrentPlayer().getClass() == HumanPlayer.class;
 
         if (isHumanTurn) {
@@ -121,21 +119,30 @@ public class GameControllerImpl implements GameController {
         checkAndRunAITurn();
     }
 
+    /**
+     * Creates a GameViewData object that encapsulates all the necessary information
+     * about the current game state, players, and cards to be displayed in the view.
+     * 
+     * @return a GameViewData instance with the current game information.
+     */
     private GameViewData createGameViewData() {
         final GameState state = gameModel.getGameState();
 
-        final java.util.List<uno.view.api.PlayerViewData> playerViewDataList = gameModel.getPlayers().stream()
+        final List<PlayerViewData> playerViewDataList = gameModel.getPlayers().stream()
                 .map(this::createPlayerViewData)
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
-        final uno.view.api.PlayerViewData currentPlayer = createPlayerViewData(gameModel.getCurrentPlayer());
+        final PlayerViewData currentPlayer = createPlayerViewData(gameModel.getCurrentPlayer());
 
-        uno.view.api.PlayerViewData winner = null;
+        final PlayerViewData winner = gameModel.getGameState() == GameState.GAME_OVER 
+                                    || gameModel.getGameState() == GameState.ROUND_OVER
+                ? createPlayerViewData(gameModel.getWinner())
+                : null;
 
-        final java.util.Optional<uno.view.api.CardViewData> topCard = gameModel.getTopDiscardCard()
+        final Optional<CardViewData> topCard = gameModel.getTopDiscardCard()
                 .map(this::createCardViewData);
 
-        return new uno.view.api.GameViewData(
+        return new GameViewDataImpl(
                 state,
                 playerViewDataList,
                 currentPlayer,
@@ -149,13 +156,20 @@ public class GameControllerImpl implements GameController {
                 gameModel.isClockwise());
     }
 
-    private uno.view.api.PlayerViewData createPlayerViewData(final AbstractPlayer player) {
-        final java.util.List<uno.view.api.CardViewData> hand = player.getHand().stream()
-                .filter(java.util.Optional::isPresent)
+    /**
+     * Creates a PlayerViewData object for a given player, including their name, hand
+     * size, score, and whether they are the current player.
+     * 
+     * @param player the player for whom to create the view data.
+     * @return a PlayerViewData instance with the player's information and hand cards.
+     */
+    private PlayerViewData createPlayerViewData(final AbstractPlayer player) {
+        final List<CardViewData> hand = player.getHand().stream()
+                .filter(Optional::isPresent)
                 .map(cardOpt -> createCardViewData(cardOpt.get()))
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
-        return new uno.view.api.PlayerViewData(
+        return new PlayerViewDataImpl(
                 player.getName(),
                 player.getHandSize(),
                 player.getScore(),
@@ -164,13 +178,20 @@ public class GameControllerImpl implements GameController {
                 player);
     }
 
-    private uno.view.api.CardViewData createCardViewData(final Card card) {
+    /**
+     * Creates a CardViewData object for a given card, including its color, value, and
+     * an image key for display purposes.
+     * 
+     * @param card the card for which to create the view data.
+     * @return a CardViewData instance with the card's information and image key.
+     */
+    private CardViewData createCardViewData(final Card card) {
         final String imageKey = card.getColor(gameModel).name() + "_" + card.getValue(gameModel).name();
-        return new uno.view.api.CardViewData(
+        return new CardViewDataImpl(
                 card.getColor(gameModel),
                 card.getValue(gameModel),
                 imageKey,
-                java.util.Optional.of(card));
+                Optional.of(card));
     }
 
     /**
@@ -188,10 +209,12 @@ public class GameControllerImpl implements GameController {
             gameScene.setHumanInputEnabled(false);
 
             final ActionListener aiTask = new ActionListener() {
+                /**
+                 * When the timer triggers, this method is called to execute the AI player's turn.
+                 */
                 @Override
                 public void actionPerformed(final ActionEvent e) {
-                    ((AbstractAIPlayer) currentPlayer).takeTurn(gameModel); // Cast to AbstractAIPlayer to access
-                                                                            // takeTurn
+                    ((AbstractAIPlayer) currentPlayer).takeTurn(gameModel);
                 }
             };
 

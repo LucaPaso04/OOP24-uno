@@ -22,7 +22,7 @@ public abstract class AbstractGameState implements GameStateBehavior {
     /**
      * Constructor to initialize the game context.
      * 
-     * @param game the game context to be used by the state
+     * @param game the game context to be used by the state.
      */
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public AbstractGameState(final GameContext game) {
@@ -34,7 +34,7 @@ public abstract class AbstractGameState implements GameStateBehavior {
      */
     @Override
     public void playCard(final Optional<Card> card) {
-        throw new IllegalStateException("Non è possibile giocare una carta in questo stato: " + getEnum());
+        throw new IllegalStateException("Cannot play a card in this state: " + getEnum());
     }
 
     /**
@@ -42,7 +42,7 @@ public abstract class AbstractGameState implements GameStateBehavior {
      */
     @Override
     public void playerInitiatesDraw() {
-        throw new IllegalStateException("Non è possibile pescare in questo stato: " + getEnum());
+        throw new IllegalStateException("Cannot draw a card in this state: " + getEnum());
     }
 
     /**
@@ -50,7 +50,7 @@ public abstract class AbstractGameState implements GameStateBehavior {
      */
     @Override
     public void playerPassTurn() {
-        throw new IllegalStateException("Non è possibile passare il turno in questo stato: " + getEnum());
+        throw new IllegalStateException("Cannot pass turn in this state: " + getEnum());
     }
 
     /**
@@ -58,7 +58,7 @@ public abstract class AbstractGameState implements GameStateBehavior {
      */
     @Override
     public void setColor(final CardColor color) {
-        throw new IllegalStateException("Non è possibile impostare il colore in questo stato: " + getEnum());
+        throw new IllegalStateException("Cannot set color in this state: " + getEnum());
     }
 
     /**
@@ -66,7 +66,7 @@ public abstract class AbstractGameState implements GameStateBehavior {
      */
     @Override
     public void chosenPlayer(final AbstractPlayer player) {
-        throw new IllegalStateException("Non è possibile scegliere un giocatore in questo stato: " + getEnum());
+        throw new IllegalStateException("Cannot choose a player in this state: " + getEnum());
     }
 
     /**
@@ -74,13 +74,13 @@ public abstract class AbstractGameState implements GameStateBehavior {
      */
     @Override
     public void drawUntilColorChosenCard(final CardColor color) {
-        throw new IllegalStateException("Non è possibile pescare fino al colore in questo stato: " + getEnum());
+        throw new IllegalStateException("Cannot draw until color chosen in this state: " + getEnum());
     }
 
     /**
      * Getter for the game context.
      * 
-     * @return the game context associated with this state
+     * @return the game context associated with this state.
      */
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public GameContext getGame() {

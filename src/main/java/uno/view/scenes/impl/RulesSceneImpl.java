@@ -20,11 +20,13 @@ import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.util.Optional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * The panel (JPanel) representing the Rules Configuration screen.
  * Maintains the same modern graphical style as the MenuScene.
  */
-@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("SE_BAD_FIELD")
+@SuppressFBWarnings("SE_BAD_FIELD")
 public final class RulesSceneImpl extends JPanel implements RulesScene {
 
     private static final long serialVersionUID = 1L;
@@ -59,13 +61,10 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
         contentPanel.setOpaque(false);
         contentPanel.setBorder(UnoTheme.PADDING_BORDER);
 
-        // 1. Title
         final JLabel title = new JLabel("House Rules");
         title.setFont(UnoTheme.SUBTITLE_FONT);
         title.setForeground(UnoTheme.TEXT_COLOR);
         title.setAlignmentX(CENTER_ALIGNMENT);
-
-        // 2. Create Rule Panels
 
         // Rule 1: UNO Penalty (Default: On)
         final JPanel rule1 = createRulePanel(
@@ -81,9 +80,9 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
                 currentRules.isSkipAfterDrawEnabled());
         skipAfterDrawCheck = (JCheckBox) rule2.getClientProperty(CHECKBOX);
 
-        // Rule 3: Mandatory Pass / No Reshuffle (Default: Off)
+        // Rule 3: No Reshuffle (Default: Off)
         final JPanel rule3 = createRulePanel(
-                "No Reshuffle (Hardcore)",
+                "No Reshuffle",
                 "If the draw deck is empty, the game ends in a draw (discard pile is not reshuffled).",
                 currentRules.isMandatoryPassEnabled());
         mandatoryPassCheck = (JCheckBox) rule3.getClientProperty(CHECKBOX);
@@ -95,7 +94,6 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
                 currentRules.isScoringModeEnabled());
         scoringModeCheck = (JCheckBox) rule4.getClientProperty(CHECKBOX);
 
-        // 3. "Save and Back" Button
         final StyledButton backButton = new StyledButtonImpl("Save & Back to Menu");
         backButton.setMnemonic(KeyEvent.VK_B);
 
@@ -111,7 +109,6 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
             }
         });
 
-        // 4. Assembly
         contentPanel.add(title);
         contentPanel.add(Box.createRigidArea(RIGID_AREA_1));
         contentPanel.add(rule1);
@@ -123,7 +120,6 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
         contentPanel.add(rule4);
         contentPanel.add(Box.createRigidArea(RIGID_AREA_3));
         contentPanel.add(backButton.getComponent());
-
         add(contentPanel);
     }
 
@@ -134,8 +130,6 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
     public void setObserver(final MenuObserver observer) {
         this.observer = Optional.of(observer);
     }
-
-    // --- API Implementation: Getters for the Controller ---
 
     /**
      * {@inheritDoc}
@@ -169,8 +163,6 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
         return scoringModeCheck.isSelected();
     }
 
-    // --- GUI Helper Methods ---
-
     /**
      * Creates a horizontal panel containing Title+Description on the left and a
      * Checkbox on the right.
@@ -185,23 +177,18 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
         panel.setOpaque(false);
         panel.setMaximumSize(PANEL_DIMENSION);
         panel.setPreferredSize(PANEL_DIMENSION);
-        panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UnoTheme.PANEL_COLOR)); // Separator line using
+        panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UnoTheme.PANEL_COLOR));
 
-        // Left Side: Text
         final JPanel textPanel = new JPanel();
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
         textPanel.setOpaque(false);
 
         final JLabel lblTitle = new JLabel(titleText);
-        lblTitle.setFont(UnoTheme.BUTTON_FONT); // Using BUTTON_FONT (18 Bold) as it matches ~18px title
+        lblTitle.setFont(UnoTheme.BUTTON_FONT);
         lblTitle.setForeground(UnoTheme.TEXT_COLOR);
 
         final JLabel lblDesc = new JLabel("<html><body style='width: 450px'>" + descText + "</body></html>");
-        // We probably need a small font for description, TEXT_FONT is 14, previous was
-        // 12.
-        // I'll stick to TEXT_FONT (14) for better readability or create a SMALL_FONT in
-        // theme later.
-        // For now allowing 14 is likely fine, or I can derive.
+
         lblDesc.setFont(UnoTheme.TEXT_FONT.deriveFont(FONT_SIZE));
         lblDesc.setForeground(UnoTheme.DESC_COLOR);
 
@@ -209,12 +196,10 @@ public final class RulesSceneImpl extends JPanel implements RulesScene {
         textPanel.add(Box.createRigidArea(TEXT_PANEL_RIGID_AREA));
         textPanel.add(lblDesc);
 
-        // Right Side: Checkbox
         final JCheckBox checkBox = new JCheckBox();
         checkBox.setOpaque(false);
         checkBox.setSelected(defaultState);
 
-        // Store checkbox reference in the panel for retrieval during construction
         panel.putClientProperty(CHECKBOX, checkBox);
 
         panel.add(textPanel, BorderLayout.CENTER);
