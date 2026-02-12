@@ -1,0 +1,30 @@
+package uno.model.game.impl.states;
+
+import uno.model.game.api.GameContext;
+import uno.model.game.api.GameState;
+import uno.model.game.impl.AbstractGameState;
+
+/**
+ * State representing the end of a round.
+ * The game pauses here to show the round winner and scores before starting the
+ * next round.
+ */
+public class RoundOverState extends AbstractGameState {
+
+    /**
+     * Constructor for RoundOverState.
+     * 
+     * @param game the game context to which this state belongs
+     */
+    public RoundOverState(final GameContext game) {
+        super(game);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GameState getEnum() {
+        return GameState.ROUND_OVER;
+    }
+}
